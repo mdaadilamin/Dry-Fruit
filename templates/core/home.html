@@ -1,6 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}NutriHarvest - Premium Dry Fruits & Nuts Online Store{% endblock %}
+{% block meta_description %}Shop premium quality organic dry fruits and nuts online. Fresh, healthy, and delicious snacks delivered to your doorstep. Free shipping on orders over $50.{% endblock %}
+{% block meta_keywords %}dry fruits, nuts, organic snacks, healthy food, online store, premium quality, almonds, walnuts, cashews, dried fruits{% endblock %}
+
+{% block og_title %}NutriHarvest - Premium Dry Fruits & Nuts Online Store{% endblock %}
+{% block og_description %}Shop premium quality organic dry fruits and nuts online. Fresh, healthy, and delicious snacks delivered to your doorstep. Free shipping on orders over $50.{% endblock %}
+
+{% block twitter_title %}NutriHarvest - Premium Dry Fruits & Nuts Online Store{% endblock %}
+{% block twitter_description %}Shop premium quality organic dry fruits and nuts online. Fresh, healthy, and delicious snacks delivered to your doorstep. Free shipping on orders over $50.{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section">
@@ -9,15 +19,15 @@
             <div class="col-lg-6 hero-content">
                 <h1 class="display-4 fw-bold mb-4">Premium Dry Fruits & Nuts</h1>
                 <p class="lead mb-4">Discover the finest selection of organic, hand-picked dry fruits and nuts from around the world. Quality, taste, and nutrition in every bite.</p>
-                <div class="d-flex gap-3">
+                <div class="d-flex gap-3 flex-wrap">
                     <a href="{% url 'core:shop' %}" class="btn btn-primary btn-lg">
                         <i data-lucide="shopping-bag" class="me-2"></i>Shop Now
                     </a>
                     <a href="{% url 'cms:page_view' 'about' %}" class="btn btn-outline-light btn-lg">Learn More</a>
                 </div>
             </div>
-            <div class="col-lg-6 text-center">
-                <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Premium Dry Fruits" class="img-fluid rounded-3 shadow-lg">
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Premium Dry Fruits" class="img-fluid rounded-3 shadow-lg hero-image">
             </div>
         </div>
     </div>
@@ -212,12 +222,14 @@
             <div class="col-12 text-center text-white">
                 <h2 class="display-5 fw-bold mb-4">Ready to Experience Premium Quality?</h2>
                 <p class="lead mb-4">Join thousands of satisfied customers who trust NutriHarvest for their healthy snacking needs.</p>
-                <a href="{% url 'core:shop' %}" class="btn btn-light btn-lg me-3">
-                    <i data-lucide="shopping-bag" class="me-2"></i>Start Shopping
-                </a>
-                <a href="{% url 'core:register' %}" class="btn btn-outline-light btn-lg">
-                    <i data-lucide="user-plus" class="me-2"></i>Create Account
-                </a>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'core:shop' %}" class="btn btn-light btn-lg">
+                        <i data-lucide="shopping-bag" class="me-2"></i>Start Shopping
+                    </a>
+                    <a href="{% url 'core:register' %}" class="btn btn-outline-light btn-lg">
+                        <i data-lucide="user-plus" class="me-2"></i>Create Account
+                    </a>
+                </div>
             </div>
         </div>
     </div>

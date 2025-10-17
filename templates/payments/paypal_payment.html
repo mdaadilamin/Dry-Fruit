@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pay with PayPal - NutriHarvest{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-4">Complete Your Payment</h1>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i data-lucide="credit-card" class="me-2"></i>Pay with PayPal
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <img src="{% static 'images/paypal-logo.png' %}" alt="PayPal" class="img-fluid" style="max-height: 60px;">
+                        </div>
+                        
+                        <p class="text-center mb-4">
+                            You will be redirected to PayPal to complete your payment securely.
+                        </p>
+                        
+                        <form method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i data-lucide="arrow-right-circle" class="me-2"></i>Continue to PayPal
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i data-lucide="shield-check" class="me-1"></i>
+                                Secure payment processing powered by PayPal
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Order Number</span>
+                                <span>{{ order.order_number }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Amount</span>
+                                <span>${{ order.total_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <strong>Amount to Pay</strong>
+                            <strong class="text-primary">${{ order.total_amount|floatformat:2 }}</strong>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                <span class="badge bg-light text-dark">PayPal</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Handle form submission
+    const form = document.querySelector('form');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Redirecting...';
+            
+            // Process PayPal payment
+            fetch('{% url "payments:paypal_payment" order.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    // Payment data
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    // Show error to customer
+                    alert('Error: ' + data.error);
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i data-lucide="arrow-right-circle" class="me-2"></i>Continue to PayPal';
+                    lucide.createIcons();
+                } else if (data.approval_url) {
+                    // Redirect to PayPal
+                    window.location.href = data.approval_url;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i data-lucide="arrow-right-circle" class="me-2"></i>Continue to PayPal';
+                lucide.createIcons();
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

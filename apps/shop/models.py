@@ -30,6 +30,15 @@ class Product(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # SEO fields
+    meta_title = models.CharField(max_length=200, blank=True)
+    meta_description = models.CharField(max_length=160, blank=True)
+    keywords = models.CharField(max_length=255, blank=True)
+    
+    # Marketing fields
+    discount_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+    tags = models.CharField(max_length=255, blank=True, help_text="Comma-separated tags for marketing")
+    
     class Meta:
         ordering = ['name']
     
@@ -46,6 +55,40 @@ class Product(models.Model):
     @property
     def is_low_stock(self):
         return self.stock <= 10
+    
+    @property
+    def discounted_price(self):
+        if self.discount_percent > 0:
+            return self.price * (1 - self.discount_percent / 100)
+        return self.price
+    
+    @property
+    def has_discount(self):
+        return self.discount_percent > 0
+
+class ProductVariant(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='variants')
+    name = models.CharField(max_length=100, help_text="e.g., Size, Weight, Color")
+    value = models.CharField(max_length=100, help_text="e.g., 250g, 500g, Large")
+    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price for this variant (overrides product price if set)")
+    stock = models.PositiveIntegerField(default=0)
+    sku = models.CharField(max_length=50, unique=True, help_text="Stock Keeping Unit")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        unique_together = ['product', 'name', 'value']
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.name}: {self.value}"
+    
+    @property
+    def in_stock(self):
+        return self.stock > 0
+    
+    @property
+    def is_low_stock(self):
+        return self.stock <= 5
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')

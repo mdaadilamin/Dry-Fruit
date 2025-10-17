@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Product, ProductImage, ProductReview
+from .models import Category, Product, ProductVariant, ProductImage, ProductReview
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -9,9 +9,13 @@ class CategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
     prepopulated_fields = {'slug': ('name',)} if hasattr(Category, 'slug') else {}
     
+    @admin.display(description='Products')
     def product_count(self, obj):
         return obj.products.count()
-    product_count.short_description = 'Products'
+
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
@@ -22,7 +26,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ['name', 'category', 'price', 'stock', 'is_active', 'is_featured', 'created_at']
     list_filter = ['category', 'is_active', 'is_featured', 'created_at']
     search_fields = ['name', 'description']
-    inlines = [ProductImageInline]
+    inlines = [ProductVariantInline, ProductImageInline]
     readonly_fields = ['created_at', 'updated_at']
     
     fieldsets = (
@@ -30,13 +34,17 @@ class ProductAdmin(admin.ModelAdmin):
             'fields': ('name', 'slug', 'category', 'description')
         }),
         ('Pricing & Inventory', {
-            'fields': ('price', 'stock')
+            'fields': ('price', 'stock', 'discount_percent')
         }),
         ('Images & Media', {
             'fields': ('image',)
         }),
         ('Additional Info', {
-            'fields': ('nutritional_info',)
+            'fields': ('nutritional_info', 'tags')
+        }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'keywords'),
+            'classes': ('collapse',)
         }),
         ('Status', {
             'fields': ('is_active', 'is_featured')
@@ -46,11 +54,13 @@ class ProductAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
-    def get_readonly_fields(self, request, obj=None):
-        if obj:  # Editing existing object
-            return self.readonly_fields + ('slug',)
-        return self.readonly_fields
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ['product', 'name', 'value', 'price', 'stock', 'is_active']
+    list_filter = ['is_active', 'name', 'product__category']
+    search_fields = ['product__name', 'name', 'value']
+    readonly_fields = ['created_at']
 
 @admin.register(ProductReview)
 class ProductReviewAdmin(admin.ModelAdmin):

@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Pay with Stripe - NutriHarvest{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <h1 class="display-5 fw-bold mb-4">Complete Your Payment</h1>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i data-lucide="credit-card" class="me-2"></i>Pay with Card
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="payment-element">
+                            <!-- Stripe Elements will be inserted here -->
+                        </div>
+                        
+                        <div id="payment-message" class="alert alert-info mt-3" style="display: none;">
+                            <!-- Payment messages will be displayed here -->
+                        </div>
+                        
+                        <button id="submit" class="btn btn-primary w-100 btn-lg mt-3">
+                            <i data-lucide="lock" class="me-2"></i>Pay Now
+                        </button>
+                        
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i data-lucide="shield-check" class="me-1"></i>
+                                Secure payment processing powered by Stripe
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Order Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Order Number</span>
+                                <span>{{ order.order_number }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Total Amount</span>
+                                <span>${{ order.total_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <strong>Amount to Pay</strong>
+                            <strong class="text-primary">${{ order.total_amount|floatformat:2 }}</strong>
+                        </div>
+                        
+                        <div class="text-center">
+                            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                                <span class="badge bg-light text-dark">Visa</span>
+                                <span class="badge bg-light text-dark">Mastercard</span>
+                                <span class="badge bg-light text-dark">Amex</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Stripe integration
+    const stripe = Stripe('{{ stripe_public_key }}');
+    
+    // Create an instance of Elements
+    const elements = stripe.elements();
+    
+    // Create an instance of the card Element
+    const card = elements.create('card');
+    
+    // Add an instance of the card Element into the `card-element` div
+    card.mount('#payment-element');
+    
+    // Handle real-time validation errors from the card Element
+    card.addEventListener('change', function(event) {
+        const displayError = document.getElementById('payment-message');
+        if (event.error) {
+            displayError.textContent = event.error.message;
+            displayError.style.display = 'block';
+        } else {
+            displayError.textContent = '';
+            displayError.style.display = 'none';
+        }
+    });
+    
+    // Handle form submission
+    const form = document.querySelector('form');
+    const submitButton = document.getElementById('submit');
+    
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processing...';
+            
+            // Create payment intent and confirm payment
+            fetch('{% url "payments:stripe_payment" order.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    // Payment data
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    // Show error to customer
+                    const displayError = document.getElementById('payment-message');
+                    displayError.textContent = data.error;
+                    displayError.style.display = 'block';
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i data-lucide="lock" class="me-2"></i>Pay Now';
+                    lucide.createIcons();
+                } else {
+                    // Confirm the payment with Stripe
+                    return stripe.confirmCardPayment(data.client_secret, {
+                        payment_method: {
+                            card: card,
+                            billing_details: {
+                                name: '{{ order.shipping_name }}',
+                                email: '{{ order.shipping_email }}'
+                            }
+                        }
+                    });
+                }
+            })
+            .then(result => {
+                if (result) {
+                    if (result.error) {
+                        // Show error to customer
+                        const displayError = document.getElementById('payment-message');
+                        displayError.textContent = result.error.message;
+                        displayError.style.display = 'block';
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = '<i data-lucide="lock" class="me-2"></i>Pay Now';
+                        lucide.createIcons();
+                    } else {
+                        // Payment succeeded
+                        if (result.paymentIntent.status === 'succeeded') {
+                            window.location.href = '{% url "core:dashboard" %}?payment=success';
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                const displayError = document.getElementById('payment-message');
+                displayError.textContent = 'An unexpected error occurred.';
+                displayError.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i data-lucide="lock" class="me-2"></i>Pay Now';
+                lucide.createIcons();
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

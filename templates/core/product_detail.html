@@ -1,147 +1,359 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}{{ product.name }} - NutriHarvest{% endblock %}
+{% block meta_description %}{{ product.description|truncatewords:30 }} Buy premium {{ product.name }} at the best price. Fast delivery and quality guarantee.{% endblock %}
+{% block meta_keywords %}{{ product.name }}, {{ product.category.name }}, dry fruits, nuts, organic, healthy snacks{% endblock %}
+
+{% block og_title %}{{ product.name }} - NutriHarvest{% endblock %}
+{% block og_description %}{{ product.description|truncatewords:30 }} Buy premium {{ product.name }} at the best price. Fast delivery and quality guarantee.{% endblock %}
+{% block og_image %}{% if product.image %}{{ request.build_absolute_uri }}{{ product.image.url }}{% else %}https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600{% endif %}{% endblock %}
+
+{% block twitter_title %}{{ product.name }} - NutriHarvest{% endblock %}
+{% block twitter_description %}{{ product.description|truncatewords:30 }} Buy premium {{ product.name }} at the best price. Fast delivery and quality guarantee.{% endblock %}
+{% block twitter_image %}{% if product.image %}{{ request.build_absolute_uri }}{{ product.image.url }}{% else %}https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600{% endif %}{% endblock %}
+
 {% block content %}
 <section class="py-5">
     <div class="container">
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
-                <li class="breadcrumb-item"><a href="{% url 'core:shop' %}">Shop</a></li>
-                <li class="breadcrumb-item active">{{ product.name }}</li>
-            </ol>
-        </nav>
-
         <div class="row">
+            <!-- Product Images -->
             <div class="col-lg-6 mb-4">
-                {% if product.image %}
-    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top">
-{% elif product.image_url %}
-    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="card-img-top">
-{% else %}
-    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="card-img-top">
-{% endif %}
-            </div>
-
-            <div class="col-lg-6">
-                <h1 class="display-5 fw-bold mb-3">{{ product.name }}</h1>
-
-                <div class="mb-3">
-                    <span class="badge bg-primary">{{ product.category.name }}</span>
-                    {% if product.is_featured %}
-                    <span class="badge bg-warning text-dark">Featured</span>
-                    {% endif %}
-                    {% if product.is_organic %}
-                    <span class="badge bg-success">Organic</span>
-                    {% endif %}
-                </div>
-
-                <div class="mb-4">
-                    <h2 class="display-6 text-primary fw-bold">${{ product.price }}</h2>
-                    {% if product.in_stock %}
-                        <p class="text-success mb-0">
-                            <i data-lucide="check-circle" class="me-2"></i>In Stock
-                        </p>
-                    {% else %}
-                        <p class="text-danger mb-0">
-                            <i data-lucide="x-circle" class="me-2"></i>Out of Stock
-                        </p>
-                    {% endif %}
-                </div>
-
-                <div class="mb-4">
-                    <h5 class="fw-bold mb-3">Description</h5>
-                    <p class="lead">{{ product.description }}</p>
-                </div>
-
-                {% if product.nutritional_info %}
-                <div class="mb-4">
-                    <h5 class="fw-bold mb-3">Nutritional Information</h5>
-                    <p>{{ product.nutritional_info }}</p>
-                </div>
-                {% endif %}
-
-                {% if product.in_stock %}
-                <form method="post" action="{% url 'core:cart' %}" class="mb-4">
-                    {% csrf_token %}
-                    <input type="hidden" name="product_id" value="{{ product.id }}">
-                    <input type="hidden" name="action" value="add">
-
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label fw-bold">Quantity</label>
-                            <input type="number" class="form-control form-control-lg" name="quantity" value="1" min="1" max="50">
-                        </div>
-                        <div class="col-md-8">
-                            <button type="submit" class="btn btn-primary btn-lg w-100">
-                                <i data-lucide="shopping-cart" class="me-2"></i>Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </form>
-                {% endif %}
-
-                <div class="card bg-light">
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-3">Product Details</h6>
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-2">
-                                <i data-lucide="package" class="me-2"></i>
-                                <strong>Weight:</strong> {{ product.weight }}g
-                            </li>
-                            <li class="mb-2">
-                                <i data-lucide="tag" class="me-2"></i>
-                                <strong>Category:</strong> {{ product.category.name }}
-                            </li>
-                            <li class="mb-2">
-                                <i data-lucide="shield-check" class="me-2"></i>
-                                <strong>Quality Assured</strong>
-                            </li>
-                            <li>
-                                <i data-lucide="truck" class="me-2"></i>
-                                <strong>Free shipping on orders over $50</strong>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-5 bg-light">
-    <div class="container">
-        <h3 class="fw-bold mb-4">Related Products</h3>
-        <div class="row g-4">
-            {% for related_product in related_products %}
-            <div class="col-lg-3 col-md-6">
-                <div class="product-card">
-                    <a href="{% url 'core:product_detail' related_product.id %}">
+                <div class="product-gallery">
+                    <!-- Main Image -->
+                    <div class="main-image mb-3">
                         {% if product.image %}
-    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top">
-{% elif product.image_url %}
-    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="card-img-top">
-{% else %}
-    <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="card-img-top">
-{% endif %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded-3 shadow-sm main-product-image" id="mainImage">
+                        {% else %}
+                            <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="img-fluid rounded-3 shadow-sm main-product-image" id="mainImage">
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Thumbnail Images -->
+                    {% if product.images.all %}
+                    <div class="thumbnail-images d-flex flex-wrap gap-2">
+                        {% for image in product.images.all %}
+                        <div class="thumbnail-item">
+                            <img src="{{ image.image.url }}" alt="{{ image.alt_text|default:product.name }}" class="img-thumbnail thumbnail-image" data-src="{{ image.image.url }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Product Details -->
+            <div class="col-lg-6">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'core:home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'core:shop' %}">Shop</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-5 fw-bold mb-3">{{ product.name }}</h1>
+                
+                <!-- Rating -->
+                {% if avg_rating > 0 %}
+                <div class="mb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="testimonial-stars me-2">
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= avg_rating|floatformat:"0"|add:"0" %}
+                                    <i data-lucide="star" class="filled"></i>
+                                {% else %}
+                                    <i data-lucide="star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="text-muted">({{ reviews|length }} reviews)</span>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    {% if product.has_discount %}
+                        <span class="h4 text-muted text-decoration-line-through me-2">${{ product.price }}</span>
+                        <span class="h4 text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                        <span class="badge bg-danger ms-2">{{ product.discount_percent }}% OFF</span>
+                    {% else %}
+                        <span class="h4 text-primary fw-bold">${{ product.price }}</span>
+                    {% endif %}
+                    
+                    {% if product.in_stock %}
+                        <span class="badge bg-success ms-2">In Stock</span>
+                        {% if product.is_low_stock %}
+                            <span class="badge bg-warning text-dark ms-2">Low Stock</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-danger ms-2">Out of Stock</span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold">Description</h5>
+                    <p class="text-muted">{{ product.description }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold">Nutritional Information</h5>
+                    <p class="text-muted">{{ product.nutritional_info|default:"Nutritional information not available." }}</p>
+                </div>
+                
+                <div class="mb-4">
+                    <h5 class="fw-bold">Category</h5>
+                    <a href="{% url 'core:shop' %}?category={{ product.category.id }}" class="badge bg-secondary text-decoration-none">
+                        {{ product.category.name }}
                     </a>
-                    <div class="product-card-body">
-                        <h5 class="product-title">
-                            <a href="{% url 'core:product_detail' related_product.id %}">{{ related_product.name }}</a>
-                        </h5>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">${{ related_product.price }}</span>
-                            {% if related_product.in_stock %}
-                                <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ related_product.id }}">
-                                    <i data-lucide="shopping-cart"></i>
+                </div>
+                
+                <!-- Product Variants -->
+                {% if product.variants.all %}
+                <div class="mb-4">
+                    <h5 class="fw-bold">Variants</h5>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for variant in product.variants.all %}
+                            {% if variant.is_active and variant.in_stock %}
+                                <button class="btn btn-outline-primary variant-btn" 
+                                        data-variant-id="{{ variant.id }}"
+                                        data-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}">
+                                    {{ variant.name }}: {{ variant.value }}
                                 </button>
                             {% endif %}
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
+                {% endif %}
+                
+                {% if product.in_stock %}
+                <div class="mb-4">
+                    <div class="input-group mb-3" style="max-width: 150px;">
+                        <button class="btn btn-outline-secondary" type="button" id="decreaseQty">-</button>
+                        <input type="number" class="form-control text-center" value="1" min="1" max="{{ product.stock }}" id="quantityInput">
+                        <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
+                    </div>
+                    <small class="text-muted">{{ product.stock }} items available</small>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <button class="btn btn-primary btn-lg me-md-2 add-to-cart" data-product-id="{{ product.id }}">
+                        <i data-lucide="shopping-cart" class="me-2"></i>Add to Cart
+                    </button>
+                    <button class="btn btn-outline-primary btn-lg">
+                        <i data-lucide="heart" class="me-2"></i>Wishlist
+                    </button>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i data-lucide="alert-triangle" class="me-2"></i>This product is currently out of stock.
+                </div>
+                {% endif %}
             </div>
-            {% endfor %}
         </div>
+        
+        <!-- Product Reviews -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">Customer Reviews</h3>
+                
+                {% if reviews %}
+                <div class="row g-4">
+                    {% for review in reviews %}
+                    <div class="col-lg-6">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="card-title mb-1">{{ review.user.full_name }}</h5>
+                                        <div class="testimonial-stars">
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i data-lucide="star" class="filled"></i>
+                                                {% else %}
+                                                    <i data-lucide="star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% if review.is_verified %}
+                                        <span class="badge bg-success">Verified Purchase</span>
+                                    {% endif %}
+                                </div>
+                                <p class="card-text">{{ review.comment }}</p>
+                                <small class="text-muted">{{ review.created_at|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i data-lucide="message-circle" class="text-muted" style="width: 48px; height: 48px;"></i>
+                    <h5 class="mt-3">No reviews yet</h5>
+                    <p class="text-muted">Be the first to review this product!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Related Products -->
+        {% if related_products %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">Related Products</h3>
+                <div class="row g-4">
+                    {% for product in related_products %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="product-card">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top">
+                            {% else %}
+                                <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="card-img-top">
+                            {% endif %}
+                            <div class="product-card-body">
+                                <h5 class="product-title">{{ product.name }}</h5>
+                                <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="product-price">${{ product.price }}</span>
+                                    {% if product.in_stock %}
+                                        <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ product.id }}">
+                                            <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
+                                        </button>
+                                    {% else %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </section>
+
+<!-- Structured Data for Product -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    "name": "{{ product.name }}",
+    "image": [
+        "{% if product.image %}{{ request.build_absolute_uri }}{{ product.image.url }}{% endif %}"
+    ],
+    "description": "{{ product.description|escapejs }}",
+    "sku": "{{ product.id }}",
+    "brand": {
+        "@type": "Brand",
+        "name": "NutriHarvest"
+    },
+    "offers": {
+        "@type": "Offer",
+        "url": "{{ request.build_absolute_uri }}",
+        "priceCurrency": "USD",
+        "price": "{{ product.discounted_price|floatformat:2 }}",
+        "priceValidUntil": "{{ product.updated_at|date:'Y-m-d' }}",
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
+        "seller": {
+            "@type": "Organization",
+            "name": "NutriHarvest"
+        }
+    },
+    "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ avg_rating|floatformat:1 }}",
+        "reviewCount": "{{ reviews|length }}"
+    }
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Quantity controls
+    const quantityInput = document.getElementById('quantityInput');
+    const decreaseBtn = document.getElementById('decreaseQty');
+    const increaseBtn = document.getElementById('increaseQty');
+    
+    if (quantityInput && decreaseBtn && increaseBtn) {
+        decreaseBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            if (value > 1) {
+                quantityInput.value = value - 1;
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            let value = parseInt(quantityInput.value);
+            let max = parseInt(quantityInput.max);
+            if (value < max) {
+                quantityInput.value = value + 1;
+            }
+        });
+        
+        quantityInput.addEventListener('change', function() {
+            let value = parseInt(this.value);
+            let max = parseInt(this.max);
+            if (value < 1) this.value = 1;
+            if (value > max) this.value = max;
+        });
+    }
+    
+    // Image gallery functionality
+    const thumbnailImages = document.querySelectorAll('.thumbnail-image');
+    const mainImage = document.getElementById('mainImage');
+    
+    thumbnailImages.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            const src = this.getAttribute('data-src');
+            if (mainImage && src) {
+                mainImage.src = src;
+                // Update active state
+                thumbnailImages.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+            }
+        });
+    });
+    
+    // Set first thumbnail as active
+    if (thumbnailImages.length > 0) {
+        thumbnailImages[0].classList.add('active');
+    }
+    
+    // Variant selection
+    const variantButtons = document.querySelectorAll('.variant-btn');
+    const addToCartBtn = document.querySelector('.add-to-cart');
+    
+    variantButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            variantButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Update price display if needed
+            const price = this.getAttribute('data-price');
+            if (price) {
+                const priceElement = document.querySelector('.product-price');
+                if (priceElement) {
+                    priceElement.textContent = '$' + price;
+                }
+            }
+            
+            // Update add to cart button with variant info
+            if (addToCartBtn) {
+                addToCartBtn.setAttribute('data-variant-id', this.getAttribute('data-variant-id'));
+            }
+        });
+    });
+    
+    // Initialize Lucide icons
+    lucide.createIcons();
+});
+</script>
 {% endblock %}
