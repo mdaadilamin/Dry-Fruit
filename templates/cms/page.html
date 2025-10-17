@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - NutriHarvest{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="bg-white rounded-3 shadow-sm p-5">
+                    <h1 class="display-4 fw-bold mb-4">{{ page.title }}</h1>
+                    <div class="page-content">
+                        {{ page.content|safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
