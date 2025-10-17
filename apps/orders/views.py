@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-from .models import Order, OrderItem, CartItem
+from .models import Order, OrderItem, CartItem, GiftWrap
 from apps.shop.models import Product
 import json
 
@@ -15,7 +15,7 @@ def order_management(request):
         messages.error(request, 'Access denied.')
         return redirect('core:dashboard')
     
-    orders = Order.objects.select_related('customer').prefetch_related('items__product')
+    orders = Order.objects.select_related('customer').prefetch_related('items__product', 'items__gift_wrap')
     
     # Filters
     status_filter = request.GET.get('status')
@@ -58,7 +58,7 @@ def order_detail(request, order_id):
             # Here you would trigger email notifications
             messages.success(request, f'Order status updated to {order.get_order_status_display()}')
     
-    return render(request, 'orders/order_detail.html', {'order': order})
+    return render(request, 'orders/order_detail.html', {'order': order, 'can_edit': request.user.has_permission('orders', 'edit')})
 
 @login_required
 @require_POST
@@ -166,4 +166,34 @@ def remove_from_cart(request):
         return JsonResponse({
             'success': False,
             'message': 'An error occurred while removing item'
+        })
+
+@login_required
+@require_POST
+def update_gift_wrap(request):
+    """Update gift wrap option for a cart item"""
+    try:
+        data = json.loads(request.body)
+        cart_item_id = data.get('cart_item_id')
+        gift_wrap_id = data.get('gift_wrap_id')
+        
+        cart_item = get_object_or_404(CartItem, id=cart_item_id, user=request.user)
+        
+        if gift_wrap_id:
+            gift_wrap = get_object_or_404(GiftWrap, id=gift_wrap_id, is_active=True)
+            cart_item.gift_wrap = gift_wrap
+        else:
+            cart_item.gift_wrap = None
+            
+        cart_item.save()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Gift wrap option updated successfully'
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while updating gift wrap option'
         })

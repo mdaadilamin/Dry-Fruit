@@ -15,6 +15,11 @@ urlpatterns = router.urls + [
     path('manage/testimonials/', views.testimonial_management, name='testimonial_management'),
     path('manage/pages/', views.page_management, name='page_management'),
     path('manage/contact/', views.contact_management, name='contact_management'),
+    path('manage/enquiries/', views.enquiry_management, name='enquiry_management'),  # Add this line
+    path('manage/enquiries/<int:enquiry_id>/resolve/', views.resolve_enquiry, name='resolve_enquiry'),  # Add this line
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('newsletter/confirm/<uuid:token>/', views.confirm_newsletter_subscription, name='confirm_newsletter'),
+    path('testimonial/submit/', views.submit_testimonial, name='submit_testimonial'),
+    path('enquiry/submit/', views.submit_enquiry, name='submit_enquiry'),  # Add this line
     path('<str:page_type>/', views.page_view, name='page_view'),
 ]

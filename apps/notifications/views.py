@@ -2,10 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.utils import timezone
 from django.db import models
 from .models import EmailTemplate, SMSTemplate, EmailLog, SMSLog, SystemNotification, Notification
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.http import require_http_methods
+from .management.commands.check_low_stock import Command as CheckLowStockCommand
 
 @login_required
 def email_template_management(request):
@@ -79,6 +82,64 @@ def sms_log(request):
     return render(request, 'notifications/sms_log.html', {'logs': logs})
 
 
+@login_required
+def system_notification_management(request):
+    """Manage system notifications (Admin only)"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST':
+        # Handle notification creation/update
+        notification_id = request.POST.get('notification_id')
+        title = request.POST.get('title')
+        message = request.POST.get('message')
+        notification_type = request.POST.get('notification_type')
+        is_active = 'is_active' in request.POST
+        show_to_users = 'show_to_users' in request.POST
+        show_to_guests = 'show_to_guests' in request.POST
+        valid_until = request.POST.get('valid_until')
+        
+        if notification_id:
+            # Update existing notification
+            notification = get_object_or_404(SystemNotification, id=notification_id)
+            notification.title = title
+            notification.message = message
+            notification.notification_type = notification_type
+            notification.is_active = is_active
+            notification.show_to_users = show_to_users
+            notification.show_to_guests = show_to_guests
+            if valid_until:
+                notification.valid_until = valid_until
+            notification.save()
+            messages.success(request, f'Notification "{title}" updated successfully!')
+        else:
+            # Create new notification
+            if title and message:
+                notification = SystemNotification.objects.create(
+                    title=title,
+                    message=message,
+                    notification_type=notification_type,
+                    is_active=is_active,
+                    show_to_users=show_to_users,
+                    show_to_guests=show_to_guests,
+                    valid_until=valid_until if valid_until else None
+                )
+                messages.success(request, f'Notification "{title}" created successfully!')
+            else:
+                messages.error(request, 'Title and message are required.')
+        
+        return redirect('notifications:system_notification_management')
+    
+    # Display notifications
+    notifications = SystemNotification.objects.all().order_by('-created_at')
+    context = {
+        'notifications': notifications,
+        'notification_types': SystemNotification.NOTIFICATION_TYPES,
+    }
+    return render(request, 'notifications/system_notification_management.html', context)
+
+
 @require_GET
 def get_system_notifications(request):
     """Get active system notifications for display"""
@@ -145,3 +206,17 @@ def get_user_notifications(request):
         'success': True,
         'notifications': notification_data
     })
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def check_low_stock_view(request):
+    """Manual trigger for low stock check"""
+    threshold = int(request.POST.get('threshold', 10))
+    
+    # Run the management command
+    command = CheckLowStockCommand()
+    command.handle(threshold=threshold)
+    
+    messages.success(request, f'Low stock check completed with threshold {threshold}.')
+    return redirect('core:admin_panel')

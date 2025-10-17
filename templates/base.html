@@ -100,8 +100,8 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'core:shop' %}?category=2">Dry Fruits</a></li>
                             <li><a class="dropdown-item" href="{% url 'core:shop' %}?category=4">Gift Boxes</a></li>
-                            <li><a class="dropdown-item" href="#">Chocolates</a></li>
-                            <li><a class="dropdown-item" href="#">Spices</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:chocolates_category' %}">Chocolates</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:spices_category' %}">Spices</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -256,6 +256,7 @@
                                 <i data-lucide="send"></i>
                             </button>
                         </div>
+                        <div class="form-text" id="newsletter-message"></div>
                     </form>
                 </div>
             </div>
@@ -283,6 +284,50 @@
     
     <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Newsletter subscription
+        const newsletterForm = document.getElementById('newsletter-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const emailInput = document.getElementById('newsletter-email');
+                const messageDiv = document.getElementById('newsletter-message');
+                
+                if (!emailInput.value) {
+                    messageDiv.innerHTML = '<span class="text-danger">Please enter your email address.</span>';
+                    return;
+                }
+                
+                // Send AJAX request
+                fetch('{% url "cms:newsletter_subscribe" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({
+                        email: emailInput.value
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        messageDiv.innerHTML = '<span class="text-success">' + data.message + '</span>';
+                        emailInput.value = '';
+                    } else {
+                        messageDiv.innerHTML = '<span class="text-warning">' + data.message + '</span>';
+                    }
+                })
+                .catch(error => {
+                    messageDiv.innerHTML = '<span class="text-danger">An error occurred. Please try again.</span>';
+                });
+            });
+        }
+    });
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>

@@ -225,6 +225,75 @@
     </div>
 </section>
 
+<!-- Customer Testimonial Submission -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Share Your Experience</h2>
+                <p class="lead text-muted">We'd love to hear from you! Share your experience with NutriHarvest products.</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Submit Your Testimonial</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'cms:submit_testimonial' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="customer_name" class="form-label fw-bold">Your Name *</label>
+                                        <input type="text" class="form-control" id="customer_name" name="customer_name" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="location" class="form-label fw-bold">Location</label>
+                                        <input type="text" class="form-control" id="location" name="location">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="rating" class="form-label fw-bold">Rating *</label>
+                                <select class="form-select" id="rating" name="rating" required>
+                                    <option value="5">5 Stars - Excellent</option>
+                                    <option value="4">4 Stars - Very Good</option>
+                                    <option value="3">3 Stars - Good</option>
+                                    <option value="2">2 Stars - Fair</option>
+                                    <option value="1">1 Star - Poor</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="comment" class="form-label fw-bold">Your Testimonial *</label>
+                                <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Tell us about your experience with NutriHarvest products..." required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="customer_image" class="form-label fw-bold">Your Photo (Optional)</label>
+                                <input type="file" class="form-control" id="customer_image" name="customer_image" accept="image/*">
+                                <div class="form-text">Help us personalize your testimonial with your photo.</div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i data-lucide="send" class="me-2"></i>Submit Testimonial
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Milestones Section -->
 <section class="py-5">
     <div class="container">

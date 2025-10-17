@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Notification Management - NutriHarvest{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 fw-bold mb-4">System Notification Management</h1>
+            <p class="lead mb-4">Create and manage system-wide notifications for promotions, new arrivals, and announcements.</p>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="row">
+                <!-- Notification List -->
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Existing Notifications</h5>
+                            <span class="badge bg-light text-dark">{{ notifications.count }} notifications</span>
+                        </div>
+                        <div class="card-body">
+                            {% if notifications %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                                <th>Valid Until</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for notification in notifications %}
+                                            <tr>
+                                                <td>{{ notification.title }}</td>
+                                                <td>
+                                                    <span class="badge bg-{% if notification.notification_type == 'promotion' %}success{% elif notification.notification_type == 'new_arrival' %}info{% elif notification.notification_type == 'announcement' %}primary{% else %}warning{% endif %}">
+                                                        {{ notification.get_notification_type_display }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if notification.is_active %}
+                                                        <span class="badge bg-success">Active</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if notification.valid_until %}
+                                                        {{ notification.valid_until|date:"M d, Y" }}
+                                                    {% else %}
+                                                        <span class="text-muted">No expiration</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group" role="group">
+                                                        <button class="btn btn-sm btn-outline-primary edit-notification-btn" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#editNotificationModal"
+                                                                data-notification-id="{{ notification.id }}"
+                                                                data-title="{{ notification.title }}"
+                                                                data-message="{{ notification.message }}"
+                                                                data-type="{{ notification.notification_type }}"
+                                                                data-active="{{ notification.is_active|yesno:'true,false' }}"
+                                                                data-show-users="{{ notification.show_to_users|yesno:'true,false' }}"
+                                                                data-show-guests="{{ notification.show_to_guests|yesno:'true,false' }}"
+                                                                data-valid-until="{{ notification.valid_until|date:'Y-m-d' }}">
+                                                            <i data-lucide="edit" class="me-1"></i>Edit
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center py-5">
+                                    <i data-lucide="bell" class="text-muted" style="width: 48px; height: 48px;"></i>
+                                    <h5 class="mt-3">No notifications found</h5>
+                                    <p class="text-muted">Create your first notification using the form on the right.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Add Notification Form -->
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Create New Notification</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="notification_id" id="notification_id">
+                                
+                                <div class="mb-3">
+                                    <label for="title" class="form-label fw-bold">Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="message" class="form-label fw-bold">Message *</label>
+                                    <textarea class="form-control" id="message" name="message" rows="3" required></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="notification_type" class="form-label fw-bold">Notification Type</label>
+                                    <select class="form-select" id="notification_type" name="notification_type">
+                                        {% for type, display in notification_types %}
+                                            <option value="{{ type }}">{{ display }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="valid_until" class="form-label fw-bold">Valid Until</label>
+                                    <input type="date" class="form-control" id="valid_until" name="valid_until">
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                                    <label class="form-check-label fw-bold" for="is_active">
+                                        Notification is Active
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="show_to_users" name="show_to_users" checked>
+                                    <label class="form-check-label fw-bold" for="show_to_users">
+                                        Show to Logged-in Users
+                                    </label>
+                                </div>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="show_to_guests" name="show_to_guests" checked>
+                                    <label class="form-check-label fw-bold" for="show_to_guests">
+                                        Show to Guests
+                                    </label>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i data-lucide="plus" class="me-2"></i>Create Notification
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Notification Modal -->
+<div class="modal fade" id="editNotificationModal" tabindex="-1" aria-labelledby="editNotificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editNotificationModalLabel">Edit Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="editNotificationForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="notification_id" id="edit_notification_id">
+                    
+                    <div class="mb-3">
+                        <label for="edit_title" class="form-label fw-bold">Title *</label>
+                        <input type="text" class="form-control" id="edit_title" name="title" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_message" class="form-label fw-bold">Message *</label>
+                        <textarea class="form-control" id="edit_message" name="message" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_notification_type" class="form-label fw-bold">Notification Type</label>
+                        <select class="form-select" id="edit_notification_type" name="notification_type">
+                            {% for type, display in notification_types %}
+                                <option value="{{ type }}">{{ display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_valid_until" class="form-label fw-bold">Valid Until</label>
+                        <input type="date" class="form-control" id="edit_valid_until" name="valid_until">
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active">
+                        <label class="form-check-label fw-bold" for="edit_is_active">
+                            Notification is Active
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="edit_show_to_users" name="show_to_users">
+                        <label class="form-check-label fw-bold" for="edit_show_to_users">
+                            Show to Logged-in Users
+                        </label>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="edit_show_to_guests" name="show_to_guests">
+                        <label class="form-check-label fw-bold" for="edit_show_to_guests">
+                            Show to Guests
+                        </label>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save" class="me-2"></i>Update Notification
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Handle edit notification button clicks
+    document.querySelectorAll('.edit-notification-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationId = this.getAttribute('data-notification-id');
+            const title = this.getAttribute('data-title');
+            const message = this.getAttribute('data-message');
+            const type = this.getAttribute('data-type');
+            const isActive = this.getAttribute('data-active') === 'true';
+            const showToUsers = this.getAttribute('data-show-users') === 'true';
+            const showToGuests = this.getAttribute('data-show-guests') === 'true';
+            const validUntil = this.getAttribute('data-valid-until');
+            
+            document.getElementById('edit_notification_id').value = notificationId;
+            document.getElementById('edit_title').value = title;
+            document.getElementById('edit_message').value = message;
+            document.getElementById('edit_notification_type').value = type;
+            document.getElementById('edit_is_active').checked = isActive;
+            document.getElementById('edit_show_to_users').checked = showToUsers;
+            document.getElementById('edit_show_to_guests').checked = showToGuests;
+            document.getElementById('edit_valid_until').value = validUntil;
+        });
+    });
+});
+</script>
+{% endblock %}

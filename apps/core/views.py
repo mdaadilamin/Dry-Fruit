@@ -18,11 +18,32 @@ def home(request):
     banners = Banner.objects.filter(is_active=True)[:3]
     testimonials = Testimonial.objects.filter(is_active=True)[:6]
     
+    # Get gift box products for the carousel
+    try:
+        gift_box_category = Category.objects.get(name='Gift Boxes')
+        gift_box_products = Product.objects.filter(
+            category=gift_box_category, 
+            is_active=True
+        )[:8]  # Limit to 8 gift box products
+    except Category.DoesNotExist:
+        gift_box_products = Product.objects.none()
+    
+    # Get featured products for each category
+    category_featured_products = {}
+    for category in categories:
+        category_featured_products[category.name] = Product.objects.filter(
+            category=category,
+            is_active=True,
+            is_featured=True
+        )[:4]  # Limit to 4 featured products per category
+    
     context = {
         'featured_products': featured_products,
         'categories': categories,
         'banners': banners,
         'testimonials': testimonials,
+        'gift_box_products': gift_box_products,
+        'category_featured_products': category_featured_products,
     }
     return render(request, 'core/home.html', context)
 
@@ -104,26 +125,40 @@ def shop(request):
 def product_detail(request, product_id):
     """Product detail page"""
     product = get_object_or_404(Product, id=product_id, is_active=True)
-    related_products = Product.objects.filter(
-        category=product.category, 
-        is_active=True
-    ).exclude(id=product_id)[:4]
+    
+    # Get related products based on category, tags, and purchase history
+    related_products = get_related_products(product, limit=4)
+    
+    # Get upsell products (higher priced or premium versions)
+    upsell_products = get_upsell_products(product, limit=4)
     
     # Get product reviews
     reviews = ProductReview.objects.filter(product=product, is_verified=True)
     avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
     
+    # Get gift box customizations and items if this is a gift box
+    gift_box_customizations = None
+    gift_box_items = None
+    if product.category.name == 'Gift Boxes':
+        gift_box_customizations = product.customizations.filter(is_active=True)
+        gift_box_items = product.gift_box_items.filter(product=product)
+    
     context = {
         'product': product,
         'related_products': related_products,
+        'upsell_products': upsell_products,
         'reviews': reviews,
         'avg_rating': avg_rating,
+        'gift_box_customizations': gift_box_customizations,
+        'gift_box_items': gift_box_items,
     }
     return render(request, 'core/product_detail.html', context)
 
 @login_required
 def cart(request):
     """Shopping cart page"""
+    from apps.orders.models import CartItem, GiftWrap
+    
     if request.method == 'POST':
         action = request.POST.get('action')
         product_id = request.POST.get('product_id')
@@ -167,44 +202,76 @@ def cart(request):
             from django.http import HttpResponseRedirect
             from django.urls import reverse
             return HttpResponseRedirect(reverse('marketing:remove_coupon'))
-        
-        return redirect('core:cart')
     
-    cart_items = CartItem.objects.filter(user=request.user).select_related('product')
+    # Get cart items
+    cart_items = CartItem.objects.filter(user=request.user).select_related('product', 'product__category', 'gift_wrap')
+    
+    # Calculate totals
     total = sum(item.get_total_price() for item in cart_items)
     
-    # Check for applied coupon
+    # Get gift wrap total
+    gift_wrap_total = sum(
+        (item.gift_wrap.price * item.quantity) 
+        for item in cart_items 
+        if item.gift_wrap
+    )
+    
+    # Get active gift wraps
+    gift_wraps = GiftWrap.objects.filter(is_active=True)
+    
+    # Handle coupon
+    from apps.marketing.models import Coupon, CouponUsage
     coupon = None
     discount = 0
     total_with_discount = total
     
-    if 'coupon_code' in request.session:
-        from marketing.models import Coupon
-        try:
-            coupon = Coupon.objects.get(code=request.session['coupon_code'])
-            if coupon.is_valid() and coupon.can_be_used_by_user(request.user):
-                # Calculate discount
-                if coupon.coupon_type == 'percentage':
-                    discount = total * (coupon.discount_value / 100)
-                elif coupon.coupon_type == 'fixed':
-                    discount = min(coupon.discount_value, total)
-                
-                total_with_discount = total - discount
-            else:
-                # Remove invalid coupon
-                del request.session['coupon_code']
-                coupon = None
-        except Coupon.DoesNotExist:
-            # Remove invalid coupon code from session
-            if 'coupon_code' in request.session:
-                del request.session['coupon_code']
+    # Check if user has an active coupon
+    try:
+        coupon_usage = CouponUsage.objects.filter(
+            user=request.user, 
+            is_active=True
+        ).select_related('coupon').first()
+        
+        if coupon_usage and coupon_usage.coupon.is_valid():
+            coupon = coupon_usage.coupon
+            discount = coupon.calculate_discount(total)
+            total_with_discount = total - discount
+    except CouponUsage.DoesNotExist:
+        pass
+    
+    # Get related products based on items in cart
+    related_products = []
+    if cart_items.exists():
+        # Get all products in cart
+        cart_product_ids = [item.product.id for item in cart_items]
+        cart_products = Product.objects.filter(id__in=cart_product_ids)
+        
+        # For each product in cart, get related products
+        for cart_product in cart_products:
+            related_for_item = get_related_products(cart_product, limit=2)
+            related_products.extend(related_for_item)
+        
+        # Remove duplicates and limit to 6 products
+        seen_ids = set()
+        unique_related = []
+        for product in related_products:
+            if product.id not in seen_ids and product.id not in cart_product_ids:
+                seen_ids.add(product.id)
+                unique_related.append(product)
+                if len(unique_related) >= 6:
+                    break
+        
+        related_products = unique_related
     
     context = {
         'cart_items': cart_items,
         'total': total,
+        'gift_wrap_total': gift_wrap_total,
+        'gift_wraps': gift_wraps,
         'coupon': coupon,
         'discount': discount,
         'total_with_discount': total_with_discount,
+        'related_products': related_products,
     }
     return render(request, 'core/cart.html', context)
 
@@ -213,7 +280,7 @@ def checkout(request):
     """Checkout page"""
     if request.method == 'POST':
         # Handle order creation
-        cart_items = CartItem.objects.filter(user=request.user).select_related('product')
+        cart_items = CartItem.objects.filter(user=request.user).select_related('product', 'gift_wrap')
         if not cart_items.exists():
             messages.error(request, 'Your cart is empty.')
             return redirect('core:cart')
@@ -275,14 +342,15 @@ def checkout(request):
             shipping_pincode=zip_code
         )
         
-        # Create order items
+        # Create order items with gift wrap options
         for item in cart_items:
             from apps.orders.models import OrderItem
             OrderItem.objects.create(
                 order=order,
                 product=item.product,
                 quantity=item.quantity,
-                price=item.product.price
+                price=item.product.price,
+                gift_wrap=item.gift_wrap  # Transfer gift wrap selection
             )
         
         # Clear cart
@@ -305,8 +373,15 @@ def checkout(request):
             messages.success(request, f'Order #{order.order_number} placed successfully! Payment will be collected on delivery.')
             return redirect('core:dashboard')
     
-    cart_items = CartItem.objects.filter(user=request.user).select_related('product')
+    cart_items = CartItem.objects.filter(user=request.user).select_related('product', 'gift_wrap')
     total = sum(item.get_total_price() for item in cart_items)
+    
+    # Calculate gift wrap total
+    gift_wrap_total = sum(
+        (item.gift_wrap.price * item.quantity) 
+        for item in cart_items 
+        if item.gift_wrap
+    )
     
     # Check for applied coupon
     coupon = None
@@ -337,6 +412,7 @@ def checkout(request):
     context = {
         'cart_items': cart_items,
         'total': total,
+        'gift_wrap_total': gift_wrap_total,
         'coupon': coupon,
         'discount': discount,
         'total_with_discount': total_with_discount,
@@ -393,6 +469,44 @@ def admin_panel(request):
         count=Count('id')
     )
     
+    # Enhanced product analytics
+    # Low stock products
+    low_stock_products = Product.objects.filter(stock__lte=10, is_active=True).order_by('stock')[:5]
+    
+    # Best rated products (with at least 3 reviews)
+    best_rated_products = Product.objects.annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews')
+    ).filter(
+        review_count__gte=3,
+        is_active=True
+    ).order_by('-avg_rating')[:5]
+    
+    # Worst rated products (with at least 3 reviews)
+    worst_rated_products = Product.objects.annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews')
+    ).filter(
+        review_count__gte=3,
+        is_active=True
+    ).order_by('avg_rating')[:5]
+    
+    # Products with no reviews
+    products_without_reviews = Product.objects.filter(
+        reviews__isnull=True,
+        is_active=True
+    ).order_by('name')[:5]
+    
+    # Category performance
+    category_performance = Category.objects.annotate(
+        product_count=Count('products'),
+        total_sales=Sum('products__orderitem__quantity'),
+        avg_rating=Avg('products__reviews__rating')
+    ).filter(product_count__gt=0).order_by('-total_sales')
+    
+    # Recent product reviews
+    recent_reviews = ProductReview.objects.select_related('product', 'user').order_by('-created_at')[:5]
+    
     context = {
         'total_products': total_products,
         'total_customers': total_customers,
@@ -402,8 +516,80 @@ def admin_panel(request):
         'sales_data': list(sales_data),
         'top_products': top_products,
         'order_status_data': list(order_status_data),
+        'low_stock_products': low_stock_products,
+        'best_rated_products': best_rated_products,
+        'worst_rated_products': worst_rated_products,
+        'products_without_reviews': products_without_reviews,
+        'category_performance': category_performance,
+        'recent_reviews': recent_reviews,
     }
     return render(request, 'core/admin_panel.html', context)
+
+@login_required
+def product_analytics(request):
+    """Detailed product analytics dashboard"""
+    if request.user.role.name != 'admin':
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    # Get date range filter
+    days = int(request.GET.get('days', 30))
+    start_date = timezone.now() - timedelta(days=days)
+    
+    # Product sales over time
+    sales_over_time = OrderItem.objects.filter(
+        order__created_at__gte=start_date
+    ).extra(select={
+        'day': 'date(orders_order.created_at)'
+    }).values('day').annotate(
+        total_quantity=Sum('quantity'),
+        total_revenue=Sum(F('quantity') * F('price'))
+    ).order_by('day')
+    
+    # Top selling products
+    top_selling_products = Product.objects.annotate(
+        total_sold=Sum('orderitem__quantity'),
+        total_revenue=Sum(F('orderitem__quantity') * F('orderitem__price'))
+    ).filter(total_sold__gt=0).order_by('-total_sold')[:10]
+    
+    # Product performance by category
+    category_performance = Category.objects.annotate(
+        total_products=Count('products'),
+        total_sold=Sum('products__orderitem__quantity'),
+        total_revenue=Sum(F('products__orderitem__quantity') * F('products__orderitem__price'))
+    ).filter(total_products__gt=0).order_by('-total_sold')
+    
+    # Inventory analytics
+    inventory_stats = {
+        'total_products': Product.objects.count(),
+        'out_of_stock': Product.objects.filter(stock=0).count(),
+        'low_stock': Product.objects.filter(stock__lte=10, stock__gt=0).count(),
+        'well_stocked': Product.objects.filter(stock__gt=10).count(),
+    }
+    
+    # Review analytics
+    review_stats = {
+        'total_reviews': ProductReview.objects.count(),
+        'approved_reviews': ProductReview.objects.filter(is_approved=True).count(),
+        'pending_reviews': ProductReview.objects.filter(is_approved=False).count(),
+        'avg_rating': ProductReview.objects.aggregate(avg=Avg('rating'))['avg'] or 0,
+    }
+    
+    # Rating distribution
+    rating_distribution = ProductReview.objects.values('rating').annotate(
+        count=Count('rating')
+    ).order_by('rating')
+    
+    context = {
+        'sales_over_time': list(sales_over_time),
+        'top_selling_products': top_selling_products,
+        'category_performance': category_performance,
+        'inventory_stats': inventory_stats,
+        'review_stats': review_stats,
+        'rating_distribution': list(rating_distribution),
+        'days': days,
+    }
+    return render(request, 'core/product_analytics.html', context)
 
 def login_view(request):
     """User login"""
@@ -465,3 +651,223 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('core:home')
+
+def chocolates_category(request):
+    """Chocolates category page"""
+    try:
+        chocolates_category = Category.objects.get(name='Chocolates')
+        products = Product.objects.filter(
+            category=chocolates_category, 
+            is_active=True
+        ).select_related('category')
+    except Category.DoesNotExist:
+        products = Product.objects.none()
+        chocolates_category = None
+    
+    # Apply the same filters as the general shop view
+    search_query = request.GET.get('search', '')
+    if search_query:
+        products = products.filter(
+            Q(name__icontains=search_query) | 
+            Q(description__icontains=search_query) |
+            Q(tags__icontains=search_query)
+        )
+    
+    # Price filter
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    if min_price:
+        products = products.filter(price__gte=min_price)
+    if max_price:
+        products = products.filter(price__lte=max_price)
+    
+    # Stock filter
+    in_stock_filter = request.GET.get('in_stock', '')
+    if in_stock_filter:
+        products = products.filter(stock__gt=0)
+    
+    # Sale filter
+    on_sale_filter = request.GET.get('on_sale', '')
+    if on_sale_filter:
+        products = products.filter(discount_percent__gt=0)
+    
+    # Sort functionality
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by == 'price_low':
+        products = products.order_by('price')
+    elif sort_by == 'price_high':
+        products = products.order_by('-price')
+    elif sort_by == 'newest':
+        products = products.order_by('-created_at')
+    elif sort_by == 'popularity':
+        # Order by number of reviews or featured status
+        products = products.annotate(
+            avg_rating=Avg('reviews__rating'),
+            review_count=Count('reviews')
+        ).order_by('-avg_rating', '-review_count', '-is_featured')
+    elif sort_by == 'rating':
+        products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+    else:
+        products = products.order_by('name')
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(products, 9)  # Show 9 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'products': page_obj,
+        'category': chocolates_category,
+        'search_query': search_query,
+        'min_price': min_price,
+        'max_price': max_price,
+        'in_stock_filter': in_stock_filter,
+        'on_sale_filter': on_sale_filter,
+        'sort_by': sort_by,
+        'category_name': 'Chocolates'
+    }
+    return render(request, 'core/category.html', context)
+
+def spices_category(request):
+    """Spices category page"""
+    try:
+        spices_category = Category.objects.get(name='Spices')
+        products = Product.objects.filter(
+            category=spices_category, 
+            is_active=True
+        ).select_related('category')
+    except Category.DoesNotExist:
+        products = Product.objects.none()
+        spices_category = None
+    
+    # Apply the same filters as the general shop view
+    search_query = request.GET.get('search', '')
+    if search_query:
+        products = products.filter(
+            Q(name__icontains=search_query) | 
+            Q(description__icontains=search_query) |
+            Q(tags__icontains=search_query)
+        )
+    
+    # Price filter
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    if min_price:
+        products = products.filter(price__gte=min_price)
+    if max_price:
+        products = products.filter(price__lte=max_price)
+    
+    # Stock filter
+    in_stock_filter = request.GET.get('in_stock', '')
+    if in_stock_filter:
+        products = products.filter(stock__gt=0)
+    
+    # Sale filter
+    on_sale_filter = request.GET.get('on_sale', '')
+    if on_sale_filter:
+        products = products.filter(discount_percent__gt=0)
+    
+    # Sort functionality
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by == 'price_low':
+        products = products.order_by('price')
+    elif sort_by == 'price_high':
+        products = products.order_by('-price')
+    elif sort_by == 'newest':
+        products = products.order_by('-created_at')
+    elif sort_by == 'popularity':
+        # Order by number of reviews or featured status
+        products = products.annotate(
+            avg_rating=Avg('reviews__rating'),
+            review_count=Count('reviews')
+        ).order_by('-avg_rating', '-review_count', '-is_featured')
+    elif sort_by == 'rating':
+        products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
+    else:
+        products = products.order_by('name')
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(products, 9)  # Show 9 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'products': page_obj,
+        'category': spices_category,
+        'search_query': search_query,
+        'min_price': min_price,
+        'max_price': max_price,
+        'in_stock_filter': in_stock_filter,
+        'on_sale_filter': on_sale_filter,
+        'sort_by': sort_by,
+        'category_name': 'Spices'
+    }
+    return render(request, 'core/category.html', context)
+
+def get_related_products(product, limit=4):
+    """Get related products based on category, tags, and purchase history"""
+    from django.db.models import Count, Q
+    from apps.orders.models import OrderItem
+    
+    # Start with products from the same category
+    related_products = Product.objects.filter(
+        category=product.category,
+        is_active=True
+    ).exclude(id=product.id)
+    
+    # If product has tags, also look for products with similar tags
+    if product.tags:
+        tag_list = [tag.strip() for tag in product.tags.split(',')]
+        tag_queries = Q()
+        for tag in tag_list:
+            tag_queries |= Q(tags__icontains=tag)
+        
+        # Get products with similar tags
+        tagged_products = Product.objects.filter(
+            tag_queries,
+            is_active=True
+        ).exclude(id=product.id).distinct()
+        
+        # Combine category and tagged products
+        related_products = related_products.union(tagged_products)
+    
+    # Get products that are frequently bought together (purchase history)
+    # Find orders that contain this product
+    orders_with_product = OrderItem.objects.filter(product=product).values_list('order_id', flat=True)
+    
+    # Find other products in those orders
+    if orders_with_product.exists():
+        frequently_bought_together = Product.objects.filter(
+            orderitem__order_id__in=orders_with_product,
+            is_active=True
+        ).exclude(id=product.id).annotate(
+            purchase_count=Count('orderitem')
+        ).order_by('-purchase_count')
+        
+        # Combine with existing related products
+        related_products = related_products.union(frequently_bought_together)
+    
+    # Convert to list and limit
+    related_products_list = list(related_products[:limit*2])  # Get more to ensure we have enough after filtering
+    
+    # Remove the current product if it's in the list
+    related_products_list = [p for p in related_products_list if p.id != product.id]
+    
+    # Return limited results
+    return related_products_list[:limit]
+
+def get_upsell_products(product, limit=4):
+    """Get upsell products (higher priced or premium versions)"""
+    from django.db.models import Q
+    
+    # Get products from the same category with higher price or marked as premium
+    upsell_products = Product.objects.filter(
+        category=product.category,
+        is_active=True
+    ).exclude(id=product.id).filter(
+        Q(price__gt=product.price) | Q(tags__icontains='premium') | Q(tags__icontains='deluxe')
+    ).order_by('price')[:limit]
+    
+    return list(upsell_products)

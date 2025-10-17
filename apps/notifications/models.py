@@ -9,6 +9,7 @@ class EmailTemplate(models.Model):
         ('order_delivered', 'Order Delivered'),
         ('welcome', 'Welcome Email'),
         ('password_reset', 'Password Reset'),
+        ('low_stock_alert', 'Low Stock Alert'),  # Add this line
     ]
     
     template_type = models.CharField(max_length=30, choices=TEMPLATE_TYPES, unique=True)

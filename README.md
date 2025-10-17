@@ -4,12 +4,22 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 
 ## 🚀 Features
 
-### Recent Enhancements
-- **Enhanced Navigation**: Added product categories dropdown with Dry Fruits, Gift Boxes, Chocolates, and Spices
-- **Blog Integration**: Added blog link to main navigation
-- **Product Search**: Implemented search bar in navbar for quick product discovery
-- **Notification System**: Added pop-up notifications for promotions and new arrivals
-- **Notification Bell**: Added notification icon in navbar with unread count and dropdown preview
+### Major Recent Enhancements
+- **Dynamic Homepage Carousel**: Interactive slider for featured gift boxes with automatic rotation
+- **Enhanced Testimonials Section**: Customer testimonials with submission form and admin approval
+- **Featured Collections**: Dedicated sections for popular products with category-based management
+- **Gift Box Customization Tool**: Interactive tool allowing customers to customize gift boxes with dynamic pricing
+- **Newsletter Signup**: Email subscription system with confirmation workflow
+- **RBAC-based Permissions**: Role-based access control with granular permission management
+- **Promotional Pop-ups**: Automatic notifications for promotions and new arrivals
+- **Customer Reviews/Ratings**: Comprehensive review system with moderation capabilities
+- **Low Stock Notifications**: Automatic alerts for customers and admins when inventory is low
+- **Dedicated Category Pages**: Separate pages for Chocolates and Spices categories with tailored layouts
+- **Gift Wrap Options**: Additional service with configurable pricing
+- **Related Products Suggestions**: Upsell/cross-sell functionality based on product categories
+- **Enhanced Product Analytics**: Detailed dashboard with sales trends, top products, and inventory insights
+- **Customer Enquiry System**: Contact form with admin notifications and management interface
+- **Improved Admin Panel**: Enhanced dashboard with quick access to all management interfaces
 
 ### Frontend Features
 - **Responsive Design**: Mobile-first design with Bootstrap 5
@@ -18,24 +28,31 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 - **User Authentication**: Registration, login, password reset
 - **Customer Dashboard**: Order history, profile management
 - **Rich UI/UX**: Premium "Rich Earthy Luxury" theme
+- **Interactive Elements**: Carousels, modals, and dynamic forms
+- **Enhanced Navigation**: Product categories dropdown with Dry Fruits, Gift Boxes, Chocolates, and Spices
+- **Blog Integration**: Added blog link to main navigation
+- **Product Search**: Implemented search bar in navbar for quick product discovery
 
 ### Backend Features
 - **Django REST Framework**: Full API support
-- **Role-Based Access Control**: Admin, Employee, Customer roles
-- **Product Management**: CRUD operations with categories
+- **Role-Based Access Control**: Admin, Employee, Customer roles with granular permissions
+- **Product Management**: CRUD operations with categories, variants, and inventory tracking
 - **Order Management**: Complete order lifecycle management
-- **Content Management**: Banners, testimonials, pages
-- **Email Notifications**: Automated order confirmations
+- **Content Management**: Banners, testimonials, pages with admin interface
+- **Email Notifications**: Automated order confirmations and system notifications
 - **Activity Logging**: Complete audit trail
+- **Advanced Analytics**: Sales reporting, inventory insights, and customer behavior analysis
 
 ### Admin Features
-- **Comprehensive Dashboard**: Sales analytics and metrics
-- **User Management**: Employee and customer management
-- **Permission System**: Granular access control
-- **Inventory Management**: Stock tracking and alerts
-- **Report Generation**: Sales and inventory reports
-- **CMS**: Manage website content dynamically
+- **Comprehensive Dashboard**: Sales analytics and metrics with visual charts
+- **User Management**: Employee and customer management with role assignment
+- **Permission System**: Granular access control with customizable roles
+- **Inventory Management**: Stock tracking with low stock alerts
+- **Report Generation**: Sales and inventory reports with export capabilities
+- **CMS**: Manage website content dynamically including banners, testimonials, and pages
 - **Notification Management**: Create and manage system notifications
+- **Review Moderation**: Approve/reject customer reviews with bulk operations
+- **Enquiry Management**: Handle customer inquiries with resolution tracking
 - **Enhanced Navigation**: Improved admin navigation and menu structure
 
 ## 🛠️ Tech Stack

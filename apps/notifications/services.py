@@ -26,9 +26,9 @@ class EmailService:
             
             # Replace placeholders with context data
             for key, value in context.items():
-                subject = subject.replace(f'{{{key}}}', str(value))
-                html_content = html_content.replace(f'{{{key}}}', str(value))
-                text_content = text_content.replace(f'{{{key}}}', str(value))
+                subject = subject.replace(f'{{{{{key}}}}}', str(value))
+                html_content = html_content.replace(f'{{{{{key}}}}}', str(value))
+                text_content = text_content.replace(f'{{{{{key}}}}}', str(value))
             
             # Create email log
             email_log = EmailLog.objects.create(

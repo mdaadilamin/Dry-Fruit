@@ -55,10 +55,18 @@
                                                             <div>
                                                                 <h6 class="mb-0">{{ item.product.name }}</h6>
                                                                 <small class="text-muted">Qty: {{ item.quantity }}</small>
+                                                                {% if item.gift_wrap %}
+                                                                <br><small class="text-muted">Gift Wrap: {{ item.gift_wrap.name }}</small>
+                                                                {% endif %}
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    <td class="text-end">${{ item.get_total_price|floatformat:2 }}</td>
+                                                    <td class="text-end">
+                                                        ${{ item.get_total_price|floatformat:2 }}
+                                                        {% if item.gift_wrap %}
+                                                        <br><small class="text-muted">+${{ item.gift_wrap.price|floatformat:2 }} each</small>
+                                                        {% endif %}
+                                                    </td>
                                                 </tr>
                                                 {% endfor %}
                                             </tbody>

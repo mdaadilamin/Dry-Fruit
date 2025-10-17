@@ -108,6 +108,55 @@
                     </a>
                 </div>
                 
+                <!-- Gift Box Customizations -->
+                {% if gift_box_customizations %}
+                <div class="mb-4">
+                    <h5 class="fw-bold">Customization Options</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            {% for customization in gift_box_customizations %}
+                            <div class="form-check mb-2">
+                                <input class="form-check-input gift-customization" 
+                                       type="checkbox" 
+                                       value="{{ customization.id }}" 
+                                       id="customization{{ customization.id }}"
+                                       data-price="{{ customization.price }}">
+                                <label class="form-check-label" for="customization{{ customization.id }}">
+                                    {{ customization.name }} 
+                                    {% if customization.price > 0 %}
+                                        <span class="text-muted">(+${{ customization.price }})</span>
+                                    {% else %}
+                                        <span class="text-muted">(Free)</span>
+                                    {% endif %}
+                                </label>
+                                {% if customization.description %}
+                                <small class="form-text text-muted d-block">{{ customization.description }}</small>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Gift Box Items -->
+                {% if gift_box_items %}
+                <div class="mb-4">
+                    <h5 class="fw-bold">Items Included</h5>
+                    <ul class="list-group">
+                        {% for item in gift_box_items %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-medium">{{ item.item.name }}</span>
+                                <span class="text-muted">× {{ item.quantity }}</span>
+                            </div>
+                            <span class="text-muted">${{ item.item.price }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
                 <!-- Product Variants -->
                 {% if product.variants.all %}
                 <div class="mb-4">
@@ -204,6 +253,42 @@
                 <h3 class="mb-4">Related Products</h3>
                 <div class="row g-4">
                     {% for product in related_products %}
+                    <div class="col-lg-3 col-md-6">
+                        <div class="product-card">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top">
+                            {% else %}
+                                <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="card-img-top">
+                            {% endif %}
+                            <div class="product-card-body">
+                                <h5 class="product-title">{{ product.name }}</h5>
+                                <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="product-price">${{ product.price }}</span>
+                                    {% if product.in_stock %}
+                                        <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ product.id }}">
+                                            <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
+                                        </button>
+                                    {% else %}
+                                        <span class="badge bg-danger">Out of Stock</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Upsell Products -->
+        {% if upsell_products %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="mb-4">You May Also Like</h3>
+                <div class="row g-4">
+                    {% for product in upsell_products %}
                     <div class="col-lg-3 col-md-6">
                         <div class="product-card">
                             {% if product.image %}
@@ -351,6 +436,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Gift box customization
+    const customizationCheckboxes = document.querySelectorAll('.gift-customization');
+    const basePrice = parseFloat("{{ product.price }}");
+    
+    customizationCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateTotalPrice();
+        });
+    });
+    
+    function updateTotalPrice() {
+        let totalPrice = basePrice;
+        
+        customizationCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                const price = parseFloat(checkbox.getAttribute('data-price')) || 0;
+                totalPrice += price;
+            }
+        });
+        
+        // Update price display
+        const priceElement = document.querySelector('.product-price');
+        if (priceElement) {
+            priceElement.textContent = '$' + totalPrice.toFixed(2);
+        }
+    }
     
     // Initialize Lucide icons
     lucide.createIcons();

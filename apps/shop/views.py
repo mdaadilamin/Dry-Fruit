@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.core.paginator import Paginator
-from .models import Product, Category
+from .models import Product, Category, ProductReview, ProductVariant, ProductImage
+from apps.users.models import User
 
 @login_required
 def product_management(request):
@@ -122,3 +123,42 @@ def product_edit(request, product_id):
         'categories': categories,
     }
     return render(request, 'shop/product_edit.html', context)
+
+@login_required
+def review_management(request):
+    """Manage product reviews (Admin only)"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST':
+        review_id = request.POST.get('review_id')
+        action = request.POST.get('action')
+        
+        if review_id and action:
+            review = get_object_or_404(ProductReview, id=review_id)
+            
+            if action == 'approve':
+                review.is_approved = True
+                review.save()
+                messages.success(request, f'Review by {review.user.full_name} approved successfully!')
+            elif action == 'reject':
+                review.delete()
+                messages.success(request, f'Review by {review.user.full_name} rejected and deleted!')
+            elif action == 'verify':
+                review.is_verified = True
+                review.save()
+                messages.success(request, f'Review by {review.user.full_name} marked as verified!')
+    
+    # Get all reviews, approved and pending
+    reviews = ProductReview.objects.select_related('product', 'user').order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(reviews, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'reviews': page_obj,
+    }
+    return render(request, 'shop/review_management.html', context)

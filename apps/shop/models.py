@@ -122,6 +122,7 @@ class ProductReview(models.Model):
     rating = models.IntegerField(choices=RATING_CHOICES)
     comment = models.TextField()
     is_verified = models.BooleanField(default=False)
+    is_approved = models.BooleanField(default=False)  # For moderation
     created_at = models.DateTimeField(default=timezone.now)
     
     class Meta:
@@ -130,3 +131,35 @@ class ProductReview(models.Model):
     
     def __str__(self):
         return f"{self.product.name} - {self.rating} stars"
+
+class GiftBoxCustomization(models.Model):
+    """Model for gift box customizations"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='customizations')
+    name = models.CharField(max_length=100, help_text="Name of the customization option (e.g., 'Add Message Card')")
+    description = models.TextField(blank=True, help_text="Description of the customization option")
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, 
+                               help_text="Additional price for this customization")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['name']
+    
+    def __str__(self):
+        return f"{self.product.name} - {self.name}"
+
+class GiftBoxItem(models.Model):
+    """Model for items that can be included in a gift box"""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='gift_box_items')
+    item = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='included_in_boxes')
+    quantity = models.PositiveIntegerField(default=1)
+    is_default = models.BooleanField(default=False, help_text="Is this item included by default?")
+    is_removable = models.BooleanField(default=True, help_text="Can this item be removed from the box?")
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        unique_together = ['product', 'item']
+        ordering = ['created_at']
+    
+    def __str__(self):
+        return f"{self.product.name} includes {self.item.name}"

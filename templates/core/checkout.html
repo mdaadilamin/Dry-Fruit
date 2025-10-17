@@ -119,6 +119,12 @@
                                     <span>{{ item.product.name }} x {{ item.quantity }}</span>
                                     <span>${{ item.get_total_price|floatformat:2 }}</span>
                                 </div>
+                                {% if item.gift_wrap %}
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Gift Wrap: {{ item.gift_wrap.name }}</span>
+                                    <span class="text-muted">+${{ item.gift_wrap.price|floatformat:2 }} each</span>
+                                </div>
+                                {% endif %}
                                 {% endfor %}
                             </div>
                             <hr>
@@ -126,6 +132,13 @@
                                 <span>Subtotal</span>
                                 <span>${{ total|floatformat:2 }}</span>
                             </div>
+                            
+                            {% if gift_wrap_total > 0 %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Gift Wrap</span>
+                                <span>${{ gift_wrap_total|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
                             
                             {% if coupon %}
                             <div class="d-flex justify-content-between mb-2">

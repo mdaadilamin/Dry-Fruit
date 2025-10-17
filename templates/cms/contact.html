@@ -176,26 +176,27 @@
             <div class="col-lg-8">
                 <div class="card border-0 shadow-sm">
                     <div class="card-body p-4">
-                        <form id="contact-form">
+                        <form method="post" action="{% url 'cms:submit_enquiry' %}">
+                            {% csrf_token %}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="name" class="form-label fw-bold">Full Name</label>
-                                    <input type="text" class="form-control" id="name" required>
+                                    <input type="text" class="form-control" id="name" name="name" required>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="email" class="form-label fw-bold">Email Address</label>
-                                    <input type="email" class="form-control" id="email" required>
+                                    <input type="email" class="form-control" id="email" name="email" required>
                                 </div>
                             </div>
                             
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label for="phone" class="form-label fw-bold">Phone Number</label>
-                                    <input type="tel" class="form-control" id="phone">
+                                    <input type="tel" class="form-control" id="phone" name="phone">
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="subject" class="form-label fw-bold">Subject</label>
-                                    <select class="form-select" id="subject" required>
+                                    <select class="form-select" id="subject" name="subject" required>
                                         <option value="">Select a subject</option>
                                         <option value="general">General Inquiry</option>
                                         <option value="order">Order Support</option>
@@ -209,7 +210,7 @@
                             
                             <div class="mb-3">
                                 <label for="message" class="form-label fw-bold">Message</label>
-                                <textarea class="form-control" id="message" rows="5" required></textarea>
+                                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
                             </div>
                             
                             <div class="d-flex justify-content-end">

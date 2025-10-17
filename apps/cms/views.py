@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import Banner, Testimonial, Page, ContactInfo, Newsletter
 import json
+import uuid
 
 @login_required
 def banner_management(request):
@@ -44,6 +45,32 @@ def testimonial_management(request):
     
     testimonials = Testimonial.objects.all()
     return render(request, 'cms/testimonial_management.html', {'testimonials': testimonials})
+
+def submit_testimonial(request):
+    """Customer testimonial submission"""
+    if request.method == 'POST':
+        customer_name = request.POST.get('customer_name')
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment')
+        location = request.POST.get('location', '')
+        customer_image = request.FILES.get('customer_image')
+        
+        if all([customer_name, rating, comment]):
+            # Create testimonial with is_active=False by default (requires admin approval)
+            Testimonial.objects.create(
+                customer_name=customer_name,
+                rating=int(rating),
+                comment=comment,
+                location=location,
+                customer_image=customer_image,
+                is_active=False  # Requires admin approval
+            )
+            messages.success(request, 'Thank you for your testimonial! It will be reviewed and published shortly.')
+            return redirect('cms:page_view', page_type='about')  # Redirect to about page or wherever appropriate
+        else:
+            messages.error(request, 'Please fill all required fields.')
+    
+    return redirect('cms:page_view', page_type='about')
 
 @login_required
 def page_management(request):
@@ -151,12 +178,26 @@ def newsletter_subscribe(request):
                 'message': 'Email address is required'
             })
         
-        newsletter, created = Newsletter.objects.get_or_create(email=email)
+        # Create newsletter subscription with is_active=False by default
+        newsletter, created = Newsletter.objects.get_or_create(
+            email=email,
+            defaults={
+                'is_active': False,
+                'confirmation_token': uuid.uuid4()
+            }
+        )
         
         if created:
+            # Send confirmation email (in a real application, you would send an actual email)
+            # For now, we'll just return a success message
             return JsonResponse({
                 'success': True,
-                'message': 'Successfully subscribed to newsletter!'
+                'message': 'Thank you for subscribing! Please check your email to confirm your subscription.'
+            })
+        elif not newsletter.is_active:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please check your email to confirm your subscription.'
             })
         else:
             return JsonResponse({
@@ -169,6 +210,23 @@ def newsletter_subscribe(request):
             'success': False,
             'message': 'An error occurred during subscription'
         })
+
+def confirm_newsletter_subscription(request, token):
+    """Confirm newsletter subscription"""
+    try:
+        newsletter = get_object_or_404(Newsletter, confirmation_token=token)
+        
+        if newsletter.is_active:
+            messages.info(request, 'Your subscription is already confirmed.')
+        else:
+            newsletter.confirm_subscription()
+            messages.success(request, 'Thank you for confirming your newsletter subscription!')
+        
+        return redirect('core:home')
+    
+    except Exception as e:
+        messages.error(request, 'Invalid confirmation link.')
+        return redirect('core:home')
 
 @require_POST
 def submit_return_request(request):
@@ -204,3 +262,118 @@ def submit_return_request(request):
             'success': False,
             'message': 'An error occurred while processing your return request. Please try again.'
         })
+
+@require_POST
+def submit_enquiry(request):
+    """Handle customer enquiry submissions"""
+    try:
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone', '')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+        
+        # Validate required fields
+        if not all([name, email, subject, message]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('cms:page_view', page_type='contact')
+        
+        # Create enquiry
+        from .models import Enquiry
+        enquiry = Enquiry.objects.create(
+            name=name,
+            email=email,
+            phone=phone,
+            subject=subject,
+            message=message
+        )
+        
+        # Send notification to admins
+        from apps.users.models import User
+        from apps.notifications.models import Notification
+        from apps.notifications.services import EmailService
+        from django.conf import settings
+        
+        # Get admin users
+        admin_users = User.objects.filter(role__name='admin', is_active=True)
+        
+        # Create in-app notifications for admins
+        for admin in admin_users:
+            Notification.objects.create(
+                user=admin,
+                title=f'New Customer Enquiry: {subject}',
+                message=f'From {name} ({email}): {message[:100]}...',
+                notification_type='info'
+            )
+        
+        # Send email notifications to admins
+        for admin in admin_users:
+            if admin.email:
+                context = {
+                    'name': name,
+                    'email': email,
+                    'phone': phone,
+                    'subject': subject,
+                    'message': message,
+                    'enquiry_id': enquiry.id
+                }
+                EmailService.send_email('new_enquiry', admin.email, context)
+        
+        messages.success(request, 'Thank you for your enquiry! We will get back to you soon.')
+        
+    except Exception as e:
+        messages.error(request, 'An error occurred while submitting your enquiry. Please try again.')
+    
+    return redirect('cms:page_view', page_type='contact')
+
+@login_required
+def enquiry_management(request):
+    """Manage customer enquiries"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    # Get filter parameters
+    status_filter = request.GET.get('status', 'all')
+    subject_filter = request.GET.get('subject', 'all')
+    
+    # Get enquiries
+    enquiries = Enquiry.objects.all()
+    
+    # Apply filters
+    if status_filter == 'resolved':
+        enquiries = enquiries.filter(is_resolved=True)
+    elif status_filter == 'unresolved':
+        enquiries = enquiries.filter(is_resolved=False)
+    
+    if subject_filter != 'all':
+        enquiries = enquiries.filter(subject=subject_filter)
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(enquiries, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'enquiries': page_obj,
+        'status_filter': status_filter,
+        'subject_filter': subject_filter,
+        'subject_choices': Enquiry.SUBJECT_CHOICES,
+    }
+    return render(request, 'cms/enquiry_management.html', context)
+
+@login_required
+def resolve_enquiry(request, enquiry_id):
+    """Mark an enquiry as resolved"""
+    if not request.user.has_permission('cms', 'edit'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST':
+        from .models import Enquiry
+        enquiry = get_object_or_404(Enquiry, id=enquiry_id)
+        enquiry.resolve()
+        messages.success(request, f'Enquiry from {enquiry.name} marked as resolved.')
+    
+    return redirect('cms:enquiry_management')

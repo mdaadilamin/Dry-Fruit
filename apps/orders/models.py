@@ -7,6 +7,7 @@ class CartItem(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    gift_wrap = models.ForeignKey('GiftWrap', on_delete=models.SET_NULL, null=True, blank=True)  # Add this field
     created_at = models.DateTimeField(default=timezone.now)
     
     class Meta:
@@ -21,7 +22,26 @@ class CartItem(models.Model):
         return f"{self.user.username} - {self.product.name} (x{self.quantity})"
     
     def get_total_price(self):
-        return self.quantity * self.product.price
+        base_price = self.quantity * self.product.price
+        gift_wrap_price = self.gift_wrap.price if self.gift_wrap else 0
+        return base_price + (gift_wrap_price * self.quantity)
+
+class GiftWrap(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['price']),
+        ]
+    
+    def __str__(self):
+        return f"{self.name} (${self.price})"
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -87,6 +107,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)  # Price at time of order
+    gift_wrap = models.ForeignKey(GiftWrap, on_delete=models.SET_NULL, null=True, blank=True)  # Add this field
     
     class Meta:
         indexes = [
@@ -98,7 +119,9 @@ class OrderItem(models.Model):
         return f"{self.order.order_number} - {self.product.name}"
     
     def get_total_price(self):
-        return self.quantity * self.price
+        base_price = self.quantity * self.price
+        gift_wrap_price = self.gift_wrap.price if self.gift_wrap else 0
+        return base_price + (gift_wrap_price * self.quantity)
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
