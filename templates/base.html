@@ -105,7 +105,7 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Blog</a>
+                        <a class="nav-link" href="{% url 'blog:home' %}">Blog</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cms:page_view' 'about' %}">About</a>
@@ -267,7 +267,8 @@
                     </div>
                     <div class="col-md-6 text-md-end">
                         <a href="{% url 'cms:page_view' 'privacy' %}" class="me-3">Privacy Policy</a>
-                        <a href="{% url 'cms:page_view' 'terms' %}">Terms & Conditions</a>
+                        <a href="{% url 'cms:page_view' 'terms' %}" class="me-3">Terms & Conditions</a>
+                        <a href="{% url 'cms:page_view' 'returns' %}">Returns & Refunds</a>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - NutriHarvest{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:"Read the terms and conditions governing your use of NutriHarvest's website and services. Understand your rights and responsibilities." }}{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="bg-white rounded-3 shadow-sm p-5">
+                    <h1 class="display-4 fw-bold mb-4 text-center">{{ page.title }}</h1>
+                    
+                    <div class="page-content">
+                        {{ page.content|safe }}
+                    </div>
+                    
+                    <!-- Key Terms Highlights -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Key Terms at a Glance</h3>
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="card h-100 border-primary">
+                                    <div class="card-body text-center">
+                                        <i data-lucide="shopping-cart" class="text-primary mb-3" style="width: 48px; height: 48px;"></i>
+                                        <h5 class="card-title">Orders & Payments</h5>
+                                        <p class="card-text">Understand our policies on order placement, payment processing, and pricing.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 border-success">
+                                    <div class="card-body text-center">
+                                        <i data-lucide="truck" class="text-success mb-3" style="width: 48px; height: 48px;"></i>
+                                        <h5 class="card-title">Shipping & Delivery</h5>
+                                        <p class="card-text">Learn about our shipping options, delivery times, and related policies.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 border-info">
+                                    <div class="card-body text-center">
+                                        <i data-lucide="rotate-ccw" class="text-info mb-3" style="width: 48px; height: 48px;"></i>
+                                        <h5 class="card-title">Returns & Refunds</h5>
+                                        <p class="card-text">Review our return policy and refund procedures.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Terms Categories -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Terms Categories</h3>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <i data-lucide="shield" class="text-primary me-3" style="width: 24px; height: 24px;"></i>
+                                    <div>
+                                        <h5 class="mb-1">Intellectual Property</h5>
+                                        <p class="mb-0 text-muted">Rights and restrictions on content usage</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <i data-lucide="user" class="text-primary me-3" style="width: 24px; height: 24px;"></i>
+                                    <div>
+                                        <h5 class="mb-1">User Content</h5>
+                                        <p class="mb-0 text-muted">Your rights and our license to use your content</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <i data-lucide="alert-triangle" class="text-primary me-3" style="width: 24px; height: 24px;"></i>
+                                    <div>
+                                        <h5 class="mb-1">Limitation of Liability</h5>
+                                        <p class="mb-0 text-muted">Our liability limitations and disclaimers</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-center p-3 border rounded">
+                                    <i data-lucide="book" class="text-primary me-3" style="width: 24px; height: 24px;"></i>
+                                    <div>
+                                        <h5 class="mb-1">Governing Law</h5>
+                                        <p class="mb-0 text-muted">Legal jurisdiction and applicable laws</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Section -->
+                    <div class="mt-5 text-center p-4 bg-primary bg-opacity-10 rounded-3">
+                        <h4 class="mb-3">Questions About Our Terms?</h4>
+                        <p class="mb-4">Our legal team is available to answer any questions you may have about our terms and conditions.</p>
+                        <a href="mailto:legal@nutriharvest.com" class="btn btn-primary btn-lg me-2">
+                            <i data-lucide="mail" class="me-2"></i>Email Legal Team
+                        </a>
+                        <a href="{% url 'cms:page_view' 'contact' %}" class="btn btn-outline-primary btn-lg">
+                            <i data-lucide="phone" class="me-2"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+});
+</script>
+{% endblock %}

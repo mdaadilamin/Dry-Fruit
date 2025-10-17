@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - NutriHarvest{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:"Learn about our hassle-free returns and refunds policy at NutriHarvest. We want you to be completely satisfied with your purchase." }}{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="bg-white rounded-3 shadow-sm p-5">
+                    <h1 class="display-4 fw-bold mb-4 text-center">{{ page.title }}</h1>
+                    
+                    <div class="page-content">
+                        {{ page.content|safe }}
+                    </div>
+                    
+                    <!-- Return Process Steps -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Our Simple Return Process</h3>
+                        <div class="row g-4">
+                            <div class="col-md-3 text-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold" style="font-size: 1.5rem;">1</span>
+                                </div>
+                                <h5>Contact Us</h5>
+                                <p class="text-muted">Reach out to our customer service team</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold" style="font-size: 1.5rem;">2</span>
+                                </div>
+                                <h5>Get RMA</h5>
+                                <p class="text-muted">Receive your Return Authorization</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold" style="font-size: 1.5rem;">3</span>
+                                </div>
+                                <h5>Ship Item</h5>
+                                <p class="text-muted">Send back your item securely</p>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold" style="font-size: 1.5rem;">4</span>
+                                </div>
+                                <h5>Get Refund</h5>
+                                <p class="text-muted">Receive your refund within 7 days</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Return Form -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Start Your Return</h3>
+                        <div class="row justify-content-center">
+                            <div class="col-md-8">
+                                <form id="returnForm" class="needs-validation" novalidate>
+                                    <div class="mb-3">
+                                        <label for="orderNumber" class="form-label">Order Number *</label>
+                                        <input type="text" class="form-control" id="orderNumber" required>
+                                        <div class="invalid-feedback">
+                                            Please enter your order number.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email Address *</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                        <div class="invalid-feedback">
+                                            Please enter a valid email address.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="reason" class="form-label">Reason for Return *</label>
+                                        <select class="form-select" id="reason" required>
+                                            <option value="">Select a reason</option>
+                                            <option value="defective">Defective or damaged item</option>
+                                            <option value="wrong_item">Received wrong item</option>
+                                            <option value="not_as_described">Item not as described</option>
+                                            <option value="changed_mind">Changed my mind</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <div class="invalid-feedback">
+                                            Please select a reason for return.
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="details" class="form-label">Additional Details</label>
+                                        <textarea class="form-control" id="details" rows="3" placeholder="Please provide any additional information about your return..."></textarea>
+                                    </div>
+                                    <div class="form-check mb-4">
+                                        <input class="form-check-input" type="checkbox" id="terms" required>
+                                        <label class="form-check-label" for="terms">
+                                            I agree to the <a href="{% url 'cms:page_view' 'terms' %}" target="_blank">Terms & Conditions</a> and understand the return policy
+                                        </label>
+                                        <div class="invalid-feedback">
+                                            You must agree to the terms and conditions.
+                                        </div>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary btn-lg">Submit Return Request</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Shipping Information -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Return Shipping Information</h3>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Return Address</h5>
+                                <p>
+                                    NutriHarvest Returns<br>
+                                    123 Business Street<br>
+                                    Business City, BC 12345<br>
+                                    United States
+                                </p>
+                                <p class="text-muted">
+                                    Please include your order number and return authorization number on the package.
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Shipping Guidelines</h5>
+                                <ul>
+                                    <li>Use a trackable shipping service</li>
+                                    <li>Insure packages over $75</li>
+                                    <li>Keep your shipping receipt</li>
+                                    <li>Ship within 5 business days of RMA approval</li>
+                                </ul>
+                                <div class="alert alert-info">
+                                    <strong>Tip:</strong> Consider using a shipping service that provides tracking and insurance for valuable items.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- FAQ Section -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Frequently Asked Questions</h3>
+                        <div class="accordion" id="returnsFAQ">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq1">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                        How long do I have to return an item?
+                                    </button>
+                                </h2>
+                                <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#returnsFAQ">
+                                    <div class="accordion-body">
+                                        You have 30 days from the date of delivery to return items. All items must be in their original packaging and in resalable condition.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq2">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                        Who pays for return shipping?
+                                    </button>
+                                </h2>
+                                <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#returnsFAQ">
+                                    <div class="accordion-body">
+                                        Return shipping is free if the return is due to our error (wrong item, defective product, etc.). For other returns, the customer is responsible for shipping costs.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq3">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                        How long does it take to process a refund?
+                                    </button>
+                                </h2>
+                                <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#returnsFAQ">
+                                    <div class="accordion-body">
+                                        Once we receive your returned item, refunds are processed within 5-7 business days. The time it takes for the refund to appear in your account depends on your financial institution.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq4">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                        Can I exchange an item instead of returning it?
+                                    </button>
+                                </h2>
+                                <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#returnsFAQ">
+                                    <div class="accordion-body">
+                                        Yes, we offer exchanges for defective or incorrect items. Please contact us within 30 days of receipt for exchange instructions.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="faq5">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse5">
+                                        What items are not eligible for return?
+                                    </button>
+                                </h2>
+                                <div id="collapse5" class="accordion-collapse collapse" data-bs-parent="#returnsFAQ">
+                                    <div class="accordion-body">
+                                        Items that cannot be returned include opened food products, gift cards, and downloadable software. All other items must be in their original condition and packaging.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact CTA -->
+                    <div class="mt-5 text-center p-4 bg-primary bg-opacity-10 rounded-3">
+                        <h4 class="mb-3">Need Help With Your Return?</h4>
+                        <p class="mb-4">Our customer service team is here to assist you with any questions about our return policy.</p>
+                        <a href="{% url 'cms:page_view' 'contact' %}" class="btn btn-primary btn-lg">Contact Customer Service</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Return form validation and submission
+    const returnForm = document.getElementById('returnForm');
+    if (returnForm) {
+        returnForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Check form validity
+            if (!returnForm.checkValidity()) {
+                e.stopPropagation();
+                returnForm.classList.add('was-validated');
+                return;
+            }
+            
+            // Get form data
+            const orderNumber = document.getElementById('orderNumber').value;
+            const email = document.getElementById('email').value;
+            const reason = document.getElementById('reason').value;
+            const details = document.getElementById('details').value;
+            
+            // In a real application, you would send this data to your server
+            // For now, we'll just show a success message
+            alert(`Thank you for submitting your return request for order #${orderNumber}. We've sent a confirmation email to ${email}. You'll receive your Return Merchandise Authorization (RMA) number within 24 hours.`);
+            
+            // Reset form
+            returnForm.reset();
+            returnForm.classList.remove('was-validated');
+        });
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}

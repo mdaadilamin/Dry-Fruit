@@ -1,0 +1,141 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Search Results - NutriHarvest Blog{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'blog:home' %}">Blog</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Search Results</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h1 class="display-4 fw-bold">Search Results</h1>
+                {% if query %}
+                <p class="lead">Found {{ page_obj.paginator.count }} result{{ page_obj.paginator.count|pluralize }} for "{{ query }}"</p>
+                {% else %}
+                <p class="lead">Please enter a search term</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 mb-4">
+                <form method="get" action="{% url 'blog:search_posts' %}" class="d-flex">
+                    <input type="text" class="form-control me-2" name="q" placeholder="Search blog posts..." value="{{ query|default:'' }}">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                {% for post in page_obj %}
+                <div class="blog-post">
+                    <div class="card shadow-sm">
+                        <div class="row g-0">
+                            {% if post.featured_image %}
+                            <div class="col-md-4">
+                                <img src="{{ post.featured_image.url }}" class="img-fluid rounded-start h-100" alt="{{ post.title }}" style="object-fit: cover;">
+                            </div>
+                            {% endif %}
+                            <div class="{% if post.featured_image %}col-md-8{% else %}col-12{% endif %}">
+                                <div class="card-body">
+                                    <div class="mb-2">
+                                        <a href="{{ post.category.get_absolute_url }}" class="category-badge" style="background-color: #8b7e49; color: white;">
+                                            {{ post.category.name }}
+                                        </a>
+                                    </div>
+                                    <h3 class="card-title">
+                                        <a href="{{ post.get_absolute_url }}" class="text-decoration-none">{{ post.title }}</a>
+                                    </h3>
+                                    <p class="card-text post-excerpt">{{ post.excerpt|truncatewords:30 }}</p>
+                                    <div class="post-meta">
+                                        <small>
+                                            By {{ post.author.full_name|default:post.author.username }} 
+                                            on {{ post.published_at|date:"M d, Y" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                {% if query %}
+                <div class="text-center py-5">
+                    <h3>No posts found</h3>
+                    <p class="text-muted">Try different search terms or browse our categories.</p>
+                    <a href="{% url 'blog:home' %}" class="btn btn-primary">View All Posts</a>
+                </div>
+                {% endif %}
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Search pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="blog-sidebar">
+                    <!-- Categories Widget -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Categories</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group list-group-flush">
+                                {% for category in categories %}
+                                <a href="{{ category.get_absolute_url }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    {{ category.name }}
+                                    <span class="badge bg-primary rounded-pill">
+                                        {{ category.post_count }}
+                                    </span>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

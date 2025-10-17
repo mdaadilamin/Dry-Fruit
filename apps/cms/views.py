@@ -116,9 +116,21 @@ def page_view(request, page_type):
     """Display CMS pages"""
     page = get_object_or_404(Page, page_type=page_type, is_active=True)
     
-    # Use specific template for about page
+    # Use specific templates for certain pages
     if page_type == 'about':
         template = 'cms/about.html'
+    elif page_type == 'contact':
+        # Get contact information for the contact page
+        from .models import ContactInfo
+        contact_info, created = ContactInfo.objects.get_or_create(id=1)
+        template = 'cms/contact.html'
+        return render(request, template, {'page': page, 'contact_info': contact_info})
+    elif page_type == 'returns':
+        template = 'cms/returns.html'
+    elif page_type == 'privacy':
+        template = 'cms/privacy.html'
+    elif page_type == 'terms':
+        template = 'cms/terms.html'
     else:
         template = 'cms/page.html'
     
@@ -154,4 +166,39 @@ def newsletter_subscribe(request):
         return JsonResponse({
             'success': False,
             'message': 'An error occurred during subscription'
+        })
+
+@require_POST
+def submit_return_request(request):
+    """Handle return request submission"""
+    try:
+        data = json.loads(request.body)
+        order_number = data.get('orderNumber')
+        email = data.get('email')
+        reason = data.get('reason')
+        details = data.get('details')
+        
+        # Validate required fields
+        if not all([order_number, email, reason]):
+            return JsonResponse({
+                'success': False,
+                'message': 'Please fill in all required fields.'
+            })
+        
+        # In a real application, you would:
+        # 1. Validate the order number exists
+        # 2. Validate the email matches the order
+        # 3. Save the return request to the database
+        # 4. Send confirmation emails
+        
+        # For now, we'll just simulate success
+        return JsonResponse({
+            'success': True,
+            'message': f'Thank you for submitting your return request for order #{order_number}. We\'ve sent a confirmation email to {email}. You\'ll receive your Return Merchandise Authorization (RMA) number within 24 hours.'
+        })
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while processing your return request. Please try again.'
         })

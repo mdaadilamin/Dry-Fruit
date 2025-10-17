@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - NutriHarvest{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:"Learn how NutriHarvest protects your privacy and handles your personal information. Read our comprehensive privacy policy." }}{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-10 mx-auto">
+                <div class="bg-white rounded-3 shadow-sm p-5">
+                    <h1 class="display-4 fw-bold mb-4 text-center">{{ page.title }}</h1>
+                    
+                    <div class="page-content">
+                        {{ page.content|safe }}
+                    </div>
+                    
+                    <!-- Privacy Policy Sections -->
+                    <div class="mt-5">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-primary border-2">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary">What We Collect</h5>
+                                        <p class="card-text">Information about the personal data we collect and how we use it to enhance your experience.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-success border-2">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success">How We Protect</h5>
+                                        <p class="card-text">Our security measures and practices to keep your personal information safe and secure.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="card h-100 border-info border-2">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-info">Your Rights</h5>
+                                        <p class="card-text">Your privacy rights and how to exercise control over your personal data.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Protection Highlights -->
+                    <div class="mt-5">
+                        <h3 class="mb-4 text-center">Our Commitment to Data Protection</h3>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="lock" class="text-primary" style="width: 24px; height: 24px;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Encryption</h5>
+                                        <p>All sensitive data is encrypted both in transit and at rest using industry-standard protocols.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="shield" class="text-primary" style="width: 24px; height: 24px;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Regular Audits</h5>
+                                        <p>We conduct regular security audits to ensure our systems meet the highest security standards.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="user-x" class="text-primary" style="width: 24px; height: 24px;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Minimal Data</h5>
+                                        <p>We only collect the minimum amount of personal data necessary to provide our services.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i data-lucide="clock" class="text-primary" style="width: 24px; height: 24px;"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5>Data Retention</h5>
+                                        <p>We retain your data only for as long as necessary to fulfill the purposes for which it was collected.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Section -->
+                    <div class="mt-5 text-center p-4 bg-primary bg-opacity-10 rounded-3">
+                        <h4 class="mb-3">Have Questions About Your Privacy?</h4>
+                        <p class="mb-4">Our Data Protection Officer is available to answer any questions you may have about our privacy practices.</p>
+                        <a href="mailto:privacy@nutriharvest.com" class="btn btn-primary btn-lg me-2">
+                            <i data-lucide="mail" class="me-2"></i>Email Privacy Team
+                        </a>
+                        <a href="{% url 'cms:page_view' 'contact' %}" class="btn btn-outline-primary btn-lg">
+                            <i data-lucide="phone" class="me-2"></i>Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+});
+</script>
+{% endblock %}

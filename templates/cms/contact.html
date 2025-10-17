@@ -1,0 +1,366 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - NutriHarvest{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:"Get in touch with NutriHarvest. Contact our customer service team for questions about our premium dry fruits and nuts, orders, or wholesale inquiries." }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="display-4 fw-bold mb-4">{{ page.title }}</h1>
+                <p class="lead mb-4">We'd love to hear from you! Whether you have questions about our products, need help with an order, or just want to say hello, our team is here to help.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="tel:{{ contact_info.phone }}" class="btn btn-primary btn-lg">
+                        <i data-lucide="phone" class="me-2"></i>Call Us
+                    </a>
+                    <a href="mailto:{{ contact_info.email }}" class="btn btn-outline-light btn-lg">
+                        <i data-lucide="mail" class="me-2"></i>Email Us
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <img src="https://images.pexels.com/photos/3184454/pexels-photo-3184454.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Contact Us" class="img-fluid rounded-3 shadow-lg hero-image">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Information Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Get In Touch</h2>
+                <p class="lead text-muted">We're here to help and answer any questions you might have</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Contact Info Cards -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="phone"></i>
+                        </div>
+                        <h4 class="card-title">Phone</h4>
+                        <p class="card-text">
+                            <a href="tel:{{ contact_info.phone }}" class="text-decoration-none">{{ contact_info.phone }}</a>
+                            {% if contact_info.whatsapp %}
+                            <br><a href="https://wa.me/{{ contact_info.whatsapp }}" class="text-decoration-none">WhatsApp: {{ contact_info.whatsapp }}</a>
+                            {% endif %}
+                        </p>
+                        <p class="text-muted small">{{ contact_info.business_hours|linebreaksbr }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="mail"></i>
+                        </div>
+                        <h4 class="card-title">Email</h4>
+                        <p class="card-text">
+                            <a href="mailto:{{ contact_info.email }}" class="text-decoration-none">{{ contact_info.email }}</a>
+                        </p>
+                        <p class="text-muted small">We typically respond within 24 hours</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="map-pin"></i>
+                        </div>
+                        <h4 class="card-title">Visit Us</h4>
+                        <p class="card-text">
+                            {{ contact_info.address }}<br>
+                            {{ contact_info.city }}, {{ contact_info.pincode }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Map Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Find Us</h2>
+                <p class="lead text-muted">Visit our store or reach out to us online</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Our Location</h4>
+                        <div class="ratio ratio-16x9">
+                            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.184133404672!2d-73.98757492452315!3d40.758014671388!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25855c6480299%3A0x55194ec5a1ae072e!2sTimes%20Square!5e0!3m2!1sen!2sus!4v1650000000000!5m2!1sen!2sus" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4">Connect With Us</h4>
+                        <div class="d-flex flex-wrap gap-3 mb-4">
+                            {% if contact_info.facebook_url %}
+                            <a href="{{ contact_info.facebook_url }}" class="btn btn-primary" target="_blank">
+                                <i data-lucide="facebook" class="me-2"></i>Facebook
+                            </a>
+                            {% endif %}
+                            {% if contact_info.instagram_url %}
+                            <a href="{{ contact_info.instagram_url }}" class="btn btn-danger" target="_blank">
+                                <i data-lucide="instagram" class="me-2"></i>Instagram
+                            </a>
+                            {% endif %}
+                            {% if contact_info.twitter_url %}
+                            <a href="{{ contact_info.twitter_url }}" class="btn btn-info" target="_blank">
+                                <i data-lucide="twitter" class="me-2"></i>Twitter
+                            </a>
+                            {% endif %}
+                            {% if contact_info.youtube_url %}
+                            <a href="{{ contact_info.youtube_url }}" class="btn btn-danger" target="_blank">
+                                <i data-lucide="youtube" class="me-2"></i>YouTube
+                            </a>
+                            {% endif %}
+                        </div>
+                        
+                        <h5 class="mt-4">Business Hours</h5>
+                        <p>{{ contact_info.business_hours|linebreaksbr }}</p>
+                        
+                        <div class="mt-4">
+                            <h5>Newsletter</h5>
+                            <p>Subscribe to our newsletter for updates and special offers</p>
+                            <form id="contact-newsletter-form">
+                                <div class="input-group">
+                                    <input type="email" id="contact-newsletter-email" class="form-control" placeholder="Enter your email" required>
+                                    <button class="btn btn-primary" type="submit">
+                                        <i data-lucide="send"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Send Us a Message</h2>
+                <p class="lead text-muted">Have questions? We're here to help!</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <form id="contact-form">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label fw-bold">Full Name</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label fw-bold">Email Address</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label fw-bold">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="subject" class="form-label fw-bold">Subject</label>
+                                    <select class="form-select" id="subject" required>
+                                        <option value="">Select a subject</option>
+                                        <option value="general">General Inquiry</option>
+                                        <option value="order">Order Support</option>
+                                        <option value="product">Product Information</option>
+                                        <option value="wholesale">Wholesale Inquiry</option>
+                                        <option value="feedback">Feedback</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label fw-bold">Message</label>
+                                <textarea class="form-control" id="message" rows="5" required></textarea>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i data-lucide="send" class="me-2"></i>Send Message
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Frequently Asked Questions</h2>
+                <p class="lead text-muted">Find answers to common questions</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq1">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                How can I track my order?
+                            </button>
+                        </h2>
+                        <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Once your order has been shipped, you'll receive a confirmation email with tracking information. You can also log into your account to view your order status and tracking details.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq2">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                What is your return policy?
+                            </button>
+                        </h2>
+                        <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We offer a 30-day return policy for unopened products. Please visit our <a href="{% url 'cms:page_view' 'returns' %}">Returns & Refunds</a> page for detailed information on our return process.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq3">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                Do you offer international shipping?
+                            </button>
+                        </h2>
+                        <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, we ship to many international destinations. Shipping costs and delivery times vary by location. Please check our <a href="{% url 'cms:page_view' 'shipping' %}">Shipping Policy</a> page for more details.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="faq4">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                                How should I store your products?
+                            </button>
+                        </h2>
+                        <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Our products should be stored in a cool, dry place away from direct sunlight. Once opened, please seal the package tightly or transfer to an airtight container. Most products will stay fresh for several months when stored properly.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--olive-green), var(--primary-brown));">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center text-white">
+                <h2 class="display-5 fw-bold mb-4">Ready to Experience Premium Quality?</h2>
+                <p class="lead mb-4">Join thousands of satisfied customers who trust NutriHarvest for their healthy snacking needs.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'core:shop' %}" class="btn btn-light btn-lg">
+                        <i data-lucide="shopping-bag" class="me-2"></i>Start Shopping
+                    </a>
+                    <a href="{% url 'core:register' %}" class="btn btn-outline-light btn-lg">
+                        <i data-lucide="user-plus" class="me-2"></i>Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle contact form submission
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // In a real implementation, this would send the form data to the server
+            alert('Thank you for your message! We will get back to you soon.');
+            contactForm.reset();
+        });
+    }
+    
+    // Handle newsletter form submission
+    const newsletterForm = document.getElementById('contact-newsletter-form');
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('contact-newsletter-email').value;
+            
+            // Send subscription request
+            fetch('/api/cms/newsletter/subscribe/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ email: email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    newsletterForm.reset();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}
