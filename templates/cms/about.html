@@ -1,0 +1,389 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page.title }} - NutriHarvest{% endblock %}
+{% block meta_description %}{{ page.meta_description|default:"Learn about NutriHarvest's mission to bring premium quality dry fruits and nuts from around the world directly to your doorstep." }}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="display-4 fw-bold mb-4">{{ page.title }}</h1>
+                <p class="lead mb-4">Discover our journey, values, and commitment to bringing you the finest quality dry fruits and nuts from around the world.</p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{% url 'core:shop' %}" class="btn btn-primary btn-lg">
+                        <i data-lucide="shopping-bag" class="me-2"></i>Shop Now
+                    </a>
+                    <a href="{% url 'cms:page_view' 'contact' %}" class="btn btn-outline-light btn-lg">Contact Us</a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center mt-4 mt-lg-0">
+                <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Premium Dry Fruits" class="img-fluid rounded-3 shadow-lg hero-image">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Story Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Our Story</h2>
+                <p class="lead text-muted">How it all began and where we are today</p>
+            </div>
+        </div>
+        
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="position-relative">
+                    <img src="https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Our Farm" class="img-fluid rounded-3 shadow">
+                    <div class="position-absolute bottom-0 start-0 m-4">
+                        <div class="bg-white rounded-3 p-3 shadow">
+                            <div class="d-flex align-items-center">
+                                <div class="stat-icon products me-3">
+                                    <i data-lucide="calendar"></i>
+                                </div>
+                                <div>
+                                    <h4 class="mb-0">2015</h4>
+                                    <p class="mb-0 text-muted">Founded</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="page-content">
+                    {{ page.content|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Values Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Our Core Values</h2>
+                <p class="lead text-muted">Principles that guide everything we do</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="award"></i>
+                        </div>
+                        <h4 class="card-title">Premium Quality</h4>
+                        <p class="card-text">We source only the highest quality products from trusted farms worldwide, ensuring every item meets our rigorous standards.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="leaf"></i>
+                        </div>
+                        <h4 class="card-title">Sustainability</h4>
+                        <p class="card-text">We're committed to sustainable farming practices and ethical sourcing that protect both people and the planet.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="heart"></i>
+                        </div>
+                        <h4 class="card-title">Customer Satisfaction</h4>
+                        <p class="card-text">Your health and happiness are our top priorities. We're dedicated to providing exceptional service and support.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="globe"></i>
+                        </div>
+                        <h4 class="card-title">Global Sourcing</h4>
+                        <p class="card-text">We partner with farmers and cooperatives worldwide to bring you the finest products from their regions.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="shield"></i>
+                        </div>
+                        <h4 class="card-title">Transparency</h4>
+                        <p class="card-text">We believe in complete transparency about our products, sourcing practices, and nutritional information.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-4 mx-auto">
+                            <i data-lucide="users"></i>
+                        </div>
+                        <h4 class="card-title">Community</h4>
+                        <p class="card-text">We support farming communities and contribute to initiatives that promote health and wellness.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Our Team Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Our Leadership Team</h2>
+                <p class="lead text-muted">Meet the people behind NutriHarvest</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mx-auto mb-4">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i data-lucide="user" class="text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Sarah Johnson</h5>
+                        <p class="text-muted mb-2">Founder & CEO</p>
+                        <p class="card-text">Passionate about sustainable agriculture and bringing premium products to health-conscious consumers.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mx-auto mb-4">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i data-lucide="user" class="text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Michael Chen</h5>
+                        <p class="text-muted mb-2">Chief Operations Officer</p>
+                        <p class="card-text">Expert in supply chain management and ensuring efficient delivery of our products worldwide.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mx-auto mb-4">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i data-lucide="user" class="text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Elena Rodriguez</h5>
+                        <p class="text-muted mb-2">Head of Quality Assurance</p>
+                        <p class="card-text">Ensures every product meets our strict quality standards before reaching our customers.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="card text-center border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="mx-auto mb-4">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 120px; height: 120px;">
+                                <i data-lucide="user" class="text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">David Kim</h5>
+                        <p class="text-muted mb-2">Sustainability Director</p>
+                        <p class="card-text">Leads our initiatives to promote sustainable farming practices and reduce environmental impact.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Milestones Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Our Journey & Milestones</h2>
+                <p class="lead text-muted">Key moments in our growth and development</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>2015</h3>
+                            <h4>Company Founded</h4>
+                            <p>NutriHarvest was established with a mission to bring premium quality dry fruits and nuts directly to consumers.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>2017</h3>
+                            <h4>First International Partnerships</h4>
+                            <p>Established partnerships with farms in California, Turkey, and India to source premium almonds, walnuts, and pistachios.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>2019</h3>
+                            <h4>E-commerce Platform Launch</h4>
+                            <p>Launched our online store to make our products accessible to customers worldwide with fast, reliable shipping.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>2021</h3>
+                            <h4>Sustainability Certification</h4>
+                            <p>Achieved certification for our sustainable sourcing practices and commitment to environmental responsibility.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>2023</h3>
+                            <h4>Organic Product Line</h4>
+                            <p>Expanded our offerings to include a complete line of certified organic products to meet growing customer demand.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item">
+                        <div class="timeline-marker"></div>
+                        <div class="timeline-content">
+                            <h3>2024</h3>
+                            <h4>Global Recognition</h4>
+                            <p>Recognized as one of the top premium dry fruit retailers globally, serving customers in over 30 countries.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--olive-green), var(--primary-brown));">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center text-white">
+                <h2 class="display-5 fw-bold mb-4">Experience Premium Quality</h2>
+                <p class="lead mb-4">Join thousands of satisfied customers who trust NutriHarvest for their healthy snacking needs.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'core:shop' %}" class="btn btn-light btn-lg">
+                        <i data-lucide="shopping-bag" class="me-2"></i>Start Shopping
+                    </a>
+                    <a href="{% url 'cms:page_view' 'contact' %}" class="btn btn-outline-light btn-lg">
+                        <i data-lucide="mail" class="me-2"></i>Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.timeline {
+    position: relative;
+    padding: 2rem 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--golden-beige);
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.timeline-marker {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--golden-beige);
+    border: 4px solid var(--white);
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    z-index: 1;
+}
+
+.timeline-content {
+    width: calc(50% - 2rem);
+    padding: 1rem;
+}
+
+.timeline-item:nth-child(odd) .timeline-content {
+    float: left;
+    text-align: right;
+}
+
+.timeline-item:nth-child(even) .timeline-content {
+    float: right;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .timeline::before {
+        left: 30px;
+    }
+    
+    .timeline-marker {
+        left: 30px;
+    }
+    
+    .timeline-content {
+        width: calc(100% - 80px);
+        float: right !important;
+        text-align: left !important;
+    }
+}
+</style>
+{% endblock %}

@@ -11,6 +11,8 @@ function initializeApp() {
     initializeFormValidation();
     initializeNotifications();
     initializeScrollAnimations();
+    initializeSystemNotifications();
+    initializeNotificationBell();
 }
 
 // Navigation functionality
@@ -336,6 +338,160 @@ function initializeNotifications() {
             }, 300);
         }, 5000);
     });
+}
+
+// System notifications
+function initializeSystemNotifications() {
+    // Fetch and display system notifications
+    fetchSystemNotifications();
+    
+    // Check for new notifications every 5 minutes
+    setInterval(fetchSystemNotifications, 5 * 60 * 1000);
+}
+
+function fetchSystemNotifications() {
+    fetch('/api/notifications/system-notifications/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.notifications.length > 0) {
+                // Display each notification
+                data.notifications.forEach(notification => {
+                    showSystemNotification(notification);
+                });
+            }
+        })
+        .catch(error => {
+            console.log('Failed to fetch system notifications:', error);
+        });
+}
+
+function showSystemNotification(notification) {
+    const container = document.getElementById('notification-popup-container');
+    
+    // Check if notification is already displayed
+    if (document.getElementById(`system-notification-${notification.id}`)) {
+        return;
+    }
+    
+    const notificationElement = document.createElement('div');
+    notificationElement.id = `system-notification-${notification.id}`;
+    notificationElement.className = `alert alert-${getNotificationClass(notification.type)} alert-dismissible fade show mb-2`;
+    notificationElement.style.minWidth = '300px';
+    notificationElement.innerHTML = `
+        <h6 class="alert-heading">${notification.title}</h6>
+        <p class="mb-0">${notification.message}</p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    container.appendChild(notificationElement);
+    
+    // Auto-hide after 10 seconds
+    setTimeout(() => {
+        if (notificationElement.parentNode) {
+            notificationElement.style.opacity = '0';
+            setTimeout(() => {
+                if (notificationElement.parentNode) {
+                    notificationElement.parentNode.removeChild(notificationElement);
+                }
+            }, 300);
+        }
+    }, 10000);
+}
+
+function getNotificationClass(type) {
+    const typeMap = {
+        'promotion': 'success',
+        'new_arrival': 'info',
+        'announcement': 'primary',
+        'alert': 'warning'
+    };
+    return typeMap[type] || 'info';
+}
+
+// Notification bell functionality
+function initializeNotificationBell() {
+    const bell = document.getElementById('notificationBell');
+    if (!bell) return;
+    
+    // Fetch user notifications
+    fetchUserNotifications();
+    
+    // Update notification count periodically
+    setInterval(fetchUserNotifications, 60 * 1000); // Every minute
+}
+
+function fetchUserNotifications() {
+    // Only fetch if user is authenticated
+    if (!isAuthenticated()) return;
+    
+    fetch('/api/notifications/user-notifications/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateNotificationBell(data.notifications);
+            }
+        })
+        .catch(error => {
+            console.log('Failed to fetch user notifications:', error);
+        });
+}
+
+function updateNotificationBell(notifications) {
+    const countElement = document.querySelector('.notification-count');
+    const dropdownMenu = document.getElementById('notificationDropdown');
+    const noNotificationsElement = document.getElementById('noNotifications');
+    
+    if (!countElement || !dropdownMenu) return;
+    
+    // Count unread notifications
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+    
+    // Update count badge
+    countElement.textContent = unreadCount;
+    countElement.style.display = unreadCount > 0 ? 'inline' : 'none';
+    
+    // Clear existing notifications in dropdown
+    // Keep the header and divider
+    const header = dropdownMenu.querySelector('.dropdown-header');
+    const divider = dropdownMenu.querySelector('.dropdown-divider');
+    
+    // Remove all except header and divider
+    while (dropdownMenu.children.length > 3) {
+        dropdownMenu.removeChild(dropdownMenu.lastChild);
+    }
+    
+    // Add notifications to dropdown
+    if (notifications.length > 0) {
+        noNotificationsElement.style.display = 'none';
+        
+        // Add up to 5 most recent notifications
+        notifications.slice(0, 5).forEach(notification => {
+            const notificationElement = document.createElement('li');
+            notificationElement.innerHTML = `
+                <a class="dropdown-item ${notification.is_read ? '' : 'bg-light'}" href="#">
+                    <div class="d-flex justify-content-between">
+                        <strong>${notification.title}</strong>
+                        ${!notification.is_read ? '<span class="badge bg-danger badge-sm">New</span>' : ''}
+                    </div>
+                    <small class="text-muted">${notification.message.substring(0, 60)}${notification.message.length > 60 ? '...' : ''}</small>
+                    <div class="small text-muted mt-1">${new Date(notification.created_at).toLocaleString()}</div>
+                </a>
+            `;
+            dropdownMenu.appendChild(notificationElement);
+        });
+        
+        // Add view all link
+        if (notifications.length > 5) {
+            const viewAllElement = document.createElement('li');
+            viewAllElement.innerHTML = `
+                <hr class="dropdown-divider">
+                <a class="dropdown-item text-center" href="#">View all notifications</a>
+            `;
+            dropdownMenu.appendChild(viewAllElement);
+        }
+    } else {
+        noNotificationsElement.style.display = 'block';
+    }
 }
 
 function showNotification(message, type = 'info', duration = 5000) {

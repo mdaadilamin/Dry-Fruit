@@ -115,7 +115,14 @@ def contact_management(request):
 def page_view(request, page_type):
     """Display CMS pages"""
     page = get_object_or_404(Page, page_type=page_type, is_active=True)
-    return render(request, 'cms/page.html', {'page': page})
+    
+    # Use specific template for about page
+    if page_type == 'about':
+        template = 'cms/about.html'
+    else:
+        template = 'cms/page.html'
+    
+    return render(request, template, {'page': page})
 
 @require_POST
 def newsletter_subscribe(request):

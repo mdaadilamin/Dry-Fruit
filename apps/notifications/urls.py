@@ -14,4 +14,7 @@ urlpatterns = router.urls + [
     path('manage/sms-templates/', views.sms_template_management, name='sms_template_management'),
     path('logs/email/', views.email_log, name='email_log'),
     path('logs/sms/', views.sms_log, name='sms_log'),
+    # API views
+    path('system-notifications/', views.get_system_notifications, name='system_notifications'),
+    path('user-notifications/', views.get_user_notifications, name='user_notifications'),
 ]

@@ -93,8 +93,19 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:home' %}">Home</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            Products
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'core:shop' %}?category=2">Dry Fruits</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:shop' %}?category=4">Gift Boxes</a></li>
+                            <li><a class="dropdown-item" href="#">Chocolates</a></li>
+                            <li><a class="dropdown-item" href="#">Spices</a></li>
+                        </ul>
+                    </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:shop' %}">Shop</a>
+                        <a class="nav-link" href="#">Blog</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cms:page_view' 'about' %}">About</a>
@@ -104,8 +115,30 @@
                     </li>
                 </ul>
                 
+                <!-- Search Form -->
+                <form class="d-flex me-3" action="{% url 'core:shop' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="q" placeholder="Search products..." aria-label="Search">
+                        <button class="btn btn-outline-light" type="submit">
+                            <i data-lucide="search"></i>
+                        </button>
+                    </div>
+                </form>
+                
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" id="notificationBell" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i data-lucide="bell" class="me-1"></i>
+                                Notifications <span class="badge bg-danger notification-count">0</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" id="notificationDropdown">
+                                <li><h6 class="dropdown-header">Notifications</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li class="text-center p-2 text-muted" id="noNotifications">No new notifications</li>
+                                <!-- Notifications will be populated here by JavaScript -->
+                            </ul>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'core:cart' %}">
                                 <i data-lucide="shopping-cart" class="me-1"></i>
@@ -152,6 +185,9 @@
             {% endfor %}
         {% endif %}
     </div>
+    
+    <!-- Notification Popup Container -->
+    <div id="notification-popup-container" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;"></div>
 
     <!-- Main Content -->
     <main>

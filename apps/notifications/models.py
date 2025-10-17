@@ -102,3 +102,37 @@ class Notification(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+
+
+class SystemNotification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('promotion', 'Promotion'),
+        ('new_arrival', 'New Arrival'),
+        ('announcement', 'Announcement'),
+        ('alert', 'Alert'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='announcement')
+    is_active = models.BooleanField(default=True)
+    show_to_users = models.BooleanField(default=True)  # Whether to show to logged-in users
+    show_to_guests = models.BooleanField(default=True)  # Whether to show to guests
+    created_at = models.DateTimeField(default=timezone.now)
+    valid_until = models.DateTimeField(null=True, blank=True)  # Optional expiration date
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.title} ({self.notification_type})"
+    
+    def is_valid(self):
+        """Check if notification is still valid"""
+        if not self.is_active:
+            return False
+        
+        if self.valid_until and timezone.now() > self.valid_until:
+            return False
+            
+        return True

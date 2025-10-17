@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import EmailTemplate, EmailLog, SMSTemplate, SMSLog, Notification
+from .models import EmailTemplate, EmailLog, SMSTemplate, SMSLog, Notification, SystemNotification
 
 @admin.register(EmailTemplate)
 class EmailTemplateAdmin(admin.ModelAdmin):
@@ -31,3 +31,10 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ['user', 'title', 'notification_type', 'is_read', 'created_at']
     list_filter = ['notification_type', 'is_read', 'created_at']
     search_fields = ['user__username', 'title', 'message']
+
+@admin.register(SystemNotification)
+class SystemNotificationAdmin(admin.ModelAdmin):
+    list_display = ['title', 'notification_type', 'is_active', 'show_to_users', 'show_to_guests', 'created_at', 'valid_until']
+    list_filter = ['notification_type', 'is_active', 'show_to_users', 'show_to_guests', 'created_at']
+    search_fields = ['title', 'message']
+    list_editable = ['is_active', 'show_to_users', 'show_to_guests']

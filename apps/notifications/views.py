@@ -1,7 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import EmailTemplate, SMSTemplate, EmailLog, SMSLog
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.utils import timezone
+from django.db import models
+from .models import EmailTemplate, SMSTemplate, EmailLog, SMSLog, SystemNotification, Notification
 
 @login_required
 def email_template_management(request):
@@ -73,3 +77,71 @@ def sms_log(request):
     
     logs = SMSLog.objects.order_by('-created_at')[:100]
     return render(request, 'notifications/sms_log.html', {'logs': logs})
+
+
+@require_GET
+def get_system_notifications(request):
+    """Get active system notifications for display"""
+    # Get active notifications that are valid
+    notifications = SystemNotification.objects.filter(
+        is_active=True,
+        created_at__lte=timezone.now()
+    ).filter(
+        models.Q(valid_until__isnull=True) | models.Q(valid_until__gte=timezone.now())
+    )
+    
+    # Filter based on user authentication status
+    if request.user.is_authenticated:
+        notifications = notifications.filter(show_to_users=True)
+    else:
+        notifications = notifications.filter(show_to_guests=True)
+    
+    # Convert to JSON format
+    notification_data = [
+        {
+            'id': n.id,
+            'title': n.title,
+            'message': n.message,
+            'type': n.notification_type,
+            'created_at': n.created_at.isoformat(),
+        }
+        for n in notifications
+    ]
+    
+    return JsonResponse({
+        'success': True,
+        'notifications': notification_data
+    })
+
+
+@require_GET
+def get_user_notifications(request):
+    """Get user notifications"""
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'success': False,
+            'message': 'Authentication required'
+        }, status=401)
+    
+    # Get user's 10 most recent notifications
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')[:10]
+    
+    # Convert to JSON format
+    notification_data = [
+        {
+            'id': n.id,
+            'title': n.title,
+            'message': n.message,
+            'type': n.notification_type,
+            'is_read': n.is_read,
+            'created_at': n.created_at.isoformat(),
+        }
+        for n in notifications
+    ]
+    
+    return JsonResponse({
+        'success': True,
+        'notifications': notification_data
+    })
