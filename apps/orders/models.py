@@ -11,6 +11,11 @@ class CartItem(models.Model):
     
     class Meta:
         unique_together = ['user', 'product']
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['product']),
+            models.Index(fields=['created_at']),
+        ]
     
     def __str__(self):
         return f"{self.user.username} - {self.product.name} (x{self.quantity})"
@@ -59,6 +64,13 @@ class Order(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['order_status']),
+            models.Index(fields=['payment_status']),
+            models.Index(fields=['customer']),
+            models.Index(fields=['order_number']),
+        ]
     
     def __str__(self):
         return f"Order {self.order_number} - {self.customer.full_name}"
@@ -76,6 +88,12 @@ class OrderItem(models.Model):
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)  # Price at time of order
     
+    class Meta:
+        indexes = [
+            models.Index(fields=['order']),
+            models.Index(fields=['product']),
+        ]
+    
     def __str__(self):
         return f"{self.order.order_number} - {self.product.name}"
     
@@ -89,6 +107,11 @@ class Wishlist(models.Model):
     
     class Meta:
         unique_together = ['user', 'product']
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['product']),
+            models.Index(fields=['created_at']),
+        ]
     
     def __str__(self):
         return f"{self.user.username} - {self.product.name}"

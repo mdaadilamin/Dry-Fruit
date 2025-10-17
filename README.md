@@ -331,6 +331,4 @@ For support, email support@nutriharvest.com or create an issue on GitHub.
 ---
 
 **NutriHarvest** - Premium Dry Fruits & Nuts E-commerce Platform
-Built with ❤️ using Django and modern web technologies.#   D r y - F r u i t 
- 
- 
+Built with ❤️ using Django and modern web technologies.

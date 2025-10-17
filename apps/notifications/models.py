@@ -19,6 +19,12 @@ class EmailTemplate(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        indexes = [
+            models.Index(fields=['template_type']),
+            models.Index(fields=['is_active']),
+        ]
+    
     def __str__(self):
         return f"{self.get_template_type_display()} - {self.subject}"
 
@@ -39,6 +45,12 @@ class EmailLog(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['status']),
+            models.Index(fields=['recipient']),
+            models.Index(fields=['template_type']),
+        ]
     
     def __str__(self):
         return f"{self.recipient} - {self.subject} - {self.status}"
@@ -57,6 +69,12 @@ class SMSTemplate(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['template_type']),
+            models.Index(fields=['is_active']),
+        ]
     
     def __str__(self):
         return f"{self.get_template_type_display()} SMS"
@@ -78,6 +96,12 @@ class SMSLog(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['status']),
+            models.Index(fields=['recipient']),
+            models.Index(fields=['template_type']),
+        ]
     
     def __str__(self):
         return f"{self.recipient} - {self.template_type} - {self.status}"
@@ -99,6 +123,12 @@ class Notification(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['user']),
+            models.Index(fields=['is_read']),
+            models.Index(fields=['notification_type']),
+        ]
     
     def __str__(self):
         return f"{self.user.username} - {self.title}"
@@ -123,6 +153,12 @@ class SystemNotification(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['notification_type']),
+            models.Index(fields=['valid_until']),
+        ]
     
     def __str__(self):
         return f"{self.title} ({self.notification_type})"

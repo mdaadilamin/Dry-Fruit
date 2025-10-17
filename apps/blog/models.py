@@ -13,9 +13,14 @@ class Category(models.Model):
     class Meta:
         verbose_name_plural = 'Categories'
         ordering = ['name']
+        indexes = [
+            models.Index(fields=['name']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['created_at']),
+        ]
     
     def __str__(self):
-        return self.name
+        return str(self.name)
     
     def get_absolute_url(self):
         return reverse('blog:category_posts', kwargs={'slug': self.slug})
@@ -50,10 +55,13 @@ class Post(models.Model):
             models.Index(fields=['-created_at']),
             models.Index(fields=['status']),
             models.Index(fields=['is_featured']),
+            models.Index(fields=['author']),
+            models.Index(fields=['category']),
+            models.Index(fields=['slug']),
         ]
     
     def __str__(self):
-        return self.title
+        return str(self.title)
     
     def get_absolute_url(self):
         return reverse('blog:post_detail', kwargs={'slug': self.slug})
@@ -77,7 +85,8 @@ class Comment(models.Model):
         indexes = [
             models.Index(fields=['-created_at']),
             models.Index(fields=['is_approved']),
+            models.Index(fields=['post']),
         ]
     
     def __str__(self):
-        return f'Comment by {self.author_name} on {self.post.title}'
+        return f'Comment by {self.author_name} on {self.post}'

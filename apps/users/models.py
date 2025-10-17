@@ -51,7 +51,10 @@ class User(AbstractUser):
     
     def has_permission(self, module, permission_type):
         """Check if user has specific permission for a module"""
-        if self.role and self.role.name == 'admin':
+        if not self.role:
+            return False
+            
+        if self.role.name == 'admin':
             return True
         
         try:
@@ -59,6 +62,21 @@ class User(AbstractUser):
             return getattr(perm, f'can_{permission_type}', False)
         except Permission.DoesNotExist:
             return False
+    
+    @property
+    def is_admin(self):
+        """Check if user is an administrator"""
+        return self.role and self.role.name == 'admin'
+    
+    @property
+    def is_employee(self):
+        """Check if user is an employee"""
+        return self.role and self.role.name == 'employee'
+    
+    @property
+    def is_customer(self):
+        """Check if user is a customer"""
+        return self.role and self.role.name == 'customer'
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

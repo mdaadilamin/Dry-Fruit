@@ -14,9 +14,14 @@ class Banner(models.Model):
     
     class Meta:
         ordering = ['order', '-created_at']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+            models.Index(fields=['created_at']),
+        ]
     
     def __str__(self):
-        return self.title
+        return str(self.title)
 
 class Testimonial(models.Model):
     customer_name = models.CharField(max_length=100)
@@ -30,6 +35,12 @@ class Testimonial(models.Model):
     
     class Meta:
         ordering = ['order', '-created_at']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+            models.Index(fields=['rating']),
+            models.Index(fields=['created_at']),
+        ]
     
     def __str__(self):
         return f"{self.customer_name} - {self.rating} stars"
@@ -51,8 +62,14 @@ class Page(models.Model):
     is_active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    class Meta:
+        indexes = [
+            models.Index(fields=['page_type']),
+            models.Index(fields=['is_active']),
+        ]
+    
     def __str__(self):
-        return self.title
+        return str(self.title)
 
 class ContactInfo(models.Model):
     business_name = models.CharField(max_length=100, default='NutriHarvest')
@@ -74,7 +91,7 @@ class ContactInfo(models.Model):
     business_hours = models.TextField(blank=True)
     
     def __str__(self):
-        return self.business_name
+        return str(self.business_name)
     
     class Meta:
         verbose_name = 'Contact Information'
@@ -85,8 +102,13 @@ class Newsletter(models.Model):
     is_active = models.BooleanField(default=True)
     subscribed_at = models.DateTimeField(default=timezone.now)
     
-    def __str__(self):
-        return self.email
-    
     class Meta:
         ordering = ['-subscribed_at']
+        indexes = [
+            models.Index(fields=['email']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['subscribed_at']),
+        ]
+    
+    def __str__(self):
+        return str(self.email)

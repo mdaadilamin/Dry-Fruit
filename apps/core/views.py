@@ -28,7 +28,7 @@ def home(request):
 
 def shop(request):
     """Shop page with products, filters, and search"""
-    products = Product.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True).select_related('category')
     categories = Category.objects.filter(is_active=True)
     
     # Search functionality
@@ -73,7 +73,10 @@ def shop(request):
         products = products.order_by('-created_at')
     elif sort_by == 'popularity':
         # Order by number of reviews or featured status
-        products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-is_featured')
+        products = products.annotate(
+            avg_rating=Avg('reviews__rating'),
+            review_count=Count('reviews')
+        ).order_by('-avg_rating', '-review_count', '-is_featured')
     elif sort_by == 'rating':
         products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
     else:
