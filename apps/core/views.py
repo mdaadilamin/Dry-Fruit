@@ -3,13 +3,14 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-from django.db.models import Q, Avg, Sum, Count
+from django.db.models import Q, Avg, Sum, Count, F
 from django.utils import timezone
 from datetime import timedelta
 from apps.shop.models import Product, Category, ProductReview
 from apps.orders.models import Order, CartItem
 from apps.users.models import User, Customer
 from apps.cms.models import Banner, Testimonial
+from .utils import get_related_products, get_upsell_products, get_product_rating_stats
 
 def home(request):
     """Home page with featured products and banners"""
@@ -126,15 +127,13 @@ def product_detail(request, product_id):
     """Product detail page"""
     product = get_object_or_404(Product, id=product_id, is_active=True)
     
-    # Get related products based on category, tags, and purchase history
+    # Get related products and upsell products using utility functions
     related_products = get_related_products(product, limit=4)
-    
-    # Get upsell products (higher priced or premium versions)
     upsell_products = get_upsell_products(product, limit=4)
     
     # Get product reviews
     reviews = ProductReview.objects.filter(product=product, is_verified=True)
-    avg_rating = reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+    rating_stats = get_product_rating_stats(product)
     
     # Get gift box customizations and items if this is a gift box
     gift_box_customizations = None
@@ -148,7 +147,7 @@ def product_detail(request, product_id):
         'related_products': related_products,
         'upsell_products': upsell_products,
         'reviews': reviews,
-        'avg_rating': avg_rating,
+        'avg_rating': rating_stats['avg_rating'],
         'gift_box_customizations': gift_box_customizations,
         'gift_box_items': gift_box_items,
     }
@@ -191,8 +190,6 @@ def cart(request):
         
         elif action == 'apply_coupon':
             # Apply coupon code
-            coupon_code = request.POST.get('coupon_code')
-            # Redirect to the marketing app's apply coupon view
             from django.http import HttpResponseRedirect
             from django.urls import reverse
             return HttpResponseRedirect(reverse('marketing:apply_coupon'))
@@ -805,69 +802,3 @@ def spices_category(request):
         'category_name': 'Spices'
     }
     return render(request, 'core/category.html', context)
-
-def get_related_products(product, limit=4):
-    """Get related products based on category, tags, and purchase history"""
-    from django.db.models import Count, Q
-    from apps.orders.models import OrderItem
-    
-    # Start with products from the same category
-    related_products = Product.objects.filter(
-        category=product.category,
-        is_active=True
-    ).exclude(id=product.id)
-    
-    # If product has tags, also look for products with similar tags
-    if product.tags:
-        tag_list = [tag.strip() for tag in product.tags.split(',')]
-        tag_queries = Q()
-        for tag in tag_list:
-            tag_queries |= Q(tags__icontains=tag)
-        
-        # Get products with similar tags
-        tagged_products = Product.objects.filter(
-            tag_queries,
-            is_active=True
-        ).exclude(id=product.id).distinct()
-        
-        # Combine category and tagged products
-        related_products = related_products.union(tagged_products)
-    
-    # Get products that are frequently bought together (purchase history)
-    # Find orders that contain this product
-    orders_with_product = OrderItem.objects.filter(product=product).values_list('order_id', flat=True)
-    
-    # Find other products in those orders
-    if orders_with_product.exists():
-        frequently_bought_together = Product.objects.filter(
-            orderitem__order_id__in=orders_with_product,
-            is_active=True
-        ).exclude(id=product.id).annotate(
-            purchase_count=Count('orderitem')
-        ).order_by('-purchase_count')
-        
-        # Combine with existing related products
-        related_products = related_products.union(frequently_bought_together)
-    
-    # Convert to list and limit
-    related_products_list = list(related_products[:limit*2])  # Get more to ensure we have enough after filtering
-    
-    # Remove the current product if it's in the list
-    related_products_list = [p for p in related_products_list if p.id != product.id]
-    
-    # Return limited results
-    return related_products_list[:limit]
-
-def get_upsell_products(product, limit=4):
-    """Get upsell products (higher priced or premium versions)"""
-    from django.db.models import Q
-    
-    # Get products from the same category with higher price or marked as premium
-    upsell_products = Product.objects.filter(
-        category=product.category,
-        is_active=True
-    ).exclude(id=product.id).filter(
-        Q(price__gt=product.price) | Q(tags__icontains='premium') | Q(tags__icontains='deluxe')
-    ).order_by('price')[:limit]
-    
-    return list(upsell_products)
