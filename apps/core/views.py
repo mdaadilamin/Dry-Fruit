@@ -53,6 +53,16 @@ def shop(request):
     if max_price:
         products = products.filter(price__lte=max_price)
     
+    # Stock filter
+    in_stock_filter = request.GET.get('in_stock', '')
+    if in_stock_filter:
+        products = products.filter(stock__gt=0)
+    
+    # Sale filter
+    on_sale_filter = request.GET.get('on_sale', '')
+    if on_sale_filter:
+        products = products.filter(discount_percent__gt=0)
+    
     # Sort functionality
     sort_by = request.GET.get('sort', 'name')
     if sort_by == 'price_low':
@@ -64,16 +74,26 @@ def shop(request):
     elif sort_by == 'popularity':
         # Order by number of reviews or featured status
         products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating', '-is_featured')
+    elif sort_by == 'rating':
+        products = products.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
     else:
         products = products.order_by('name')
     
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(products, 9)  # Show 9 products per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     context = {
-        'products': products,
+        'products': page_obj,
         'categories': categories,
         'search_query': search_query,
         'selected_category': category_filter,
         'min_price': min_price,
         'max_price': max_price,
+        'in_stock_filter': in_stock_filter,
+        'on_sale_filter': on_sale_filter,
         'sort_by': sort_by,
     }
     return render(request, 'core/shop.html', context)

@@ -131,6 +131,8 @@ def page_view(request, page_type):
         template = 'cms/privacy.html'
     elif page_type == 'terms':
         template = 'cms/terms.html'
+    elif page_type == 'shipping':
+        template = 'cms/shipping.html'
     else:
         template = 'cms/page.html'
     
