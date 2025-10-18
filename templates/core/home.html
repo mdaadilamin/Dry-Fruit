@@ -379,4 +379,34 @@
         </div>
     </div>
 </section>
+
+<!-- Structured Data for Organization -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "NutriHarvest",
+    "url": "https://dryfruithouse.com",
+    "logo": "https://dryfruithouse.com{% static 'images/logo.png' %}",
+    "description": "Premium dry fruits and nuts sourced directly from the finest farms worldwide.",
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "123 Business Street",
+        "addressLocality": "Business City",
+        "postalCode": "12345",
+        "addressCountry": "US"
+    },
+    "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+1-234-567-8900",
+        "contactType": "customer service"
+    },
+    "sameAs": [
+        "https://www.facebook.com/nutriharvest",
+        "https://www.instagram.com/nutriharvest",
+        "https://www.twitter.com/nutriharvest",
+        "https://www.youtube.com/nutriharvest"
+    ]
+}
+</script>
 {% endblock %}

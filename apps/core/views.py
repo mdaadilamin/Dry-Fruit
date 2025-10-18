@@ -357,6 +357,64 @@ def checkout(request):
         if 'coupon_code' in request.session:
             del request.session['coupon_code']
         
+        # Send notification for new order
+        from apps.notifications.services import EmailService
+        from apps.notifications.models import Notification
+        from django.urls import reverse
+        
+        # Notify customer
+        if request.user.email:
+            context = {
+                'order_number': order.order_number,
+                'customer_name': request.user.full_name,
+                'order_total': order.total_amount,
+                'order_date': order.created_at.strftime('%B %d, %Y'),
+                'order_items': [
+                    {
+                        'name': item.product.name,
+                        'quantity': item.quantity,
+                        'price': item.price,
+                        'total': item.get_total_price()
+                    }
+                    for item in order.items.all()
+                ],
+                'shipping_address': f"{order.shipping_address}, {order.shipping_city}, {order.shipping_pincode}",
+                'order_url': request.build_absolute_uri(reverse('core:dashboard'))
+            }
+            EmailService.send_email('order_confirmation', request.user.email, context)
+        
+        # Create in-app notification for customer
+        Notification.objects.get_or_create(
+            user=request.user,
+            title=f'Order #{order.order_number} Confirmed',
+            message=f'Your order #{order.order_number} for ₹{order.total_amount} has been confirmed and is being processed.',
+            notification_type='success'
+        )
+        
+        # Notify admins
+        from apps.users.models import User
+        admin_users = [user for user in User.objects.filter(is_active=True) if user.is_admin]
+        admin_context = {
+            'order_number': order.order_number,
+            'customer_name': request.user.full_name,
+            'order_total': order.total_amount,
+            'order_date': order.created_at.strftime('%B %d, %Y'),
+            'order_url': request.build_absolute_uri(reverse('orders:order_detail', args=[order.id]))
+        }
+        
+        for admin in admin_users:
+            # Create in-app notification for admins
+            Notification.objects.get_or_create(
+                user=admin,
+                title=f'New Order #{order.order_number}',
+                message=f'New order from {request.user.full_name} for ₹{order.total_amount}',
+                notification_type='info'
+            )
+            
+            # Send email notification to admins
+            if admin.email:
+                EmailService.send_email('order_confirmation', admin.email, admin_context)
+        
         # Redirect to payment page based on selected method
         if payment_method == 'card':
             return redirect('payments:stripe_payment', order_id=order.id)

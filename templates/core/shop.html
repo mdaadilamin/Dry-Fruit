@@ -330,4 +330,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
 </style>
+
+<!-- Structured Data for WebPage -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Shop - NutriHarvest",
+    "description": "Browse our premium collection of dry fruits, nuts, gift boxes, chocolates, and spices.",
+    "url": "{{ request.build_absolute_uri }}",
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://dryfruithouse.com/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Shop",
+                "item": "{{ request.build_absolute_uri }}"
+            }
+        ]
+    }
+}
+</script>
 {% endblock %}
