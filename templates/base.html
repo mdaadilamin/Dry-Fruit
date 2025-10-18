@@ -116,16 +116,6 @@
                     </li>
                 </ul>
                 
-                <!-- Search Form -->
-                <form class="d-flex me-3" action="{% url 'core:shop' %}" method="get">
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="q" placeholder="Search products..." aria-label="Search">
-                        <button class="btn btn-outline-light" type="submit">
-                            <i data-lucide="search"></i>
-                        </button>
-                    </div>
-                </form>
-                
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item">

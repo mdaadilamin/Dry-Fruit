@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q, Avg, Sum, Count, F
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_protect
 from datetime import timedelta
 from apps.shop.models import Product, Category, ProductReview
 from apps.orders.models import Order, CartItem
@@ -646,6 +647,7 @@ def product_analytics(request):
     }
     return render(request, 'core/product_analytics.html', context)
 
+@csrf_protect
 def login_view(request):
     """User login"""
     if request.method == 'POST':
@@ -655,7 +657,11 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            next_url = request.GET.get('next', 'core:dashboard')
+            # Redirect admin users to admin panel, others to dashboard
+            if user.is_admin:
+                next_url = request.GET.get('next', 'core:admin_panel')
+            else:
+                next_url = request.GET.get('next', 'core:dashboard')
             return redirect(next_url)
         else:
             messages.error(request, 'Invalid username or password.')
