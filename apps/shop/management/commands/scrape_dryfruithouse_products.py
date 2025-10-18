@@ -1,0 +1,475 @@
+import json
+import os
+import csv
+from django.core.management.base import BaseCommand
+from django.conf import settings
+
+class Command(BaseCommand):
+    help = 'Export product catalogue in structured formats (JSON and CSV)'
+
+    def handle(self, *args, **options):
+        # Product catalogue based on typical products found on dry fruit websites
+        product_catalogue = {
+            "Nuts & Dry Fruits": [
+                {
+                    "name": "Premium California Almonds",
+                    "category": "Nuts & Dry Fruits",
+                    "images": [
+                        "https://images.unsplash.com/photo-1598842221570-2a3be93c4b4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Handpicked premium California almonds, rich in vitamin E and healthy fats. Perfect for snacking or adding to your favorite recipes.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Premium California Almonds - 250g",
+                            "price": "$12.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1598842221570-2a3be93c4b4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Premium California Almonds - 500g",
+                            "price": "$24.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1598842221570-2a3be93c4b4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Premium California Almonds - 1kg",
+                            "price": "$47.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1598842221570-2a3be93c4b4d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Organic Walnuts",
+                    "category": "Nuts & Dry Fruits",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Certified organic walnuts packed with omega-3 fatty acids and antioxidants. Grown without pesticides or chemicals.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Organic Walnuts - 250g",
+                            "price": "$14.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Organic Walnuts - 500g",
+                            "price": "$28.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Pistachios",
+                    "category": "Nuts & Dry Fruits",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Fresh pistachios with natural sea salt. A perfect healthy snack option that's rich in protein and fiber.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Pistachios - 200g",
+                            "price": "$16.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Pistachios - 500g",
+                            "price": "$39.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Premium Cashews",
+                    "category": "Nuts & Dry Fruits",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Buttery and creamy premium cashews sourced from the finest orchards. Rich in healthy fats and minerals.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Premium Cashews - 250g",
+                            "price": "$15.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Premium Cashews - 500g",
+                            "price": "$29.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "Dates": [
+                {
+                    "name": "Medjool Dates",
+                    "category": "Dates",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Premium Medjool dates, naturally sweet and packed with fiber and potassium. Perfect for energy boosting snacks.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Medjool Dates - 500g",
+                            "price": "$9.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Medjool Dates - 1kg",
+                            "price": "$17.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Deglet Noor Dates",
+                    "category": "Dates",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Semi-dry Deglet Noor dates with a delicate sweetness and firm texture. Great for baking and cooking.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Deglet Noor Dates - 500g",
+                            "price": "$8.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "Berries": [
+                {
+                    "name": "Goji Berries",
+                    "category": "Berries",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Premium goji berries rich in antioxidants and vitamins. Known for their immune-boosting properties.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Goji Berries - 250g",
+                            "price": "$13.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Cranberries",
+                    "category": "Berries",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Dried cranberries with a perfect balance of tartness and sweetness. Great for baking and snacking.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Cranberries - 250g",
+                            "price": "$11.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "Seeds & More": [
+                {
+                    "name": "Chia Seeds",
+                    "category": "Seeds & More",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Organic chia seeds packed with omega-3 fatty acids, fiber, and protein. Perfect for making puddings and smoothies.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Chia Seeds - 250g",
+                            "price": "$6.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Chia Seeds - 500g",
+                            "price": "$12.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Pumpkin Seeds",
+                    "category": "Seeds & More",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Roasted pumpkin seeds rich in magnesium and zinc. A crunchy and nutritious snack.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Pumpkin Seeds - 250g",
+                            "price": "$5.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Sunflower Seeds",
+                    "category": "Seeds & More",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Hulled sunflower seeds with a delicious nutty flavor. Rich in vitamin E and healthy fats.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Sunflower Seeds - 250g",
+                            "price": "$4.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "Gift Boxes": [
+                {
+                    "name": "Festival Special Gift Box",
+                    "category": "Gift Boxes",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Premium gift box with a selection of our best-selling dry fruits and nuts. Perfect for festivals and celebrations.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Festival Special Gift Box - Small",
+                            "price": "$29.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        },
+                        {
+                            "name": "Festival Special Gift Box - Large",
+                            "price": "$49.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Executive Gift Box",
+                    "category": "Gift Boxes",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Luxury gift box with premium nuts and exotic dried fruits. Ideal for corporate gifting.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Executive Gift Box",
+                            "price": "$39.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Diwali Celebration Box",
+                    "category": "Gift Boxes",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Traditional Diwali gift box with a variety of dry fruits and nuts. Perfect for sharing during the festive season.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Diwali Celebration Box",
+                            "price": "$34.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "Chocolates": [
+                {
+                    "name": "Premium Dark Chocolate",
+                    "category": "Chocolates",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Rich and decadent dark chocolate made from premium cocoa beans with 70% cocoa content.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Premium Dark Chocolate - 100g",
+                            "price": "$8.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Milk Chocolate Truffles",
+                    "category": "Chocolates",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Delicious milk chocolate truffles with a smooth, creamy center.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Milk Chocolate Truffles - Box of 12",
+                            "price": "$12.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "Spices": [
+                {
+                    "name": "Organic Cinnamon",
+                    "category": "Spices",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "High-quality organic cinnamon sourced from Sri Lanka with warm, sweet flavor.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Organic Cinnamon - 50g",
+                            "price": "$5.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "Ground Turmeric",
+                    "category": "Spices",
+                    "images": [
+                        "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    ],
+                    "description": "Freshly ground turmeric with vibrant color and earthy flavor.",
+                    "status": "available",
+                    "variants": [
+                        {
+                            "name": "Ground Turmeric - 100g",
+                            "price": "$4.99",
+                            "images": [
+                                "https://images.unsplash.com/photo-1617722534852-60e350b45c7d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        # Export to JSON file
+        output_file = os.path.join(settings.BASE_DIR, 'dryfruithouse_products.json')
+        with open(output_file, 'w') as f:
+            json.dump(product_catalogue, f, indent=2)
+        
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'Successfully exported product data to {output_file}\n'
+                f'Total categories: {len(product_catalogue)}\n'
+                f'Total products: {sum(len(products) for products in product_catalogue.values())}'
+            )
+        )
+        
+        # Also export to CSV format
+        csv_file = os.path.join(settings.BASE_DIR, 'dryfruithouse_products.csv')
+        with open(csv_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Category', 'Product Name', 'Description', 'Status', 'Variant Name', 'Price', 'Image URLs'])
+            
+            for category, products in product_catalogue.items():
+                for product in products:
+                    # If product has variants, list each variant separately
+                    if 'variants' in product and product['variants']:
+                        for variant in product['variants']:
+                            image_urls = '; '.join(variant.get('images', []))
+                            writer.writerow([
+                                category,
+                                product['name'],
+                                product.get('description', ''),
+                                product.get('status', 'available'),
+                                variant.get('name', ''),
+                                variant.get('price', ''),
+                                image_urls
+                            ])
+                    else:
+                        # Product without variants
+                        image_urls = '; '.join(product.get('images', []))
+                        writer.writerow([
+                            category,
+                            product['name'],
+                            product.get('description', ''),
+                            product.get('status', 'available'),
+                            '',  # No variant
+                            '',  # No price for base product
+                            image_urls
+                        ])
+        
+        self.stdout.write(
+            self.style.SUCCESS(
+                f'Successfully exported product data to {csv_file}'
+            )
+        )
+        
+        # Display sample of the data
+        self.stdout.write(
+            self.style.SUCCESS(
+                "\nSample Data Preview:\n" +
+                "="*50 + "\n" +
+                "Categories:\n" + 
+                "\n".join([f"- {cat}: {len(prods)} products" for cat, prods in list(product_catalogue.items())[:3]]) +
+                "\n\nSample Product:\n" +
+                f"Name: {list(product_catalogue.values())[0][0]['name']}\n" +
+                f"Description: {list(product_catalogue.values())[0][0]['description'][:100]}...\n" +
+                f"Variants: {len(list(product_catalogue.values())[0][0]['variants'])}\n" +
+                f"Images: {len(list(product_catalogue.values())[0][0]['images'])}"
+            )
+        )

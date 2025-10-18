@@ -14,7 +14,7 @@
                         <h5 class="mb-0">Filters</h5>
                         <button class="btn btn-sm btn-light d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
                             <i data-lucide="filter"></i>
-                        </button>
+button>
                     </div>
                     <div class="collapse d-lg-block" id="filterCollapse">
                         <div class="card-body">
@@ -71,6 +71,23 @@
                                     </div>
                                 </div>
                                 
+                                <!-- Tags Filter -->
+                                <div class="mb-3">
+                                    <label class="form-label">Tags</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="organic" name="tags" value="organic" {% if 'organic' in request.GET.tags %}checked{% endif %}>
+                                        <label class="form-check-label" for="organic">Organic</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="premium" name="tags" value="premium" {% if 'premium' in request.GET.tags %}checked{% endif %}>
+                                        <label class="form-check-label" for="premium">Premium</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="gift" name="tags" value="gift" {% if 'gift' in request.GET.tags %}checked{% endif %}>
+                                        <label class="form-check-label" for="gift">Gift Pack</label>
+                                    </div>
+                                </div>
+                                
                                 <!-- Sort By -->
                                 <div class="mb-3">
                                     <label for="sort" class="form-label">Sort By</label>
@@ -81,6 +98,7 @@
                                         <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
                                         <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Popularity</option>
                                         <option value="rating" {% if sort_by == 'rating' %}selected{% endif %}>Top Rated</option>
+                                        <option value="discount" {% if sort_by == 'discount' %}selected{% endif %}>Highest Discount</option>
                                     </select>
                                 </div>
                                 
@@ -107,6 +125,15 @@
                             </a>
                             {% endfor %}
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Promotional Banner -->
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Special Offer!</h5>
+                        <p class="card-text">Get 10% off on your first order. Use code: WELCOME10</p>
+                        <a href="{% url 'core:shop' %}" class="btn btn-primary">Shop Now</a>
                     </div>
                 </div>
             </div>
@@ -155,6 +182,13 @@
                                         Featured
                                     </span>
                                 {% endif %}
+                                
+                                <!-- Quick View Button -->
+                                <div class="position-absolute top-50 start-50 translate-middle d-none quick-view">
+                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#productModal{{ product.id }}">
+                                        Quick View
+                                    </button>
+                                </div>
                             </div>
                             
                             <div class="product-card-body d-flex flex-column">
@@ -204,6 +238,49 @@
                                                 <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
                                             </button>
                                         {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick View Modal -->
+                    <div class="modal fade" id="productModal{{ product.id }}" tabindex="-1" aria-labelledby="productModalLabel{{ product.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="productModalLabel{{ product.id }}">{{ product.name }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            {% if product.image %}
+                                                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid rounded">
+                                            {% else %}
+                                                <img src="{% static 'images/placeholder.jpg' %}" alt="{{ product.name }}" class="img-fluid rounded">
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p>{{ product.description|truncatewords:30 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                {% if product.has_discount %}
+                                                    <div>
+                                                        <span class="text-decoration-line-through text-muted me-2">${{ product.price }}</span>
+                                                        <span class="text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="fw-bold">${{ product.price }}</span>
+                                                {% endif %}
+                                                
+                                                {% if product.in_stock %}
+                                                    <span class="badge bg-success">In Stock</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Out of Stock</span>
+                                                {% endif %}
+                                            </div>
+                                            <a href="{% url 'core:product_detail' product.id %}" class="btn btn-primary">View Full Details</a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -298,6 +375,24 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Quick view hover effect
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            const quickView = this.querySelector('.quick-view');
+            if (quickView) {
+                quickView.classList.remove('d-none');
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            const quickView = this.querySelector('.quick-view');
+            if (quickView) {
+                quickView.classList.add('d-none');
+            }
+        });
+    });
+    
     // Initialize Lucide icons
     lucide.createIcons();
 });
@@ -328,6 +423,10 @@ document.addEventListener('DOMContentLoaded', function() {
         width: 100%;
         height: 200px;
     }
+}
+
+.quick-view {
+    transition: opacity 0.3s ease;
 }
 </style>
 

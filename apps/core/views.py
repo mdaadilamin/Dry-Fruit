@@ -166,7 +166,7 @@ def cart(request):
         if action == 'update':
             # Update quantity
             quantity = int(request.POST.get('quantity', 1))
-            from apps.shop.models import Product
+            # Use the Product model imported at the top of the file
             product = get_object_or_404(Product, id=product_id)
             
             # Ensure quantity doesn't exceed stock
@@ -243,12 +243,17 @@ def cart(request):
     if cart_items.exists():
         # Get all products in cart
         cart_product_ids = [item.product.id for item in cart_items]
+        # Use the Product model imported at the top of the file
         cart_products = Product.objects.filter(id__in=cart_product_ids)
         
         # For each product in cart, get related products
         for cart_product in cart_products:
-            related_for_item = get_related_products(cart_product, limit=2)
-            related_products.extend(related_for_item)
+            try:
+                related_for_item = get_related_products(cart_product, limit=2)
+                related_products.extend(related_for_item)
+            except Exception:
+                # If there's an error getting related products, continue without them
+                pass
         
         # Remove duplicates and limit to 6 products
         seen_ids = set()

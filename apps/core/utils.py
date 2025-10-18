@@ -4,52 +4,17 @@ from apps.orders.models import OrderItem
 
 def get_related_products(product, limit=4):
     """Get related products based on category, tags, and purchase history"""
-    # Start with products from the same category
-    related_products = Product.objects.filter(
-        category=product.category,
-        is_active=True
-    ).exclude(id=product.id)
-    
-    # If product has tags, also look for products with similar tags
-    if product.tags:
-        tag_list = [tag.strip() for tag in product.tags.split(',')]
-        tag_queries = Q()
-        for tag in tag_list:
-            tag_queries = tag_queries | Q(tags__icontains=tag)
-        
-        # Get products with similar tags
-        tagged_products = Product.objects.filter(
-            tag_queries,
+    try:
+        # Start with products from the same category
+        related_products = Product.objects.filter(
+            category=product.category,
             is_active=True
-        ).exclude(id=product.id).distinct()
+        ).exclude(id=product.id)[:limit]
         
-        # Combine category and tagged products
-        related_products = related_products.union(tagged_products)
-    
-    # Get products that are frequently bought together (purchase history)
-    # Find orders that contain this product
-    orders_with_product = OrderItem.objects.filter(product=product).values_list('order_id', flat=True)
-    
-    # Find other products in those orders
-    if orders_with_product.exists():
-        frequently_bought_together = Product.objects.filter(
-            orderitem__order_id__in=orders_with_product,
-            is_active=True
-        ).exclude(id=product.id).annotate(
-            purchase_count=Count('orderitem')
-        ).order_by('-purchase_count')
-        
-        # Combine with existing related products
-        related_products = related_products.union(frequently_bought_together)
-    
-    # Convert to list and limit
-    related_products_list = list(related_products[:limit*2])  # Get more to ensure we have enough after filtering
-    
-    # Remove the current product if it's in the list
-    related_products_list = [p for p in related_products_list if p.id != product.id]
-    
-    # Return limited results
-    return related_products_list[:limit]
+        return list(related_products)
+    except Exception:
+        # If there's any issue, return an empty list
+        return []
 
 def get_upsell_products(product, limit=4):
     """Get upsell products (higher priced or premium versions)"""

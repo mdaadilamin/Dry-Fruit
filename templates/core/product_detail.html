@@ -108,6 +108,16 @@
                     </a>
                 </div>
                 
+                <!-- Tags -->
+                {% if product.tags %}
+                <div class="mb-4">
+                    <h5 class="fw-bold">Tags</h5>
+                    {% for tag in product.tags.split(',') %}
+                    <span class="badge bg-info me-1">{{ tag|capfirst }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
                 <!-- Gift Box Customizations -->
                 {% if gift_box_customizations %}
                 <div class="mb-4">
@@ -189,9 +199,28 @@
                     <button class="btn btn-primary btn-lg me-md-2 add-to-cart" data-product-id="{{ product.id }}">
                         <i data-lucide="shopping-cart" class="me-2"></i>Add to Cart
                     </button>
-                    <button class="btn btn-outline-primary btn-lg">
+                    <button class="btn btn-outline-primary btn-lg wishlist-btn" data-product-id="{{ product.id }}">
                         <i data-lucide="heart" class="me-2"></i>Wishlist
                     </button>
+                </div>
+                
+                <!-- Share Buttons -->
+                <div class="mt-4">
+                    <h5 class="fw-bold">Share this product</h5>
+                    <div class="d-flex gap-2">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" target="_blank" class="btn btn-outline-primary">
+                            <i data-lucide="facebook"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ product.name }}" target="_blank" class="btn btn-outline-info">
+                            <i data-lucide="twitter"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ product.name }}" target="_blank" class="btn btn-outline-primary">
+                            <i data-lucide="linkedin"></i>
+                        </a>
+                        <a href="mailto:?subject=Check out this product&body={{ request.build_absolute_uri }}" class="btn btn-outline-secondary">
+                            <i data-lucide="mail"></i>
+                        </a>
+                    </div>
                 </div>
                 {% else %}
                 <div class="alert alert-warning">
@@ -241,6 +270,33 @@
                     <i data-lucide="message-circle" class="text-muted" style="width: 48px; height: 48px;"></i>
                     <h5 class="mt-3">No reviews yet</h5>
                     <p class="text-muted">Be the first to review this product!</p>
+                </div>
+                {% endif %}
+                
+                <!-- Add Review Form -->
+                {% if user.is_authenticated %}
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Write a Review</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="review-form">
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <div class="rating-stars">
+                                    <input type="hidden" id="rating-value" name="rating" value="0">
+                                    {% for i in "12345" %}
+                                    <i data-lucide="star" class="star-icon text-muted" data-rating="{{ forloop.counter }}" style="cursor: pointer; width: 24px; height: 24px;"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="review-comment" class="form-label">Your Review</label>
+                                <textarea class="form-control" id="review-comment" name="comment" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                    </div>
                 </div>
                 {% endif %}
             </div>
@@ -462,6 +518,168 @@ document.addEventListener('DOMContentLoaded', function() {
         if (priceElement) {
             priceElement.textContent = '$' + totalPrice.toFixed(2);
         }
+    }
+    
+    // Wishlist functionality
+    const wishlistBtn = document.querySelector('.wishlist-btn');
+    if (wishlistBtn) {
+        wishlistBtn.addEventListener('click', function() {
+            const productId = this.getAttribute('data-product-id');
+            
+            fetch('{% url "orders:add_to_wishlist" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    product_id: productId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                    alertDiv.setAttribute('role', 'alert');
+                    alertDiv.innerHTML = `
+                        <strong>Success!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alertDiv);
+                    
+                    // Auto dismiss after 3 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 3000);
+                } else {
+                    // Show error message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                    alertDiv.setAttribute('role', 'alert');
+                    alertDiv.innerHTML = `
+                        <strong>Error!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alertDiv);
+                    
+                    // Auto dismiss after 3 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    }
+    
+    // Rating stars
+    const starIcons = document.querySelectorAll('.star-icon[data-rating]');
+    const ratingValue = document.getElementById('rating-value');
+    
+    starIcons.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            ratingValue.value = rating;
+            
+            // Update star appearance
+            starIcons.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('filled');
+                    s.classList.remove('text-muted');
+                    s.classList.add('text-warning');
+                } else {
+                    s.classList.remove('filled');
+                    s.classList.remove('text-warning');
+                    s.classList.add('text-muted');
+                }
+            });
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const rating = this.getAttribute('data-rating');
+            starIcons.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('text-warning');
+                } else {
+                    s.classList.remove('text-warning');
+                }
+            });
+        });
+    });
+    
+    // Reset star appearance on mouse leave
+    document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+        const currentRating = parseInt(ratingValue.value);
+        starIcons.forEach((s, index) => {
+            if (index < currentRating) {
+                s.classList.add('filled');
+                s.classList.add('text-warning');
+                s.classList.remove('text-muted');
+            } else {
+                s.classList.remove('filled');
+                s.classList.remove('text-warning');
+                s.classList.add('text-muted');
+            }
+        });
+    });
+    
+    // Review form submission
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const rating = document.getElementById('rating-value').value;
+            const comment = document.getElementById('review-comment').value;
+            
+            if (rating === '0') {
+                alert('Please select a rating');
+                return;
+            }
+            
+            if (comment.trim() === '') {
+                alert('Please enter your review');
+                return;
+            }
+            
+            fetch('{% url "shop:submit_review" product.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    rating: rating,
+                    comment: comment
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert('Review submitted successfully!');
+                    // Reset form
+                    reviewForm.reset();
+                    // Reset stars
+                    ratingValue.value = '0';
+                    starIcons.forEach(s => {
+                        s.classList.remove('filled');
+                        s.classList.remove('text-warning');
+                        s.classList.add('text-muted');
+                    });
+                } else {
+                    alert('Error submitting review: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error submitting review. Please try again.');
+            });
+        });
     }
     
     // Initialize Lucide icons
