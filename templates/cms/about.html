@@ -65,6 +65,37 @@
     </div>
 </section>
 
+<!-- Video Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold">Discover Our Journey</h2>
+                <p class="lead text-muted">See how we bring premium quality dry fruits from farm to your table</p>
+            </div>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="video-container rounded-3 shadow-lg overflow-hidden">
+                    <!-- Video placeholder - replace with actual video embed -->
+                    <div class="position-relative" style="padding-top: 56.25%;"> <!-- 16:9 Aspect Ratio -->
+                        <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600" alt="Our Journey Video" class="img-fluid position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;">
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <a href="#" class="btn btn-primary btn-lg rounded-circle play-button" style="width: 70px; height: 70px; display: flex; align-items: center; justify-content: center;">
+                                <i data-lucide="play" class="text-white" style="margin-left: 5px;"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <p class="text-muted">Watch our story unfold as we take you through our journey of bringing premium quality dry fruits from farms around the world directly to your doorstep.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Our Values Section -->
 <section class="py-5">
     <div class="container">
@@ -439,6 +470,21 @@
     text-align: left;
 }
 
+/* Video Section Styles */
+.video-container {
+    position: relative;
+    background: #000;
+}
+
+.play-button {
+    transition: all 0.3s ease;
+}
+
+.play-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(194, 166, 97, 0.5);
+}
+
 @media (max-width: 768px) {
     .timeline::before {
         left: 30px;
@@ -455,4 +501,26 @@
     }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize Lucide icons
+document.addEventListener('DOMContentLoaded', function() {
+    lucide.createIcons();
+});
+
+// Video section interaction
+document.addEventListener('DOMContentLoaded', function() {
+    const playButton = document.querySelector('.play-button');
+    if (playButton) {
+        playButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            // In a real implementation, this would open a modal with the video
+            // For now, we'll just show an alert
+            alert('In a complete implementation, this would play a video about our company journey. You can replace this with an actual video embed from YouTube or Vimeo.');
+        });
+    }
+});
+</script>
 {% endblock %}

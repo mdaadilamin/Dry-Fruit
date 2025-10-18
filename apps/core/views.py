@@ -15,7 +15,7 @@ from .utils import get_related_products, get_upsell_products, get_product_rating
 
 def home(request):
     """Home page with featured products and banners"""
-    featured_products = Product.objects.filter(is_active=True, is_featured=True)[:8]
+    featured_products = Product.objects.filter(is_active=True, is_featured=True)[:4]  # Changed from 8 to 4
     categories = Category.objects.filter(is_active=True)[:6]
     banners = Banner.objects.filter(is_active=True)[:3]
     testimonials = Testimonial.objects.filter(is_active=True)[:6]
@@ -26,7 +26,7 @@ def home(request):
         gift_box_products = Product.objects.filter(
             category=gift_box_category, 
             is_active=True
-        )[:8]  # Limit to 8 gift box products
+        )[:4]  # Changed from 8 to 4
     except Category.DoesNotExist:
         gift_box_products = Product.objects.none()
     
@@ -37,7 +37,12 @@ def home(request):
             category=category,
             is_active=True,
             is_featured=True
-        )[:4]  # Limit to 4 featured products per category
+        )[:4]  # Already limited to 4 featured products per category
+    
+    # Get personalized recommendations for authenticated users
+    recommended_products = []
+    if request.user.is_authenticated:
+        recommended_products = get_recommended_products(request.user)
     
     context = {
         'featured_products': featured_products,
@@ -46,8 +51,47 @@ def home(request):
         'testimonials': testimonials,
         'gift_box_products': gift_box_products,
         'category_featured_products': category_featured_products,
+        'recommended_products': recommended_products,
     }
     return render(request, 'core/home.html', context)
+
+def get_recommended_products(user):
+    """Get personalized product recommendations for a user"""
+    recommended_products = []
+    
+    # Get user's order history
+    user_orders = Order.objects.filter(customer=user).prefetch_related('items__product')
+    
+    if user_orders.exists():
+        # Get products from user's order history
+        ordered_product_ids = []
+        for order in user_orders:
+            for item in order.items.all():
+                ordered_product_ids.append(item.product.id)
+        
+        # Get related products to those ordered
+        ordered_products = Product.objects.filter(id__in=ordered_product_ids[:5])  # Limit to 5 products
+        for product in ordered_products:
+            related = get_related_products(product, limit=2)
+            recommended_products.extend(related)
+    else:
+        # For new users, show popular products
+        recommended_products = list(Product.objects.filter(
+            is_active=True, 
+            is_featured=True
+        ).order_by('-created_at')[:4])  # Changed from 8 to 4
+    
+    # Remove duplicates and limit to 4 products
+    seen_ids = set()
+    unique_recommended = []
+    for product in recommended_products:
+        if product.id not in seen_ids and product.is_active:
+            seen_ids.add(product.id)
+            unique_recommended.append(product)
+            if len(unique_recommended) >= 4:  # Changed from 8 to 4
+                break
+    
+    return unique_recommended
 
 def shop(request):
     """Shop page with products, filters, and search"""

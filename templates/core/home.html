@@ -50,7 +50,7 @@
 </section>
 
 <!-- Personalized Recommendations for Logged-in Users -->
-{% if user.is_authenticated %}
+{% if user.is_authenticated and recommended_products %}
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row">
@@ -61,70 +61,31 @@
         </div>
         
         <div class="row g-4">
-            <!-- This would be populated dynamically in a real implementation -->
+            {% for product in recommended_products %}
             <div class="col-lg-3 col-md-6">
                 <div class="product-card">
-                    <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Recommended Product" class="card-img-top">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top">
+                    {% else %}
+                        <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400" alt="{{ product.name }}" class="card-img-top">
+                    {% endif %}
                     <div class="product-card-body">
-                        <h5 class="product-title">Premium Almonds</h5>
-                        <p class="product-description">Hand-picked organic almonds from California</p>
+                        <h5 class="product-title">{{ product.name }}</h5>
+                        <p class="product-description">{{ product.description|truncatewords:10 }}</p>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">$12.99</span>
-                            <button class="btn btn-primary btn-sm add-to-cart" data-product-id="1">
-                                <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
-                            </button>
+                            <span class="product-price">${{ product.price }}</span>
+                            {% if product.in_stock %}
+                                <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ product.id }}">
+                                    <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
+                                </button>
+                            {% else %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="product-card">
-                    <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Recommended Product" class="card-img-top">
-                    <div class="product-card-body">
-                        <h5 class="product-title">Mixed Dry Fruits</h5>
-                        <p class="product-description">A healthy mix of premium dried fruits</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">$19.99</span>
-                            <button class="btn btn-primary btn-sm add-to-cart" data-product-id="2">
-                                <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="product-card">
-                    <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Recommended Product" class="card-img-top">
-                    <div class="product-card-body">
-                        <h5 class="product-title">Organic Walnuts</h5>
-                        <p class="product-description">Fresh organic walnuts packed with omega-3</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">$14.99</span>
-                            <button class="btn btn-primary btn-sm add-to-cart" data-product-id="3">
-                                <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-3 col-md-6">
-                <div class="product-card">
-                    <img src="https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=400" alt="Recommended Product" class="card-img-top">
-                    <div class="product-card-body">
-                        <h5 class="product-title">Festival Gift Box</h5>
-                        <p class="product-description">Premium gift box perfect for celebrations</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">$29.99</span>
-                            <button class="btn btn-primary btn-sm add-to-cart" data-product-id="4">
-                                <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {% endfor %}
         </div>
         
         <div class="text-center mt-4">

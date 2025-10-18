@@ -31,6 +31,11 @@ def post_detail(request, slug):
     """Display a single blog post"""
     post = get_object_or_404(Post, slug=slug, status='published')
     
+    # Process keywords into a list
+    keywords_list = []
+    if post.keywords:
+        keywords_list = [keyword.strip() for keyword in post.keywords.split(',') if keyword.strip()]
+    
     # Get related posts from the same category
     related_posts = Post.objects.filter(
         category=post.category, 
@@ -47,6 +52,7 @@ def post_detail(request, slug):
     
     context = {
         'post': post,
+        'keywords_list': keywords_list,
         'related_posts': related_posts,
         'comments': comments,
         'categories': categories,

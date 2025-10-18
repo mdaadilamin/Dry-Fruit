@@ -1,4 +1,5 @@
 {% extends 'blog/base.html' %}
+{% load static %}
 
 {% block title %}{{ post.title }} - NutriHarvest Blog{% endblock %}
 {% block meta_description %}{{ post.excerpt|default:post.content|truncatewords:30 }}{% endblock %}
@@ -41,11 +42,11 @@
                     </div>
                     
                     <!-- Tags -->
-                    {% if post.keywords %}
+                    {% if keywords_list %}
                     <div class="mt-4">
                         <h5>Tags:</h5>
-                        {% for keyword in post.keywords.split(',') %}
-                        <span class="badge bg-secondary me-1">{{ keyword|trim }}</span>
+                        {% for keyword in keywords_list %}
+                        <span class="badge bg-secondary me-1">{{ keyword }}</span>
                         {% endfor %}
                     </div>
                     {% endif %}
@@ -138,7 +139,7 @@
                                 <a href="{{ category.get_absolute_url }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                                     {{ category.name }}
                                     <span class="badge bg-primary rounded-pill">
-                                        {{ category.posts.filter(status='published').count }}
+                                        {{ category.post_count }}
                                     </span>
                                 </a>
                                 {% endfor %}
@@ -152,7 +153,7 @@
                             <h5 class="mb-0">Recent Posts</h5>
                         </div>
                         <div class="card-body">
-                            {% for recent_post in post.category.posts.filter(status='published').exclude(id=post.id)[:5] %}
+                            {% for recent_post in related_posts %}
                             <div class="d-flex mb-3">
                                 {% if recent_post.featured_image %}
                                 <div class="flex-shrink-0">

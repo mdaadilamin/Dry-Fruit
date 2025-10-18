@@ -160,6 +160,8 @@ def page_view(request, page_type):
         template = 'cms/terms.html'
     elif page_type == 'shipping':
         template = 'cms/shipping.html'
+    elif page_type == 'careers':
+        template = 'cms/careers.html'  # Using custom careers template
     else:
         template = 'cms/page.html'
     
