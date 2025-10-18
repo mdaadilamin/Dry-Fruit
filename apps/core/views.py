@@ -225,11 +225,12 @@ def cart(request):
     
     # Check if user has an active coupon
     try:
+        # Get the most recent coupon usage for this user
         coupon_usage = CouponUsage.objects.filter(
-            user=request.user, 
-            is_active=True
+            user=request.user
         ).select_related('coupon').first()
         
+        # Check if the coupon usage exists and the coupon is still valid
         if coupon_usage and coupon_usage.coupon.is_valid():
             coupon = coupon_usage.coupon
             discount = coupon.calculate_discount(total)
