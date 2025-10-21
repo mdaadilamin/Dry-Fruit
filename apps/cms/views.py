@@ -595,3 +595,80 @@ def careers_opening_management(request):
     return render(request, 'cms/careers_opening_management.html', {
         'openings': openings
     })
+
+
+@login_required
+def newsletter_management(request):
+    """Manage newsletter subscribers"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    from .models import Newsletter
+    from django.core.paginator import Paginator
+    
+    # Get all subscribers
+    subscribers = Newsletter.objects.all().order_by('-subscribed_at')
+    
+    # Pagination
+    paginator = Paginator(subscribers, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get counts
+    total_subscribers = Newsletter.objects.count()
+    active_subscribers = Newsletter.objects.filter(is_active=True).count()
+    
+    return render(request, 'cms/newsletter_management.html', {
+        'subscribers': page_obj,
+        'total_subscribers_count': total_subscribers,
+        'active_subscribers_count': active_subscribers
+    })
+
+
+@login_required
+def confirm_newsletter_subscriber(request, subscriber_id):
+    """Confirm a newsletter subscriber"""
+    if not request.user.has_permission('cms', 'edit'):
+        return JsonResponse({'success': False, 'message': 'Access denied.'})
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    
+    try:
+        from .models import Newsletter
+        subscriber = Newsletter.objects.get(id=subscriber_id)
+        subscriber.confirm_subscription()
+        return JsonResponse({
+            'success': True, 
+            'message': 'Subscriber confirmed successfully.',
+            'subscriber_id': subscriber_id
+        })
+    except Newsletter.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Subscriber not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'An error occurred while confirming the subscriber.'})
+
+
+@login_required
+def delete_newsletter_subscriber(request, subscriber_id):
+    """Delete a newsletter subscriber"""
+    if not request.user.has_permission('cms', 'delete'):
+        return JsonResponse({'success': False, 'message': 'Access denied.'})
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    
+    try:
+        from .models import Newsletter
+        subscriber = Newsletter.objects.get(id=subscriber_id)
+        subscriber.delete()
+        return JsonResponse({
+            'success': True, 
+            'message': 'Subscriber deleted successfully.',
+            'subscriber_id': subscriber_id
+        })
+    except Newsletter.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Subscriber not found.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'An error occurred while deleting the subscriber.'})

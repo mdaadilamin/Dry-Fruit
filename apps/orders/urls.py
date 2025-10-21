@@ -21,5 +21,5 @@ urlpatterns = router.urls + [
     path('wishlist/', views.wishlist, name='wishlist'),
     
     # API endpoints
-    path('api/wishlist-count/', api_views.wishlist_count, name='wishlist_count'),  # Add this line
+    path('api/wishlist-count/', api_views.wishlist_count, name='wishlist_count'),
 ]

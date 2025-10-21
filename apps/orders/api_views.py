@@ -78,7 +78,6 @@ class CartItemViewSet(viewsets.ModelViewSet):
 
 # Add this function for wishlist count API
 @login_required
-@require_POST
 def wishlist_count(request):
     """Get wishlist count for authenticated user"""
     try:

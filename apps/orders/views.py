@@ -43,11 +43,13 @@ def order_management(request):
 @login_required
 def order_detail(request, order_id):
     """Order detail and status update"""
-    if not request.user.has_permission('orders', 'view'):
+    # Get the order
+    order = get_object_or_404(Order, id=order_id)
+    
+    # Allow customers to view their own orders, or staff with permission to view all orders
+    if not (order.customer == request.user or request.user.has_permission('orders', 'view')):
         messages.error(request, 'Access denied.')
         return redirect('core:dashboard')
-    
-    order = get_object_or_404(Order, id=order_id)
     
     if request.method == 'POST' and request.user.has_permission('orders', 'edit'):
         new_status = request.POST.get('order_status')

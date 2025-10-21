@@ -717,7 +717,7 @@ function toggleWishlist(productId, buttonElement) {
     buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
     buttonElement.disabled = true;
     
-    fetch('/api/orders/add-to-wishlist/', {
+    fetch('/orders/add-to-wishlist/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -765,7 +765,7 @@ function fetchWishlistCount() {
     // Only fetch if user is authenticated
     if (!isAuthenticated()) return;
     
-    fetch('/api/orders/wishlist-count/')
+    fetch('/orders/api/wishlist-count/')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
