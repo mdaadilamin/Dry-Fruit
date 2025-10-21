@@ -199,15 +199,47 @@ button>
                                 <h5 class="product-title">{{ product.name }}</h5>
                                 <p class="product-description">{{ product.description|truncatewords:15 }}</p>
                                 
+                                <!-- Product Variants (Weight Options) -->
+                                {% if product.variants.all %}
+                                <div class="mb-2">
+                                    <label class="form-label small">Weight:</label>
+                                    <select class="form-select form-select-sm variant-select" data-product-id="{{ product.id }}">
+                                        <option value="" data-price="{{ product.price }}" data-base-price="{{ product.price }}">Select Weight</option>
+                                        {% for variant in product.variants.all %}
+                                            {% if variant.is_active and variant.in_stock %}
+                                                <option value="{{ variant.id }}" 
+                                                        data-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}" 
+                                                        data-base-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}"
+                                                        data-stock="{{ variant.stock }}">
+                                                    {{ variant.value }} - ₹{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% endif %}
+                                
                                 <div class="mt-auto">
+                                    <!-- Quantity Selector -->
+                                    <div class="mb-2">
+                                        <label class="form-label small">Quantity:</label>
+                                        <div class="input-group input-group-sm" style="max-width: 120px;">
+                                            <button class="btn btn-outline-secondary qty-btn" type="button" data-action="decrease">-</button>
+                                            <input type="number" class="form-control text-center qty-input" value="1" min="1" max="{{ product.stock }}" data-product-id="{{ product.id }}" readonly>
+                                            <button class="btn btn-outline-secondary qty-btn" type="button" data-action="increase">+</button>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        {% if product.has_discount %}
+                                        {% if product.has_discount and not product.variants.all %}
                                             <div>
-                                                <span class="product-price text-decoration-line-through text-muted me-2">${{ product.price }}</span>
-                                                <span class="product-price text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                                                <span class="product-price text-decoration-line-through text-muted me-2">₹{{ product.price }}</span>
+                                                <span class="product-price text-success fw-bold discounted-price" data-product-id="{{ product.id }}" data-base-price="{{ product.discounted_price }}">₹{{ product.discounted_price|floatformat:2 }}</span>
                                             </div>
+                                        {% elif product.variants.all %}
+                                            <span class="product-price fw-bold" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
                                         {% else %}
-                                            <span class="product-price fw-bold">${{ product.price }}</span>
+                                            <span class="product-price fw-bold" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
                                         {% endif %}
                                         
                                         {% if product.in_stock %}
@@ -266,11 +298,11 @@ button>
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 {% if product.has_discount %}
                                                     <div>
-                                                        <span class="text-decoration-line-through text-muted me-2">${{ product.price }}</span>
-                                                        <span class="text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                                                        <span class="text-decoration-line-through text-muted me-2">₹{{ product.price }}</span>
+                                                        <span class="text-success fw-bold">₹{{ product.discounted_price|floatformat:2 }}</span>
                                                     </div>
                                                 {% else %}
-                                                    <span class="fw-bold">${{ product.price }}</span>
+                                                    <span class="fw-bold">₹{{ product.price }}</span>
                                                 {% endif %}
                                                 
                                                 {% if product.in_stock %}
@@ -393,6 +425,81 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    // Quantity buttons functionality
+    const qtyButtons = document.querySelectorAll('.qty-btn');
+    qtyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.getAttribute('data-action');
+            const input = this.parentNode.querySelector('.qty-input');
+            const productId = input.getAttribute('data-product-id');
+            let value = parseInt(input.value);
+            const max = parseInt(input.max) || 999;
+            
+            if (action === 'increase' && value < max) {
+                value++;
+            } else if (action === 'decrease' && value > 1) {
+                value--;
+            }
+            
+            input.value = value;
+            updateProductPrice(productId, value);
+        });
+    });
+    
+    // Variant selection functionality
+    const variantSelects = document.querySelectorAll('.variant-select');
+    variantSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const productId = this.getAttribute('data-product-id');
+            const selectedOption = this.options[this.selectedIndex];
+            const basePrice = parseFloat(selectedOption.getAttribute('data-base-price'));
+            const stock = parseInt(selectedOption.getAttribute('data-stock')) || 999;
+            
+            // Update the price display
+            const priceElements = document.querySelectorAll(`[data-product-id="${productId}"]`);
+            priceElements.forEach(element => {
+                element.setAttribute('data-base-price', basePrice);
+                element.textContent = '₹' + basePrice.toFixed(2);
+            });
+            
+            // Update the quantity input max value
+            const qtyInput = document.querySelector(`.qty-input[data-product-id="${productId}"]`);
+            if (qtyInput) {
+                qtyInput.max = stock;
+                // Reset quantity to 1 if it exceeds the new max
+                if (parseInt(qtyInput.value) > stock) {
+                    qtyInput.value = 1;
+                }
+            }
+            
+            // Update the price based on quantity
+            const quantity = parseInt(qtyInput.value) || 1;
+            updateProductPrice(productId, quantity);
+        });
+    });
+    
+    // Function to update product price based on quantity
+    function updateProductPrice(productId, quantity) {
+        // Find all price elements for this product
+        const priceElements = document.querySelectorAll(`[data-product-id="${productId}"]`);
+        
+        priceElements.forEach(element => {
+            // Get the base price from data attribute
+            const basePrice = parseFloat(element.getAttribute('data-base-price'));
+            
+            if (!isNaN(basePrice)) {
+                const totalPrice = basePrice * quantity;
+                
+                // Update the displayed price
+                if (element.classList.contains('discounted-price')) {
+                    element.textContent = '₹' + totalPrice.toFixed(2);
+                } else {
+                    element.textContent = '₹' + totalPrice.toFixed(2);
+                }
+            }
+        });
+    }
+    
     // Initialize Lucide icons
     lucide.createIcons();
 });
@@ -427,6 +534,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .quick-view {
     transition: opacity 0.3s ease;
+}
+
+/* Product card quantity selector */
+.product-card .input-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.product-card .input-group-sm .form-control {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.product-card .form-label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
 }
 </style>
 

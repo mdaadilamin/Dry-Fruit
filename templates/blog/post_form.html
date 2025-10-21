@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form_title }} - NutriHarvest{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-4 fw-bold mb-0">{{ form_title }}</h1>
+                <a href="{% url 'blog:post_management' %}" class="btn btn-outline-primary">
+                    <i data-lucide="arrow-left" class="me-2"></i>Back to Posts
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.title.id_for_label }}" class="form-label">Title *</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                        <div class="text-danger">{{ form.title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.excerpt.id_for_label }}" class="form-label">Excerpt</label>
+                                    {{ form.excerpt }}
+                                    <div class="form-text">Brief summary of the post (max 300 characters)</div>
+                                    {% if form.excerpt.errors %}
+                                        <div class="text-danger">{{ form.excerpt.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.content.id_for_label }}" class="form-label">Content *</label>
+                                    {{ form.content }}
+                                    {% if form.content.errors %}
+                                        <div class="text-danger">{{ form.content.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.category.id_for_label }}" class="form-label">Category *</label>
+                                    {{ form.category }}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger">{{ form.category.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label">Status *</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <div class="text-danger">{{ form.status.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.is_featured.id_for_label }}" class="form-label">Featured Post</label>
+                                    {{ form.is_featured }}
+                                    <div class="form-text">Featured posts appear prominently on the blog homepage</div>
+                                    {% if form.is_featured.errors %}
+                                        <div class="text-danger">{{ form.is_featured.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.slug.id_for_label }}" class="form-label">Slug</label>
+                                    {{ form.slug }}
+                                    <div class="form-text">URL-friendly version of the title (auto-generated if left blank)</div>
+                                    {% if form.slug.errors %}
+                                        <div class="text-danger">{{ form.slug.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.featured_image.id_for_label }}" class="form-label">Featured Image</label>
+                                    {{ form.featured_image }}
+                                    {% if form.featured_image.errors %}
+                                        <div class="text-danger">{{ form.featured_image.errors }}</div>
+                                    {% endif %}
+                                    {% if post.featured_image %}
+                                        <div class="mt-2">
+                                            <img src="{{ post.featured_image.url }}" alt="Current featured image" class="img-thumbnail" style="max-width: 200px;">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.meta_title.id_for_label }}" class="form-label">Meta Title</label>
+                                    {{ form.meta_title }}
+                                    <div class="form-text">SEO title (max 200 characters)</div>
+                                    {% if form.meta_title.errors %}
+                                        <div class="text-danger">{{ form.meta_title.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.meta_description.id_for_label }}" class="form-label">Meta Description</label>
+                                    {{ form.meta_description }}
+                                    <div class="form-text">SEO description (max 160 characters)</div>
+                                    {% if form.meta_description.errors %}
+                                        <div class="text-danger">{{ form.meta_description.errors }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.keywords.id_for_label }}" class="form-label">Keywords</label>
+                                    {{ form.keywords }}
+                                    <div class="form-text">Comma-separated keywords for SEO</div>
+                                    {% if form.keywords.errors %}
+                                        <div class="text-danger">{{ form.keywords.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'blog:post_management' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Post</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Auto-generate slug from title
+    const titleInput = document.getElementById('{{ form.title.id_for_label }}');
+    const slugInput = document.getElementById('{{ form.slug.id_for_label }}');
+    
+    if (titleInput && slugInput && !slugInput.value) {
+        titleInput.addEventListener('blur', function() {
+            if (!slugInput.value) {
+                const slug = this.value.toLowerCase()
+                    .replace(/[^a-z0-9\s-]/g, '')
+                    .replace(/\s+/g, '-')
+                    .replace(/-+/g, '-')
+                    .trim('-');
+                slugInput.value = slug;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -8,9 +8,9 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_protect
 from datetime import timedelta
 from apps.shop.models import Product, Category, ProductReview
-from apps.orders.models import Order, CartItem
+from apps.orders.models import Order, CartItem, OrderItem
 from apps.users.models import User, Customer
-from apps.cms.models import Banner, Testimonial
+from apps.cms.models import Banner, Testimonial, HomePageHero, FooterContent, HomePageFeature
 from .utils import get_related_products, get_upsell_products, get_product_rating_stats
 
 def home(request):
@@ -19,6 +19,12 @@ def home(request):
     categories = Category.objects.filter(is_active=True)[:6]
     banners = Banner.objects.filter(is_active=True)[:3]
     testimonials = Testimonial.objects.filter(is_active=True)[:6]
+    
+    # Get dynamic homepage hero content
+    homepage_heroes = HomePageHero.objects.filter(is_active=True).order_by('order')
+    
+    # Get dynamic homepage features
+    homepage_features = HomePageFeature.objects.filter(is_active=True).order_by('order')
     
     # Get gift box products for the carousel
     try:
@@ -49,6 +55,8 @@ def home(request):
         'categories': categories,
         'banners': banners,
         'testimonials': testimonials,
+        'homepage_heroes': homepage_heroes,
+        'homepage_features': homepage_features,
         'gift_box_products': gift_box_products,
         'category_featured_products': category_featured_products,
         'recommended_products': recommended_products,
@@ -762,6 +770,14 @@ def logout_view(request):
     logout(request)
     messages.success(request, 'You have been logged out successfully.')
     return redirect('core:home')
+
+def get_footer_content():
+    """Get the active footer content"""
+    try:
+        return FooterContent.objects.get(is_active=True)
+    except FooterContent.DoesNotExist:
+        # Return a default footer content if none is active
+        return None
 
 def chocolates_category(request):
     """Chocolates category page"""

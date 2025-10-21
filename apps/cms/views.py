@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Banner, Testimonial, Page, ContactInfo, Newsletter
+from .models import Banner, Testimonial, Page, ContactInfo, Newsletter, Enquiry
 import json
 import uuid
 
@@ -161,7 +161,17 @@ def page_view(request, page_type):
     elif page_type == 'shipping':
         template = 'cms/shipping.html'
     elif page_type == 'careers':
-        template = 'cms/careers.html'  # Using custom careers template
+        # Get dynamic content for careers page
+        from .models import CareersSection, CareersCultureItem, CareersTestimonial, CareersBenefit, CareersJobOpening
+        template = 'cms/careers.html'
+        return render(request, template, {
+            'page': page,
+            'careers_sections': CareersSection.objects.filter(is_active=True),
+            'culture_items': CareersCultureItem.objects.filter(is_active=True),
+            'testimonials': CareersTestimonial.objects.filter(is_active=True),
+            'benefits': CareersBenefit.objects.filter(is_active=True),
+            'job_openings': CareersJobOpening.objects.filter(is_active=True),
+        })
     else:
         template = 'cms/page.html'
     
@@ -379,3 +389,169 @@ def resolve_enquiry(request, enquiry_id):
         messages.success(request, f'Enquiry from {enquiry.name} marked as resolved.')
     
     return redirect('cms:enquiry_management')
+
+@login_required
+def careers_section_management(request):
+    """Manage careers page sections"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST' and request.user.has_permission('cms', 'edit'):
+        from .models import CareersSection
+        section_id = request.POST.get('section_id')
+        if section_id:
+            # Edit existing section
+            section = get_object_or_404(CareersSection, id=section_id)
+        else:
+            # Create new section
+            section = CareersSection()
+        
+        section.section_type = request.POST.get('section_type')
+        section.title = request.POST.get('title', '')
+        section.subtitle = request.POST.get('subtitle', '')
+        section.content = request.POST.get('content', '')
+        section.order = int(request.POST.get('order', 0))
+        section.is_active = bool(request.POST.get('is_active', True))
+        section.save()
+        messages.success(request, 'Section saved successfully!')
+    
+    from .models import CareersSection
+    sections = CareersSection.objects.all().order_by('section_type', 'order')
+    section_types = CareersSection.SECTION_TYPES
+    
+    return render(request, 'cms/careers_section_management.html', {
+        'sections': sections,
+        'section_types': section_types
+    })
+
+@login_required
+def careers_culture_management(request):
+    """Manage careers culture items"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST' and request.user.has_permission('cms', 'edit'):
+        from .models import CareersCultureItem
+        item_id = request.POST.get('item_id')
+        if item_id:
+            # Edit existing item
+            item = get_object_or_404(CareersCultureItem, id=item_id)
+        else:
+            # Create new item
+            item = CareersCultureItem()
+        
+        item.title = request.POST.get('title')
+        item.description = request.POST.get('description')
+        item.icon_name = request.POST.get('icon_name')
+        item.order = int(request.POST.get('order', 0))
+        item.is_active = bool(request.POST.get('is_active', True))
+        item.save()
+        messages.success(request, 'Culture item saved successfully!')
+    
+    from .models import CareersCultureItem
+    culture_items = CareersCultureItem.objects.all().order_by('order')
+    
+    return render(request, 'cms/careers_culture_management.html', {
+        'culture_items': culture_items
+    })
+
+@login_required
+def careers_testimonial_management(request):
+    """Manage careers testimonials"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST' and request.user.has_permission('cms', 'edit'):
+        from .models import CareersTestimonial
+        testimonial_id = request.POST.get('testimonial_id')
+        if testimonial_id:
+            # Edit existing testimonial
+            testimonial = get_object_or_404(CareersTestimonial, id=testimonial_id)
+        else:
+            # Create new testimonial
+            testimonial = CareersTestimonial()
+        
+        testimonial.name = request.POST.get('name')
+        testimonial.position = request.POST.get('position')
+        testimonial.testimonial = request.POST.get('testimonial')
+        testimonial.order = int(request.POST.get('order', 0))
+        testimonial.is_active = bool(request.POST.get('is_active', True))
+        testimonial.save()
+        messages.success(request, 'Testimonial saved successfully!')
+    
+    from .models import CareersTestimonial
+    testimonials = CareersTestimonial.objects.all().order_by('order')
+    
+    return render(request, 'cms/careers_testimonial_management.html', {
+        'testimonials': testimonials
+    })
+
+@login_required
+def careers_benefit_management(request):
+    """Manage careers benefits"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST' and request.user.has_permission('cms', 'edit'):
+        from .models import CareersBenefit
+        benefit_id = request.POST.get('benefit_id')
+        if benefit_id:
+            # Edit existing benefit
+            benefit = get_object_or_404(CareersBenefit, id=benefit_id)
+        else:
+            # Create new benefit
+            benefit = CareersBenefit()
+        
+        benefit.title = request.POST.get('title')
+        benefit.description = request.POST.get('description')
+        benefit.icon_name = request.POST.get('icon_name')
+        benefit.order = int(request.POST.get('order', 0))
+        benefit.is_active = bool(request.POST.get('is_active', True))
+        benefit.save()
+        messages.success(request, 'Benefit saved successfully!')
+    
+    from .models import CareersBenefit
+    benefits = CareersBenefit.objects.all().order_by('order')
+    
+    return render(request, 'cms/careers_benefit_management.html', {
+        'benefits': benefits
+    })
+
+@login_required
+def careers_opening_management(request):
+    """Manage job openings"""
+    if not request.user.has_permission('cms', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST' and request.user.has_permission('cms', 'edit'):
+        from .models import CareersJobOpening
+        opening_id = request.POST.get('opening_id')
+        if opening_id:
+            # Edit existing opening
+            opening = get_object_or_404(CareersJobOpening, id=opening_id)
+        else:
+            # Create new opening
+            opening = CareersJobOpening()
+        
+        opening.title = request.POST.get('title')
+        opening.department = request.POST.get('department')
+        opening.location = request.POST.get('location')
+        opening.description = request.POST.get('description')
+        opening.responsibilities = request.POST.get('responsibilities', '')
+        opening.requirements = request.POST.get('requirements', '')
+        opening.order = int(request.POST.get('order', 0))
+        opening.is_active = bool(request.POST.get('is_active', True))
+        opening.save()
+        messages.success(request, 'Job opening saved successfully!')
+    
+    from .models import CareersJobOpening
+    openings = CareersJobOpening.objects.all().order_by('order')
+    
+    return render(request, 'cms/careers_opening_management.html', {
+        'openings': openings
+    })

@@ -17,14 +17,30 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-lg-6 hero-content">
-                <h1 class="display-4 fw-bold mb-4">Premium Dry Fruits & Nuts</h1>
-                <p class="lead mb-4">Discover the finest selection of organic, hand-picked dry fruits and nuts from around the world. Quality, taste, and nutrition in every bite.</p>
-                <div class="d-flex gap-3 flex-wrap">
-                    <a href="{% url 'core:shop' %}" class="btn btn-primary btn-lg">
-                        <i data-lucide="shopping-bag" class="me-2"></i>Shop Now
-                    </a>
-                    <a href="{% url 'cms:page_view' 'about' %}" class="btn btn-outline-light btn-lg">Learn More</a>
-                </div>
+                {% if homepage_heroes %}
+                    {% for hero in homepage_heroes %}
+                        {% if forloop.first %}
+                            <h1 class="display-4 fw-bold mb-4">{{ hero.title }}</h1>
+                            <p class="lead mb-4">{{ hero.description }}</p>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <a href="{% url 'core:shop' %}" class="btn btn-primary btn-lg">
+                                    <i data-lucide="shopping-bag" class="me-2"></i>{{ hero.button_text }}
+                                </a>
+                                <a href="{% url 'cms:page_view' 'about' %}" class="btn btn-outline-light btn-lg">Learn More</a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <!-- Fallback content if no heroes are defined -->
+                    <h1 class="display-4 fw-bold mb-4">Premium Dry Fruits & Nuts</h1>
+                    <p class="lead mb-4">Discover the finest selection of organic, hand-picked dry fruits and nuts from around the world. Quality, taste, and nutrition in every bite.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{% url 'core:shop' %}" class="btn btn-primary btn-lg">
+                            <i data-lucide="shopping-bag" class="me-2"></i>Shop Now
+                        </a>
+                        <a href="{% url 'cms:page_view' 'about' %}" class="btn btn-outline-light btn-lg">Learn More</a>
+                    </div>
+                {% endif %}
                 <!-- Promotional Banner -->
                 <div class="mt-4 p-3 bg-white rounded shadow-sm">
                     <div class="d-flex align-items-center">
@@ -72,8 +88,39 @@
                     <div class="product-card-body">
                         <h5 class="product-title">{{ product.name }}</h5>
                         <p class="product-description">{{ product.description|truncatewords:10 }}</p>
+                        
+                        <!-- Product Variants (Weight Options) -->
+                        {% if product.variants.all %}
+                        <div class="mb-2">
+                            <label class="form-label small">Weight:</label>
+                            <select class="form-select form-select-sm variant-select" data-product-id="{{ product.id }}">
+                                <option value="" data-price="{{ product.price }}" data-base-price="{{ product.price }}">Select Weight</option>
+                                {% for variant in product.variants.all %}
+                                    {% if variant.is_active and variant.in_stock %}
+                                        <option value="{{ variant.id }}" 
+                                                data-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}" 
+                                                data-base-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}"
+                                                data-stock="{{ variant.stock }}">
+                                            {{ variant.value }} - ₹{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Quantity Selector -->
+                        <div class="mb-2">
+                            <label class="form-label small">Quantity:</label>
+                            <div class="input-group input-group-sm" style="max-width: 120px;">
+                                <button class="btn btn-outline-secondary qty-btn" type="button" data-action="decrease">-</button>
+                                <input type="number" class="form-control text-center qty-input" value="1" min="1" max="{{ product.stock }}" data-product-id="{{ product.id }}" readonly>
+                                <button class="btn btn-outline-secondary qty-btn" type="button" data-action="increase">+</button>
+                            </div>
+                        </div>
+                        
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">${{ product.price }}</span>
+                            <span class="product-price" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
                             {% if product.in_stock %}
                                 <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ product.id }}">
                                     <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
@@ -237,8 +284,48 @@
                     <div class="product-card-body">
                         <h5 class="product-title">{{ product.name }}</h5>
                         <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                        
+                        <!-- Product Variants (Weight Options) -->
+                        {% if product.variants.all %}
+                        <div class="mb-2">
+                            <label class="form-label small">Weight:</label>
+                            <select class="form-select form-select-sm variant-select" data-product-id="{{ product.id }}">
+                                <option value="" data-price="{{ product.price }}" data-base-price="{{ product.price }}">Select Weight</option>
+                                {% for variant in product.variants.all %}
+                                    {% if variant.is_active and variant.in_stock %}
+                                        <option value="{{ variant.id }}" 
+                                                data-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}" 
+                                                data-base-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}"
+                                                data-stock="{{ variant.stock }}">
+                                            {{ variant.value }} - ₹{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}
+                                        </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Quantity Selector -->
+                        <div class="mb-2">
+                            <label class="form-label small">Quantity:</label>
+                            <div class="input-group input-group-sm" style="max-width: 120px;">
+                                <button class="btn btn-outline-secondary qty-btn" type="button" data-action="decrease">-</button>
+                                <input type="number" class="form-control text-center qty-input" value="1" min="1" max="{{ product.stock }}" data-product-id="{{ product.id }}" readonly>
+                                <button class="btn btn-outline-secondary qty-btn" type="button" data-action="increase">+</button>
+                            </div>
+                        </div>
+                        
                         <div class="d-flex justify-content-between align-items-center">
-                            <span class="product-price">${{ product.price }}</span>
+                            {% if product.has_discount and not product.variants.all %}
+                                <div>
+                                    <span class="product-price text-decoration-line-through text-muted me-2">₹{{ product.price }}</span>
+                                    <span class="product-price text-success fw-bold discounted-price" data-product-id="{{ product.id }}" data-base-price="{{ product.discounted_price }}">₹{{ product.discounted_price|floatformat:2 }}</span>
+                                </div>
+                            {% elif product.variants.all %}
+                                <span class="product-price" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
+                            {% else %}
+                                <span class="product-price" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
+                            {% endif %}
                             {% if product.in_stock %}
                                 <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ product.id }}">
                                     <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
@@ -287,8 +374,48 @@
                         <div class="product-card-body">
                             <h5 class="product-title">{{ product.name }}</h5>
                             <p class="product-description">{{ product.description|truncatewords:15 }}</p>
+                            
+                            <!-- Product Variants (Weight Options) -->
+                            {% if product.variants.all %}
+                            <div class="mb-2">
+                                <label class="form-label small">Weight:</label>
+                                <select class="form-select form-select-sm variant-select" data-product-id="{{ product.id }}">
+                                    <option value="" data-price="{{ product.price }}" data-base-price="{{ product.price }}">Select Weight</option>
+                                    {% for variant in product.variants.all %}
+                                        {% if variant.is_active and variant.in_stock %}
+                                            <option value="{{ variant.id }}" 
+                                                    data-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}" 
+                                                    data-base-price="{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}"
+                                                    data-stock="{{ variant.stock }}">
+                                                {{ variant.value }} - ₹{% if variant.price > 0 %}{{ variant.price }}{% else %}{{ product.price }}{% endif %}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Quantity Selector -->
+                            <div class="mb-2">
+                                <label class="form-label small">Quantity:</label>
+                                <div class="input-group input-group-sm" style="max-width: 120px;">
+                                    <button class="btn btn-outline-secondary qty-btn" type="button" data-action="decrease">-</button>
+                                    <input type="number" class="form-control text-center qty-input" value="1" min="1" max="{{ product.stock }}" data-product-id="{{ product.id }}" readonly>
+                                    <button class="btn btn-outline-secondary qty-btn" type="button" data-action="increase">+</button>
+                                </div>
+                            </div>
+                            
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="product-price">${{ product.price }}</span>
+                                {% if product.has_discount and not product.variants.all %}
+                                    <div>
+                                        <span class="product-price text-decoration-line-through text-muted me-2">₹{{ product.price }}</span>
+                                        <span class="product-price text-success fw-bold discounted-price" data-product-id="{{ product.id }}" data-base-price="{{ product.discounted_price }}">₹{{ product.discounted_price|floatformat:2 }}</span>
+                                    </div>
+                                {% elif product.variants.all %}
+                                    <span class="product-price" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
+                                {% else %}
+                                    <span class="product-price" data-product-id="{{ product.id }}" data-base-price="{{ product.price }}">₹{{ product.price }}</span>
+                                {% endif %}
                                 {% if product.in_stock %}
                                     <button class="btn btn-primary btn-sm add-to-cart" data-product-id="{{ product.id }}">
                                         <i data-lucide="shopping-cart" class="me-1"></i>Add to Cart
@@ -324,53 +451,66 @@
         </div>
         
         <div class="row g-4">
-            <div class="col-lg-4 col-md-6 text-center">
-                <div class="feature-icon">
-                    <i data-lucide="leaf"></i>
+            {% if homepage_features %}
+                {% for feature in homepage_features %}
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="{{ feature.icon_name }}"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">{{ feature.title }}</h4>
+                    <p class="text-muted">{{ feature.description }}</p>
                 </div>
-                <h4 class="h5 fw-bold">100% Organic</h4>
-                <p class="text-muted">All our products are certified organic and free from harmful chemicals and pesticides.</p>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 text-center">
-                <div class="feature-icon">
-                    <i data-lucide="award"></i>
+                {% endfor %}
+            {% else %}
+                <!-- Fallback content if no features are defined -->
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="leaf"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">100% Organic</h4>
+                    <p class="text-muted">All our products are certified organic and free from harmful chemicals and pesticides.</p>
                 </div>
-                <h4 class="h5 fw-bold">Premium Quality</h4>
-                <p class="text-muted">Hand-picked and carefully selected products to ensure the highest quality and freshness.</p>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 text-center">
-                <div class="feature-icon">
-                    <i data-lucide="truck"></i>
+                
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="award"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">Premium Quality</h4>
+                    <p class="text-muted">Hand-picked and carefully selected products to ensure the highest quality and freshness.</p>
                 </div>
-                <h4 class="h5 fw-bold">Fast Delivery</h4>
-                <p class="text-muted">Quick and secure delivery to ensure your products reach you fresh and on time.</p>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 text-center">
-                <div class="feature-icon">
-                    <i data-lucide="shield-check"></i>
+                
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="truck"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">Fast Delivery</h4>
+                    <p class="text-muted">Quick and secure delivery to ensure your products reach you fresh and on time.</p>
                 </div>
-                <h4 class="h5 fw-bold">Quality Assurance</h4>
-                <p class="text-muted">Rigorous quality checks at every step to maintain our high standards.</p>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 text-center">
-                <div class="feature-icon">
-                    <i data-lucide="heart"></i>
+                
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="shield-check"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">Quality Assurance</h4>
+                    <p class="text-muted">Rigorous quality checks at every step to maintain our high standards.</p>
                 </div>
-                <h4 class="h5 fw-bold">Health Benefits</h4>
-                <p class="text-muted">Rich in nutrients, vitamins, and minerals for your healthy lifestyle.</p>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 text-center">
-                <div class="feature-icon">
-                    <i data-lucide="users"></i>
+                
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="heart"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">Health Benefits</h4>
+                    <p class="text-muted">Rich in nutrients, vitamins, and minerals for your healthy lifestyle.</p>
                 </div>
-                <h4 class="h5 fw-bold">Customer Support</h4>
-                <p class="text-muted">Dedicated customer service team to assist you with any queries or concerns.</p>
-            </div>
+                
+                <div class="col-lg-4 col-md-6 text-center">
+                    <div class="feature-icon">
+                        <i data-lucide="users"></i>
+                    </div>
+                    <h4 class="h5 fw-bold">Customer Support</h4>
+                    <p class="text-muted">Dedicated customer service team to assist you with any queries or concerns.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -528,6 +668,23 @@
 .floating-element:nth-child(2) {
     animation-delay: 2s;
 }
+
+/* Product card quantity selector */
+.product-card .input-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.product-card .input-group-sm .form-control {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    text-align: center;
+}
+
+.product-card .form-label {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
 </style>
 {% endblock %}
 
@@ -535,22 +692,90 @@
 <script>
 // Show promotional popup to new users after a delay
 document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is not authenticated
-    var isAuthenticated = document.body.classList.contains('authenticated');
-    
-    if (!isAuthenticated) {
-        setTimeout(function() {
-            var promoModal = new bootstrap.Modal(document.getElementById('promoModal'));
-            promoModal.show();
-        }, 5000); // Show after 5 seconds
-    }
-    
     // Copy to clipboard function
     window.copyToClipboard = function(text) {
         navigator.clipboard.writeText(text).then(function() {
             alert('Coupon code copied to clipboard!');
         });
     };
+    
+    // Quantity buttons functionality
+    const qtyButtons = document.querySelectorAll('.qty-btn');
+    qtyButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const action = this.getAttribute('data-action');
+            const input = this.parentNode.querySelector('.qty-input');
+            const productId = input.getAttribute('data-product-id');
+            let value = parseInt(input.value);
+            const max = parseInt(input.max) || 999;
+            
+            if (action === 'increase' && value < max) {
+                value++;
+            } else if (action === 'decrease' && value > 1) {
+                value--;
+            }
+            
+            input.value = value;
+            updateProductPrice(productId, value);
+        });
+    });
+    
+    // Variant selection functionality
+    const variantSelects = document.querySelectorAll('.variant-select');
+    variantSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const productId = this.getAttribute('data-product-id');
+            const selectedOption = this.options[this.selectedIndex];
+            const basePrice = parseFloat(selectedOption.getAttribute('data-base-price'));
+            const stock = parseInt(selectedOption.getAttribute('data-stock')) || 999;
+            
+            // Update the price display
+            const priceElements = document.querySelectorAll(`[data-product-id="${productId}"]`);
+            priceElements.forEach(element => {
+                element.setAttribute('data-base-price', basePrice);
+                element.textContent = '₹' + basePrice.toFixed(2);
+            });
+            
+            // Update the quantity input max value
+            const qtyInput = document.querySelector(`.qty-input[data-product-id="${productId}"]`);
+            if (qtyInput) {
+                qtyInput.max = stock;
+                // Reset quantity to 1 if it exceeds the new max
+                if (parseInt(qtyInput.value) > stock) {
+                    qtyInput.value = 1;
+                }
+            }
+            
+            // Update the price based on quantity
+            const quantity = parseInt(qtyInput.value) || 1;
+            updateProductPrice(productId, quantity);
+        });
+    });
+    
+    // Function to update product price based on quantity
+    function updateProductPrice(productId, quantity) {
+        // Find all price elements for this product
+        const priceElements = document.querySelectorAll(`[data-product-id="${productId}"]`);
+        
+        priceElements.forEach(element => {
+            // Get the base price from data attribute
+            const basePrice = parseFloat(element.getAttribute('data-base-price'));
+            
+            if (!isNaN(basePrice)) {
+                const totalPrice = basePrice * quantity;
+                
+                // Update the displayed price
+                if (element.classList.contains('discounted-price')) {
+                    element.textContent = '₹' + totalPrice.toFixed(2);
+                } else {
+                    element.textContent = '₹' + totalPrice.toFixed(2);
+                }
+            }
+        });
+    }
+    
+    // Initialize Lucide icons
+    lucide.createIcons();
 });
 </script>
 {% endblock %}

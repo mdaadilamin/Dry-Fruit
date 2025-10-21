@@ -193,14 +193,33 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4">
-                    <h5><i data-lucide="shopping-bag" class="me-2"></i>NutriHarvest</h5>
-                    <p class="mb-3">Premium quality dry fruits and nuts sourced directly from the finest farms worldwide. Committed to delivering healthy, natural, and delicious products to your doorstep.</p>
-                    <div class="d-flex">
-                        <a href="#" class="me-3"><i data-lucide="facebook"></i></a>
-                        <a href="#" class="me-3"><i data-lucide="instagram"></i></a>
-                        <a href="#" class="me-3"><i data-lucide="twitter"></i></a>
-                        <a href="#"><i data-lucide="youtube"></i></a>
-                    </div>
+                    {% if footer_content %}
+                        <h5><i data-lucide="shopping-bag" class="me-2"></i>{{ footer_content.business_name }}</h5>
+                        <p class="mb-3">{{ footer_content.copyright_text|linebreaksbr }}</p>
+                        <div class="d-flex">
+                            {% if footer_content.facebook_url %}
+                                <a href="{{ footer_content.facebook_url }}" class="me-3"><i data-lucide="facebook"></i></a>
+                            {% endif %}
+                            {% if footer_content.instagram_url %}
+                                <a href="{{ footer_content.instagram_url }}" class="me-3"><i data-lucide="instagram"></i></a>
+                            {% endif %}
+                            {% if footer_content.twitter_url %}
+                                <a href="{{ footer_content.twitter_url }}" class="me-3"><i data-lucide="twitter"></i></a>
+                            {% endif %}
+                            {% if footer_content.youtube_url %}
+                                <a href="{{ footer_content.youtube_url }}"><i data-lucide="youtube"></i></a>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <h5><i data-lucide="shopping-bag" class="me-2"></i>NutriHarvest</h5>
+                        <p class="mb-3">Premium quality dry fruits and nuts sourced directly from the finest farms worldwide. Committed to delivering healthy, natural, and delicious products to your doorstep.</p>
+                        <div class="d-flex">
+                            <a href="#" class="me-3"><i data-lucide="facebook"></i></a>
+                            <a href="#" class="me-3"><i data-lucide="instagram"></i></a>
+                            <a href="#" class="me-3"><i data-lucide="twitter"></i></a>
+                            <a href="#"><i data-lucide="youtube"></i></a>
+                        </div>
+                    {% endif %}
                 </div>
                 
                 <div class="col-lg-2 col-md-6 mb-4">
@@ -228,20 +247,37 @@
                 
                 <div class="col-lg-4 col-md-6 mb-4">
                     <h5>Contact Info</h5>
-                    <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i data-lucide="phone" class="me-2"></i>
-                            +1-234-567-8900
-                        </li>
-                        <li class="mb-2">
-                            <i data-lucide="mail" class="me-2"></i>
-                            info@nutriharvest.com
-                        </li>
-                        <li class="mb-3">
-                            <i data-lucide="map-pin" class="me-2"></i>
-                            123 Business Street, Business City, BC 12345
-                        </li>
-                    </ul>
+                    {% if footer_content %}
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i data-lucide="phone" class="me-2"></i>
+                                {{ footer_content.phone }}
+                            </li>
+                            <li class="mb-2">
+                                <i data-lucide="mail" class="me-2"></i>
+                                {{ footer_content.email }}
+                            </li>
+                            <li class="mb-3">
+                                <i data-lucide="map-pin" class="me-2"></i>
+                                {{ footer_content.address|linebreaksbr }}
+                            </li>
+                        </ul>
+                    {% else %}
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i data-lucide="phone" class="me-2"></i>
+                                +1-234-567-8900
+                            </li>
+                            <li class="mb-2">
+                                <i data-lucide="mail" class="me-2"></i>
+                                info@nutriharvest.com
+                            </li>
+                            <li class="mb-3">
+                                <i data-lucide="map-pin" class="me-2"></i>
+                                123 Business Street, Business City, BC 12345
+                            </li>
+                        </ul>
+                    {% endif %}
                     
                     <h5>Newsletter</h5>
                     <form id="newsletter-form">
@@ -259,7 +295,11 @@
             <div class="footer-bottom">
                 <div class="row">
                     <div class="col-md-6">
-                        <p>&copy; 2024 NutriHarvest. All rights reserved.</p>
+                        {% if footer_content %}
+                            <p>{{ footer_content.copyright_text }}</p>
+                        {% else %}
+                            <p>&copy; 2024 NutriHarvest. All rights reserved.</p>
+                        {% endif %}
                     </div>
                     <div class="col-md-6 text-md-end">
                         <a href="{% url 'cms:page_view' 'privacy' %}" class="me-3">Privacy Policy</a>

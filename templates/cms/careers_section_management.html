@@ -1,0 +1,182 @@
+{% extends 'cms/banner_management.html' %}
+{% load static %}
+
+{% block title %}Careers Section Management - NutriHarvest CMS{% endblock %}
+
+{% block content_header %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i data-lucide="briefcase" class="me-2"></i>Careers Section Management</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sectionModal">
+        <i data-lucide="plus" class="me-1"></i>Add New Section
+    </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Careers Page Sections</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Title</th>
+                                <th>Subtitle</th>
+                                <th>Order</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for section in sections %}
+                            <tr>
+                                <td>{{ section.get_section_type_display }}</td>
+                                <td>{{ section.title }}</td>
+                                <td>{{ section.subtitle|truncatewords:5 }}</td>
+                                <td>{{ section.order }}</td>
+                                <td>
+                                    {% if section.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary edit-section" 
+                                            data-id="{{ section.id }}"
+                                            data-section_type="{{ section.section_type }}"
+                                            data-title="{{ section.title }}"
+                                            data-subtitle="{{ section.subtitle }}"
+                                            data-content="{{ section.content }}"
+                                            data-order="{{ section.order }}"
+                                            data-is_active="{{ section.is_active }}">
+                                        <i data-lucide="edit-3" class="me-1"></i>Edit
+                                    </button>
+                                    <a href="#" class="btn btn-sm btn-outline-danger">
+                                        <i data-lucide="trash-2" class="me-1"></i>Delete
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">No sections found</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section Modal -->
+<div class="modal fade" id="sectionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sectionModalLabel">Add/Edit Section</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="sectionForm">
+                {% csrf_token %}
+                <input type="hidden" name="section_id" id="section_id">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="section_type" class="form-label">Section Type</label>
+                        <select class="form-select" id="section_type" name="section_type" required>
+                            <option value="">Select Section Type</option>
+                            {% for value, label in section_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="title" name="title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="subtitle" class="form-label">Subtitle</label>
+                        <input type="text" class="form-control" id="subtitle" name="subtitle">
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="4"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="order" class="form-label">Order</label>
+                                <input type="number" class="form-control" id="order" name="order" min="0" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="is_active" class="form-label">Status</label>
+                                <select class="form-select" id="is_active" name="is_active">
+                                    <option value="1">Active</option>
+                                    <option value="0">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Section</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+    
+    // Edit section button click handler
+    document.querySelectorAll('.edit-section').forEach(button => {
+        button.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            const sectionType = this.getAttribute('data-section_type');
+            const title = this.getAttribute('data-title');
+            const subtitle = this.getAttribute('data-subtitle');
+            const content = this.getAttribute('data-content');
+            const order = this.getAttribute('data-order');
+            const isActive = this.getAttribute('data-is_active');
+            
+            // Populate form fields
+            document.getElementById('section_id').value = id;
+            document.getElementById('section_type').value = sectionType;
+            document.getElementById('title').value = title;
+            document.getElementById('subtitle').value = subtitle;
+            document.getElementById('content').value = content;
+            document.getElementById('order').value = order;
+            document.getElementById('is_active').value = isActive;
+            
+            // Update modal title
+            document.getElementById('sectionModalLabel').textContent = 'Edit Section';
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('sectionModal'));
+            modal.show();
+        });
+    });
+    
+    // Reset form when modal is closed
+    document.getElementById('sectionModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('sectionForm').reset();
+        document.getElementById('section_id').value = '';
+        document.getElementById('sectionModalLabel').textContent = 'Add/Edit Section';
+    });
+});
+</script>
+{% endblock %}

@@ -161,3 +161,182 @@ class Enquiry(models.Model):
         self.is_resolved = True
         self.resolved_at = timezone.now()
         self.save()
+
+class CareersSection(models.Model):
+    """Model for dynamic content sections on the Careers page"""
+    SECTION_TYPES = [
+        ('hero', 'Hero Section'),
+        ('culture', 'Culture Section'),
+        ('testimonials', 'Testimonials Section'),
+        ('benefits', 'Benefits Section'),
+        ('openings', 'Job Openings Section'),
+        ('cta', 'Call to Action Section'),
+    ]
+    
+    section_type = models.CharField(max_length=20, choices=SECTION_TYPES)
+    title = models.CharField(max_length=200, blank=True)
+    subtitle = models.CharField(max_length=300, blank=True)
+    content = models.TextField(blank=True)
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['order', 'section_type']
+        indexes = [
+            models.Index(fields=['section_type']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return f"{self.get_section_type_display()}: {self.title}"
+
+class CareersCultureItem(models.Model):
+    """Model for culture items in the Careers page"""
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    icon_name = models.CharField(max_length=50, help_text="Lucide icon name (e.g., 'heart', 'users')")
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['order']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return self.title
+
+class CareersTestimonial(models.Model):
+    """Model for employee testimonials on the Careers page"""
+    name = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
+    testimonial = models.TextField()
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['order']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return f"{self.name} - {self.position}"
+
+class CareersBenefit(models.Model):
+    """Model for employee benefits on the Careers page"""
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    icon_name = models.CharField(max_length=50, help_text="Lucide icon name (e.g., 'heart-pulse', 'calendar')")
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['order']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return self.title
+
+class CareersJobOpening(models.Model):
+    """Model for job openings on the Careers page"""
+    title = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+    location = models.CharField(max_length=100)
+    description = models.TextField()
+    responsibilities = models.TextField(blank=True)
+    requirements = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['order']
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+            models.Index(fields=['department']),
+        ]
+    
+    def __str__(self):
+        return self.title
+
+
+class HomePageHero(models.Model):
+    """Model for managing homepage hero section content"""
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=300, blank=True)
+    description = models.TextField()
+    button_text = models.CharField(max_length=50)
+    button_link = models.CharField(max_length=200)  # Can be URL name or actual URL
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['order', '-created_at']
+        verbose_name = "Homepage Hero"
+        verbose_name_plural = "Homepage Heroes"
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return self.title
+
+
+class FooterContent(models.Model):
+    """Model for managing footer content"""
+    business_name = models.CharField(max_length=100, default="NutriHarvest")
+    copyright_text = models.CharField(max_length=200, default="© 2024 NutriHarvest. All rights reserved.")
+    address = models.TextField()
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
+    facebook_url = models.URLField(blank=True)
+    instagram_url = models.URLField(blank=True)
+    twitter_url = models.URLField(blank=True)
+    youtube_url = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = "Footer Content"
+        verbose_name_plural = "Footer Content"
+    
+    def __str__(self):
+        return f"Footer Content for {self.business_name}"
+
+
+class HomePageFeature(models.Model):
+    """Model for managing homepage features/why choose us section"""
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    icon_name = models.CharField(max_length=50, help_text="Lucide icon name (e.g., 'leaf', 'award')")
+    order = models.IntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        ordering = ['order']
+        verbose_name = "Homepage Feature"
+        verbose_name_plural = "Homepage Features"
+        indexes = [
+            models.Index(fields=['is_active']),
+            models.Index(fields=['order']),
+        ]
+    
+    def __str__(self):
+        return self.title

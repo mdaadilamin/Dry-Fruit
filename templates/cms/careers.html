@@ -1,29 +1,33 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static cms_extras %}
 
 {% block title %}{{ page.title }} - NutriHarvest{% endblock %}
 {% block meta_description %}{{ page.meta_description|default:"Join our team at Dry Fruit House. We're looking for passionate professionals to help revolutionize the dry fruits industry." }}{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
-<section class="py-5 bg-primary text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center">
-                <h1 class="display-4 fw-bold mb-4">{{ page.title }}</h1>
-                <p class="lead">Join our mission to deliver premium quality dry fruits and nuts from farms around the world directly to your doorstep.</p>
-                <div class="mt-4">
-                    <a href="#openings" class="btn btn-light btn-lg me-3">
-                        <i data-lucide="briefcase" class="me-2"></i>View Openings
-                    </a>
-                    <a href="#culture" class="btn btn-outline-light btn-lg">
-                        <i data-lucide="heart" class="me-2"></i>Our Culture
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+{% for section in careers_sections %}
+  {% if section.section_type == 'hero' and section.is_active %}
+  <section class="py-5 bg-primary text-white">
+      <div class="container">
+          <div class="row">
+              <div class="col-lg-8 mx-auto text-center">
+                  <h1 class="display-4 fw-bold mb-4">{{ section.title|default:page.title }}</h1>
+                  <p class="lead">{{ section.subtitle|default:"Join our mission to deliver premium quality dry fruits and nuts from farms around the world directly to your doorstep." }}</p>
+                  <div class="mt-4">
+                      <a href="#openings" class="btn btn-light btn-lg me-3">
+                          <i data-lucide="briefcase" class="me-2"></i>View Openings
+                      </a>
+                      <a href="#culture" class="btn btn-outline-light btn-lg">
+                          <i data-lucide="heart" class="me-2"></i>Our Culture
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  {% endif %}
+{% endfor %}
 
 <!-- Main Content Section -->
 <section class="py-5">
@@ -37,278 +41,152 @@
                     </div>
                     
                     <!-- Company Culture -->
-                    <div id="culture" class="mb-5">
-                        <h2 class="display-6 fw-bold mb-4 text-center">Our Culture</h2>
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <div class="d-flex">
-                                    <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i data-lucide="heart" class="text-primary"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="fw-bold">Health & Wellness</h5>
-                                        <p class="text-muted">We promote a healthy lifestyle with access to our premium products and wellness programs.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="d-flex">
-                                    <div class="feature-icon bg-success bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i data-lucide="users" class="text-success"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="fw-bold">Collaboration</h5>
-                                        <p class="text-muted">Work with talented professionals in a supportive, inclusive environment.</p>
+                    {% for section in careers_sections %}
+                      {% if section.section_type == 'culture' and section.is_active %}
+                      <div id="culture" class="mb-5">
+                          <h2 class="display-6 fw-bold mb-4 text-center">{{ section.title|default:"Our Culture" }}</h2>
+                          <div class="row">
+                              {% for item in culture_items %}
+                                {% if item.is_active %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="d-flex">
+                                        <div class="feature-icon bg-primary bg-opacity-10 rounded-circle p-3 me-3">
+                                            <i data-lucide="{{ item.icon_name }}" class="text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold">{{ item.title }}</h5>
+                                            <p class="text-muted">{{ item.description }}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="d-flex">
-                                    <div class="feature-icon bg-info bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i data-lucide="trending-up" class="text-info"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="fw-bold">Growth Opportunities</h5>
-                                        <p class="text-muted">Unleash your potential with continuous learning and development programs.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="d-flex">
-                                    <div class="feature-icon bg-warning bg-opacity-10 rounded-circle p-3 me-3">
-                                        <i data-lucide="award" class="text-warning"></i>
-                                    </div>
-                                    <div>
-                                        <h5 class="fw-bold">Recognition</h5>
-                                        <p class="text-muted">We celebrate achievements and reward outstanding performance.</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                {% endif %}
+                              {% endfor %}
+                          </div>
+                      </div>
+                      {% endif %}
+                    {% endfor %}
                     
                     <!-- Employee Testimonials -->
-                    <div class="mb-5">
-                        <h2 class="display-6 fw-bold mb-4 text-center">What Our Team Says</h2>
-                        <div class="row">
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                                <i data-lucide="user" class="text-muted"></i>
+                    {% for section in careers_sections %}
+                      {% if section.section_type == 'testimonials' and section.is_active %}
+                      <div class="mb-5">
+                          <h2 class="display-6 fw-bold mb-4 text-center">{{ section.title|default:"What Our Team Says" }}</h2>
+                          <div class="row">
+                              {% for testimonial in testimonials %}
+                                {% if testimonial.is_active %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                                    <i data-lucide="user" class="text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ testimonial.name }}</h6>
+                                                    <small class="text-muted">{{ testimonial.position }}</small>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h6 class="mb-0">Sarah Johnson</h6>
-                                                <small class="text-muted">Marketing Manager</small>
-                                            </div>
+                                            <p class="card-text">"{{ testimonial.testimonial }}"</p>
                                         </div>
-                                        <p class="card-text">"Working at NutriHarvest has been transformative. The company truly values employee growth and provides amazing opportunities to innovate."</p>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                                <i data-lucide="user" class="text-muted"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">Michael Chen</h6>
-                                                <small class="text-muted">Product Specialist</small>
-                                            </div>
-                                        </div>
-                                        <p class="card-text">"The collaborative environment and focus on quality products make this a truly rewarding place to work. I've grown both professionally and personally."</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                                <i data-lucide="user" class="text-muted"></i>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">Priya Sharma</h6>
-                                                <small class="text-muted">Customer Experience Lead</small>
-                                            </div>
-                                        </div>
-                                        <p class="card-text">"NutriHarvest's commitment to quality and customer satisfaction aligns perfectly with my values. It's fulfilling to work for a company that makes a positive impact."</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                {% endif %}
+                              {% endfor %}
+                          </div>
+                      </div>
+                      {% endif %}
+                    {% endfor %}
                     
                     <!-- Benefits Section -->
-                    <div class="mb-5">
-                        <h2 class="display-6 fw-bold mb-4 text-center">Employee Benefits</h2>
-                        <div class="row">
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center">
-                                    <div class="feature-icon mx-auto mb-3 bg-primary bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
-                                        <i data-lucide="heart-pulse" class="text-primary"></i>
+                    {% for section in careers_sections %}
+                      {% if section.section_type == 'benefits' and section.is_active %}
+                      <div class="mb-5">
+                          <h2 class="display-6 fw-bold mb-4 text-center">{{ section.title|default:"Employee Benefits" }}</h2>
+                          <div class="row">
+                              {% for benefit in benefits %}
+                                {% if benefit.is_active %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="feature-icon mx-auto mb-3 bg-primary bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
+                                            <i data-lucide="{{ benefit.icon_name }}" class="text-primary"></i>
+                                        </div>
+                                        <h5 class="fw-bold">{{ benefit.title }}</h5>
+                                        <p class="text-muted">{{ benefit.description }}</p>
                                     </div>
-                                    <h5 class="fw-bold">Health Insurance</h5>
-                                    <p class="text-muted">Comprehensive medical, dental, and vision coverage for you and your family.</p>
                                 </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center">
-                                    <div class="feature-icon mx-auto mb-3 bg-success bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
-                                        <i data-lucide="calendar" class="text-success"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Flexible Time Off</h5>
-                                    <p class="text-muted">Generous PTO policy and flexible work arrangements to support work-life balance.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center">
-                                    <div class="feature-icon mx-auto mb-3 bg-info bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
-                                        <i data-lucide="graduation-cap" class="text-info"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Professional Development</h5>
-                                    <p class="text-muted">Tuition reimbursement and learning opportunities to advance your career.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center">
-                                    <div class="feature-icon mx-auto mb-3 bg-warning bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
-                                        <i data-lucide="-shopping-bag" class="text-warning"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Product Discounts</h5>
-                                    <p class="text-muted">Enjoy exclusive discounts on our premium dry fruits and nuts.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center">
-                                    <div class="feature-icon mx-auto mb-3 bg-danger bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
-                                        <i data-lucide="dollar-sign" class="text-danger"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Competitive Compensation</h5>
-                                    <p class="text-muted">Market-leading salaries with performance-based bonuses and equity options.</p>
-                                </div>
-                            </div>
-                            <div class="col-md-4 mb-4">
-                                <div class="text-center">
-                                    <div class="feature-icon mx-auto mb-3 bg-secondary bg-opacity-10 rounded-circle p-3" style="width: 70px; height: 70px;">
-                                        <i data-lucide="home" class="text-secondary"></i>
-                                    </div>
-                                    <h5 class="fw-bold">Remote Options</h5>
-                                    <p class="text-muted">Hybrid and remote work options for eligible positions to support flexibility.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                {% endif %}
+                              {% endfor %}
+                          </div>
+                      </div>
+                      {% endif %}
+                    {% endfor %}
                     
                     <!-- Current Openings -->
-                    <div id="openings" class="mb-5">
-                        <h2 class="display-6 fw-bold mb-4 text-center">Current Openings</h2>
-                        <div class="accordion" id="jobOpenings">
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingOne">
-                                    <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
-                                        <i data-lucide="shopping-cart" class="me-2"></i> E-commerce Manager
-                                    </button>
-                                </h2>
-                                <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#jobOpenings">
-                                    <div class="accordion-body">
-                                        <p><strong>Location:</strong> Remote/Office</p>
-                                        <p><strong>Department:</strong> Sales & Marketing</p>
-                                        <h6 class="fw-bold">Job Description:</h6>
-                                        <p>We're looking for an experienced E-commerce Manager to lead our online sales strategy and drive growth across our digital platforms.</p>
-                                        <h6 class="fw-bold">Responsibilities:</h6>
-                                        <ul>
-                                            <li>Develop and execute e-commerce strategy to increase sales and customer engagement</li>
-                                            <li>Manage product listings, pricing, and promotional campaigns</li>
-                                            <li>Analyze sales data and customer behavior to optimize performance</li>
-                                            <li>Collaborate with marketing team on digital campaigns and SEO</li>
-                                        </ul>
-                                        <h6 class="fw-bold">Requirements:</h6>
-                                        <ul>
-                                            <li>3+ years of e-commerce management experience</li>
-                                            <li>Bachelor's degree in Business, Marketing, or related field</li>
-                                            <li>Strong analytical skills and data-driven approach</li>
-                                            <li>Experience with Shopify, WooCommerce, or similar platforms</li>
-                                        </ul>
+                    {% for section in careers_sections %}
+                      {% if section.section_type == 'openings' and section.is_active %}
+                      <div id="openings" class="mb-5">
+                          <h2 class="display-6 fw-bold mb-4 text-center">{{ section.title|default:"Current Openings" }}</h2>
+                          <div class="accordion" id="jobOpenings">
+                              {% for opening in job_openings %}
+                                {% if opening.is_active %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ opening.id }}">
+                                        <button class="accordion-button fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ opening.id }}">
+                                            <i data-lucide="briefcase" class="me-2"></i> {{ opening.title }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ opening.id }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" data-bs-parent="#jobOpenings">
+                                        <div class="accordion-body">
+                                            <p><strong>Location:</strong> {{ opening.location }}</p>
+                                            <p><strong>Department:</strong> {{ opening.department }}</p>
+                                            <h6 class="fw-bold">Job Description:</h6>
+                                            <p>{{ opening.description }}</p>
+                                            {% if opening.responsibilities %}
+                                            <h6 class="fw-bold">Responsibilities:</h6>
+                                            <ul>
+                                                {% for responsibility in opening.responsibilities|linebreaksbr|split:"<br>" %}
+                                                  {% if responsibility %}
+                                                  <li>{{ responsibility|safe }}</li>
+                                                  {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                            {% if opening.requirements %}
+                                            <h6 class="fw-bold">Requirements:</h6>
+                                            <ul>
+                                                {% for requirement in opening.requirements|linebreaksbr|split:"<br>" %}
+                                                  {% if requirement %}
+                                                  <li>{{ requirement|safe }}</li>
+                                                  {% endif %}
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingTwo">
-                                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                        <i data-lucide="leaf" class="me-2"></i> Quality Assurance Specialist
-                                    </button>
-                                </h2>
-                                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#jobOpenings">
-                                    <div class="accordion-body">
-                                        <p><strong>Location:</strong> Warehouse Facility</p>
-                                        <p><strong>Department:</strong> Operations</p>
-                                        <h6 class="fw-bold">Job Description:</h6>
-                                        <p>Join our team as a Quality Assurance Specialist to ensure our products meet the highest standards of quality and freshness.</p>
-                                        <h6 class="fw-bold">Responsibilities:</h6>
-                                        <ul>
-                                            <li>Inspect incoming products for quality and compliance with standards</li>
-                                            <li>Monitor storage conditions and expiration dates</li>
-                                            <li>Document quality control processes and findings</li>
-                                            <li>Coordinate with suppliers to resolve quality issues</li>
-                                        </ul>
-                                        <h6 class="fw-bold">Requirements:</h6>
-                                        <ul>
-                                            <li>2+ years of quality assurance experience in food industry</li>
-                                            <li>Knowledge of food safety regulations and standards</li>
-                                            <li>Attention to detail and strong organizational skills</li>
-                                            <li>Ability to work in a fast-paced warehouse environment</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="headingThree">
-                                    <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
-                                        <i data-lucide="code" class="me-2"></i> Software Engineer
-                                    </button>
-                                </h2>
-                                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#jobOpenings">
-                                    <div class="accordion-body">
-                                        <p><strong>Location:</strong> Remote/Office</p>
-                                        <p><strong>Department:</strong> Technology</p>
-                                        <h6 class="fw-bold">Job Description:</h6>
-                                        <p>We're seeking a talented Software Engineer to help build and maintain our e-commerce platform and internal tools.</p>
-                                        <h6 class="fw-bold">Responsibilities:</h6>
-                                        <ul>
-                                            <li>Develop and maintain web applications using Django and JavaScript</li>
-                                            <li>Collaborate with cross-functional teams to implement new features</li>
-                                            <li>Optimize application performance and scalability</li>
-                                            <li>Write clean, maintainable, and well-documented code</li>
-                                        </ul>
-                                        <h6 class="fw-bold">Requirements:</h6>
-                                        <ul>
-                                            <li>3+ years of experience with Python/Django development</li>
-                                            <li>Proficiency in JavaScript, HTML, and CSS</li>
-                                            <li>Experience with database design and optimization</li>
-                                            <li>Bachelor's degree in Computer Science or related field</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                {% endif %}
+                              {% endfor %}
+                          </div>
+                      </div>
+                      {% endif %}
+                    {% endfor %}
                     
                     <!-- Call to Action -->
-                    <div class="text-center mt-5 p-5 bg-primary bg-opacity-10 rounded-3">
-                        <h3 class="fw-bold mb-3">Ready to Join Our Team?</h3>
-                        <p class="mb-4">Send your resume to <a href="mailto:hr@dryfruithouse.com" class="text-primary fw-bold">hr@dryfruithouse.com</a></p>
-                        <a href="mailto:hr@dryfruithouse.com?subject=Career Application" class="btn btn-primary btn-lg">
-                            <i data-lucide="send" class="me-2"></i>Apply Now
-                        </a>
-                        <div class="mt-4">
-                            <p class="mb-1"><i data-lucide="mail" class="me-2"></i>hr@dryfruithouse.com</p>
-                            <p class="mb-0"><i data-lucide="phone" class="me-2"></i>+1-234-567-8900 ext. 205</p>
-                        </div>
-                    </div>
+                    {% for section in careers_sections %}
+                      {% if section.section_type == 'cta' and section.is_active %}
+                      <div class="text-center mt-5 p-5 bg-primary bg-opacity-10 rounded-3">
+                          <h3 class="fw-bold mb-3">{{ section.title|default:"Ready to Join Our Team?" }}</h3>
+                          <p class="mb-4">{{ section.subtitle|default:'Send your resume to <a href="mailto:hr@dryfruithouse.com" class="text-primary fw-bold">hr@dryfruithouse.com</a>'|safe }}</p>
+                          <a href="mailto:hr@dryfruithouse.com?subject=Career Application" class="btn btn-primary btn-lg">
+                              <i data-lucide="send" class="me-2"></i>{{ section.content|default:"Apply Now"|safe }}
+                          </a>
+                          <div class="mt-4">
+                              <p class="mb-1"><i data-lucide="mail" class="me-2"></i>hr@dryfruithouse.com</p>
+                              <p class="mb-0"><i data-lucide="phone" class="me-2"></i>+1-234-567-8900 ext. 205</p>
+                          </div>
+                      </div>
+                      {% endif %}
+                    {% endfor %}
                 </div>
             </div>
         </div>

@@ -113,7 +113,7 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-outline-primary">View</a>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -391,6 +391,12 @@
                         </a>
                         <a href="{% url 'core:product_analytics' %}" class="btn btn-outline-primary">
                             <i data-lucide="bar-chart-2" class="me-2"></i>Product Analytics
+                        </a>
+                        <a href="{% url 'blog:post_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="file-text" class="me-2"></i>Manage Blog Posts
+                        </a>
+                        <a href="{% url 'blog:category_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="folder" class="me-2"></i>Manage Blog Categories
                         </a>
                         <form method="post" action="{% url 'notifications:check_low_stock' %}" class="d-inline">
                             {% csrf_token %}
