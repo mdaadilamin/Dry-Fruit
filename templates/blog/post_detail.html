@@ -103,20 +103,39 @@
                             <h5 class="mb-0">Leave a Comment</h5>
                         </div>
                         <div class="card-body">
-                            <form id="comment-form">
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                            
+                            <form method="post">
+                                {% csrf_token %}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="author_name" class="form-label">Name *</label>
-                                        <input type="text" class="form-control" id="author_name" required>
+                                        <label for="{{ comment_form.author_name.id_for_label }}" class="form-label">Name *</label>
+                                        {{ comment_form.author_name }}
+                                        {% if comment_form.author_name.errors %}
+                                            <div class="text-danger">{{ comment_form.author_name.errors }}</div>
+                                        {% endif %}
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="author_email" class="form-label">Email *</label>
-                                        <input type="email" class="form-control" id="author_email" required>
+                                        <label for="{{ comment_form.author_email.id_for_label }}" class="form-label">Email *</label>
+                                        {{ comment_form.author_email }}
+                                        {% if comment_form.author_email.errors %}
+                                            <div class="text-danger">{{ comment_form.author_email.errors }}</div>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="comment_content" class="form-label">Comment *</label>
-                                    <textarea class="form-control" id="comment_content" rows="4" required></textarea>
+                                    <label for="{{ comment_form.content.id_for_label }}" class="form-label">Comment *</label>
+                                    {{ comment_form.content }}
+                                    {% if comment_form.content.errors %}
+                                        <div class="text-danger">{{ comment_form.content.errors }}</div>
+                                    {% endif %}
                                 </div>
                                 <button type="submit" class="btn btn-primary">Post Comment</button>
                             </form>
@@ -214,15 +233,8 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle comment form submission
-    const commentForm = document.getElementById('comment-form');
-    if (commentForm) {
-        commentForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for your comment! It will be reviewed and published soon.');
-            commentForm.reset();
-        });
-    }
+    // Initialize Lucide icons
+    lucide.createIcons();
 });
 </script>
 {% endblock %}

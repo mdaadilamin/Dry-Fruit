@@ -16,6 +16,7 @@ urlpatterns = router.urls + [
     path('customers/', views.customer_list, name='customer_list'),
     path('profile/', views.profile, name='profile'),
     path('orders/', views.order_history, name='order_history'),
+    path('orders/reorder/<int:order_id>/', views.reorder, name='reorder'),
     path('wishlist/', views.wishlist, name='wishlist'),
     path('activity/', views.activity_log, name='activity_log'),
     path('roles/manage/', views.role_management, name='role_management'),

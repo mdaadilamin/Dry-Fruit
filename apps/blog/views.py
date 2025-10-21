@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.text import slugify
 from apps.blog.models import Post, Category, Comment
-from .forms import PostForm, CategoryForm
+from .forms import PostForm, CategoryForm, CommentForm
 import operator
 from functools import reduce
 
@@ -51,6 +51,33 @@ def post_detail(request, slug):
     # Get approved comments
     comments = post.comments.filter(is_approved=True)
     
+    # Handle comment submission
+    if request.method == 'POST':
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.post = post
+            comment.is_approved = False  # Comments need approval by default
+            comment.save()
+            
+            # Send notification to admins about new comment
+            from apps.users.models import User
+            from apps.notifications.models import Notification
+            admin_users = [user for user in User.objects.filter(is_active=True) if user.is_admin]
+            
+            for admin in admin_users:
+                Notification.objects.get_or_create(
+                    user=admin,
+                    title=f'New Comment on "{post.title}"',
+                    message=f'A new comment by {comment.author_name} needs your approval.',
+                    notification_type='info'
+                )
+            
+            messages.success(request, 'Thank you for your comment! It will be reviewed and published soon.')
+            return redirect('blog:post_detail', slug=slug)
+    else:
+        comment_form = CommentForm()
+    
     # Get categories with post counts
     categories = Category.objects.filter(is_active=True).annotate(
         post_count=Count('posts', filter=Q(posts__status='published'))
@@ -62,6 +89,7 @@ def post_detail(request, slug):
         'related_posts': related_posts,
         'comments': comments,
         'categories': categories,
+        'comment_form': comment_form,
     }
     return render(request, 'blog/post_detail.html', context)
 
@@ -251,6 +279,9 @@ def create_category(request):
         messages.error(request, 'Access denied. Admin privileges required.')
         return redirect('core:dashboard')
     
+    # Check if we should redirect back to post form
+    next_url = request.GET.get('next')
+    
     if request.method == 'POST':
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -260,7 +291,12 @@ def create_category(request):
                 category.slug = slugify(category.name)
             category.save()
             messages.success(request, 'Blog category created successfully!')
-            return redirect('blog:category_management')
+            
+            # Redirect back to post form if specified, otherwise to category management
+            if next_url and 'post' in next_url:
+                return redirect(next_url)
+            else:
+                return redirect('blog:category_management')
     else:
         form = CategoryForm()
     
@@ -297,3 +333,115 @@ def edit_category(request, category_id):
         'form_title': 'Edit Category',
     }
     return render(request, 'blog/category_form.html', context)
+
+# Comment Management Views
+@login_required
+def comment_management(request):
+    """Manage blog comments"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    # Get filters
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    
+    # Get all comments with filtering
+    comments = Comment.objects.select_related('post').order_by('-created_at')
+    
+    if search_query:
+        query_filters = [
+            Q(author_name__icontains=search_query),
+            Q(author_email__icontains=search_query),
+            Q(content__icontains=search_query)
+        ]
+        comments = comments.filter(reduce(operator.or_, query_filters))
+    
+    if status_filter == 'approved':
+        comments = comments.filter(is_approved=True)
+    elif status_filter == 'pending':
+        comments = comments.filter(is_approved=False)
+    
+    # Pagination
+    paginator = Paginator(comments, 10)  # Show 10 comments per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'comments': page_obj,
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'status_filter': status_filter,
+    }
+    return render(request, 'blog/comment_management.html', context)
+
+@login_required
+def edit_comment(request, comment_id):
+    """Edit an existing blog comment"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    if request.method == 'POST':
+        form = CommentForm(request.POST, instance=comment)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Blog comment updated successfully!')
+            return redirect('blog:comment_management')
+    else:
+        form = CommentForm(instance=comment)
+    
+    context = {
+        'form': form,
+        'form_title': 'Edit Comment',
+    }
+    return render(request, 'blog/comment_form.html', context)
+
+@login_required
+def delete_comment(request, comment_id):
+    """Delete a blog comment"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    comment = get_object_or_404(Comment, id=comment_id)
+    
+    if request.method == 'POST':
+        comment.delete()
+        messages.success(request, 'Blog comment deleted successfully!')
+        return redirect('blog:comment_management')
+    
+    context = {
+        'comment': comment,
+    }
+    return render(request, 'blog/comment_confirm_delete.html', context)
+
+@login_required
+def approve_comment(request, comment_id):
+    """Approve a blog comment"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    comment = get_object_or_404(Comment, id=comment_id)
+    comment.is_approved = True
+    comment.save()
+    
+    messages.success(request, 'Blog comment approved successfully!')
+    return redirect('blog:comment_management')
+
+@login_required
+def unapprove_comment(request, comment_id):
+    """Unapprove a blog comment"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    comment = get_object_or_404(Comment, id=comment_id)
+    comment.is_approved = False
+    comment.save()
+    
+    messages.success(request, 'Blog comment unapproved successfully!')
+    return redirect('blog:comment_management')

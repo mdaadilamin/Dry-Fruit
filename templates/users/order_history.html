@@ -107,11 +107,11 @@
                                 {% endif %}
                             </div>
                             <div>
-                                <a href="#" class="btn btn-outline-primary btn-sm">
+                                <a href="{% url 'orders:orders-invoice' pk=order.id %}?download=pdf" class="btn btn-outline-primary btn-sm">
                                     <i data-lucide="download" class="me-1"></i>Invoice
                                 </a>
                                 {% if order.order_status == 'delivered' %}
-                                    <a href="#" class="btn btn-outline-success btn-sm">
+                                    <a href="{% url 'users:reorder' order_id=order.id %}" class="btn btn-outline-success btn-sm">
                                         <i data-lucide="repeat" class="me-1"></i>Reorder
                                     </a>
                                 {% endif %}

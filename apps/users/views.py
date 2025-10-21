@@ -62,6 +62,78 @@ def order_history(request):
     return render(request, 'users/order_history.html', {'orders': orders})
 
 @login_required
+def reorder(request, order_id):
+    """Reorder all items from a previous order"""
+    # Get the order and verify it belongs to the current user
+    order = get_object_or_404(Order, id=order_id, customer=request.user)
+    
+    # Add all items from the order to the current user's cart
+    from apps.orders.models import CartItem
+    from apps.shop.models import Product
+    
+    added_items = 0
+    failed_items = 0
+    
+    for item in order.items.all():
+        try:
+            product = item.product
+            quantity = item.quantity
+            
+            # Check if product is still active and has sufficient stock
+            if product.is_active:
+                if product.stock >= quantity:
+                    # Add to cart (or update quantity if already in cart)
+                    cart_item, created = CartItem.objects.get_or_create(
+                        user=request.user,
+                        product=product,
+                        defaults={'quantity': quantity}
+                    )
+                    
+                    if not created:
+                        # If item already in cart, update quantity (check stock)
+                        new_quantity = cart_item.quantity + quantity
+                        if product.stock >= new_quantity:
+                            cart_item.quantity = new_quantity
+                            cart_item.save()
+                            added_items += 1
+                        else:
+                            # If not enough stock, add maximum available
+                            max_addable = product.stock - cart_item.quantity
+                            if max_addable > 0:
+                                cart_item.quantity = product.stock
+                                cart_item.save()
+                                added_items += 1
+                            else:
+                                failed_items += 1
+                    else:
+                        added_items += 1
+                else:
+                    # Product exists but not enough stock
+                    failed_items += 1
+            else:
+                # Product is not active
+                failed_items += 1
+        except Product.DoesNotExist:
+            # Product no longer exists
+            failed_items += 1
+        except Exception as e:
+            # Log the exception for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error reordering item {item.id}: {str(e)}")
+            failed_items += 1
+    
+    # Provide feedback to user
+    if added_items > 0 and failed_items == 0:
+        messages.success(request, f'Successfully added {added_items} items to your cart!')
+    elif added_items > 0 and failed_items > 0:
+        messages.warning(request, f'Added {added_items} items to your cart. {failed_items} items could not be added due to stock limitations.')
+    else:
+        messages.error(request, 'No items could be added to your cart. Items may be out of stock or no longer available.')
+    
+    return redirect('users:order_history')
+
+@login_required
 def wishlist(request):
     """User wishlist"""
     # In a real implementation, you would have a Wishlist model

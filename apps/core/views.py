@@ -210,6 +210,7 @@ def product_detail(request, product_id):
 def cart(request):
     """Shopping cart page"""
     from apps.orders.models import CartItem, GiftWrap
+    from decimal import Decimal
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -242,16 +243,38 @@ def cart(request):
             messages.success(request, 'Item removed from cart')
         
         elif action == 'apply_coupon':
-            # Apply coupon code
-            from django.http import HttpResponseRedirect
-            from django.urls import reverse
-            return HttpResponseRedirect(reverse('marketing:apply_coupon'))
+            # Apply coupon code directly in cart
+            coupon_code = request.POST.get('coupon_code')
+            
+            if not coupon_code:
+                messages.error(request, 'Coupon code is required')
+            else:
+                try:
+                    from apps.marketing.models import Coupon
+                    coupon = Coupon.objects.get(code=coupon_code)
+                    
+                    # Check if coupon is valid
+                    if not coupon.is_valid():
+                        messages.error(request, 'This coupon is not valid')
+                    elif not coupon.can_be_used_by_user(request.user):
+                        messages.error(request, 'You cannot use this coupon')
+                    else:
+                        # Store coupon in session for later use during checkout
+                        request.session['coupon_code'] = coupon_code
+                        messages.success(request, f'Coupon "{coupon_code}" applied successfully!')
+                except Coupon.DoesNotExist:
+                    messages.error(request, 'Invalid coupon code')
+                except Exception as e:
+                    messages.error(request, 'An error occurred while applying the coupon')
+            
+            return redirect('core:cart')
         
         elif action == 'remove_coupon':
-            # Remove coupon code
-            from django.http import HttpResponseRedirect
-            from django.urls import reverse
-            return HttpResponseRedirect(reverse('marketing:remove_coupon'))
+            # Remove coupon code directly in cart
+            if 'coupon_code' in request.session:
+                del request.session['coupon_code']
+                messages.success(request, 'Coupon removed successfully!')
+            return redirect('core:cart')
     
     # Get cart items
     cart_items = CartItem.objects.filter(user=request.user).select_related('product', 'product__category', 'gift_wrap')
@@ -271,24 +294,41 @@ def cart(request):
     
     # Handle coupon
     from apps.marketing.models import Coupon, CouponUsage
+    from apps.marketing.views import calculate_discount
     coupon = None
-    discount = 0
+    discount = Decimal('0.00')
     total_with_discount = total
     
-    # Check if user has an active coupon
-    try:
-        # Get the most recent coupon usage for this user
-        coupon_usage = CouponUsage.objects.filter(
-            user=request.user
-        ).select_related('coupon').first()
-        
-        # Check if the coupon usage exists and the coupon is still valid
-        if coupon_usage and coupon_usage.coupon.is_valid():
-            coupon = coupon_usage.coupon
-            discount = coupon.calculate_discount(total)
-            total_with_discount = total - discount
-    except CouponUsage.DoesNotExist:
-        pass
+    # Check if user has an active coupon in session
+    if 'coupon_code' in request.session:
+        try:
+            coupon = Coupon.objects.get(code=request.session['coupon_code'])
+            if coupon.is_valid() and coupon.can_be_used_by_user(request.user):
+                # Calculate discount using the marketing app's calculate_discount function
+                discount = Decimal(str(calculate_discount(coupon, cart_items, total)))
+                total_with_discount = total - discount
+            else:
+                # Remove invalid coupon from session
+                del request.session['coupon_code']
+                coupon = None
+        except Coupon.DoesNotExist:
+            # Remove invalid coupon code from session
+            if 'coupon_code' in request.session:
+                del request.session['coupon_code']
+    else:
+        # Check if user has an active coupon usage (for backward compatibility)
+        try:
+            coupon_usage = CouponUsage.objects.filter(
+                user=request.user
+            ).select_related('coupon').first()
+            
+            # Check if the coupon usage exists and the coupon is still valid
+            if coupon_usage and coupon_usage.coupon.is_valid():
+                coupon = coupon_usage.coupon
+                discount = Decimal(str(coupon.calculate_discount(cart_items, total)))
+                total_with_discount = total - discount
+        except CouponUsage.DoesNotExist:
+            pass
     
     # Get related products based on items in cart
     related_products = []
@@ -358,7 +398,7 @@ def checkout(request):
         
         # Apply coupon discount if available
         if 'coupon_code' in request.session:
-            from marketing.models import Coupon
+            from apps.marketing.models import Coupon
             try:
                 coupon = Coupon.objects.get(code=request.session['coupon_code'])
                 if coupon.is_valid() and coupon.can_be_used_by_user(request.user):
@@ -373,7 +413,7 @@ def checkout(request):
                     total_amount = total_amount - discount
                     
                     # Record coupon usage
-                    from marketing.models import CouponUsage
+                    from apps.marketing.models import CouponUsage
                     CouponUsage.objects.create(
                         coupon=coupon,
                         user=request.user
@@ -503,17 +543,17 @@ def checkout(request):
     total_with_discount = total
     
     if 'coupon_code' in request.session:
-        from marketing.models import Coupon
+        from apps.marketing.models import Coupon
         try:
             coupon = Coupon.objects.get(code=request.session['coupon_code'])
             if coupon.is_valid() and coupon.can_be_used_by_user(request.user):
-                # Calculate discount
-                if coupon.coupon_type == 'percentage':
-                    discount = total * (coupon.discount_value / 100)
-                elif coupon.coupon_type == 'fixed':
-                    discount = min(coupon.discount_value, total)
-                
-                total_with_discount = total - discount
+                # Calculate discount using the marketing app's calculate_discount function
+                from apps.marketing.views import calculate_discount
+                discount = calculate_discount(coupon, cart_items, float(total))
+                # Convert discount to Decimal for proper arithmetic
+                from decimal import Decimal
+                discount_decimal = Decimal(str(discount))
+                total_with_discount = total - discount_decimal
             else:
                 # Remove invalid coupon
                 del request.session['coupon_code']
@@ -621,6 +661,16 @@ def admin_panel(request):
     # Recent product reviews
     recent_reviews = ProductReview.objects.select_related('product', 'user').order_by('-created_at')[:5]
     
+    # Pending blog comments
+    from apps.blog.models import Comment
+    pending_comments = Comment.objects.filter(is_approved=False).select_related('post').order_by('-created_at')[:5]
+    
+    # Active coupons
+    from apps.marketing.models import Coupon
+    active_coupons = Coupon.objects.filter(is_active=True).order_by('-created_at')[:5]
+    total_coupons = Coupon.objects.count()
+    active_coupons_count = Coupon.objects.filter(is_active=True).count()
+    
     context = {
         'total_products': total_products,
         'total_customers': total_customers,
@@ -636,8 +686,180 @@ def admin_panel(request):
         'products_without_reviews': products_without_reviews,
         'category_performance': category_performance,
         'recent_reviews': recent_reviews,
+        'pending_comments': pending_comments,
+        'active_coupons': active_coupons,
+        'total_coupons': total_coupons,
+        'active_coupons_count': active_coupons_count,
     }
     return render(request, 'core/admin_panel.html', context)
+
+@login_required
+def admin_coupon_management(request):
+    """Admin coupon management page"""
+    if request.user.role.name != 'admin':
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    from apps.shop.models import Category, Product
+    
+    # Handle form submission
+    if request.method == 'POST':
+        from apps.marketing.models import Coupon
+        from django.utils import timezone
+        from django.http import JsonResponse
+        
+        coupon_id = request.POST.get('coupon_id')
+        action = request.POST.get('action')
+        
+        # Handle toggle status action
+        if action == 'toggle_status' and coupon_id:
+            coupon = get_object_or_404(Coupon, id=coupon_id)
+            coupon.is_active = not coupon.is_active
+            coupon.save()
+            status = 'activated' if coupon.is_active else 'deactivated'
+            
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Coupon {coupon.code} {status} successfully!',
+                    'is_active': coupon.is_active
+                })
+            else:
+                messages.success(request, f'Coupon {coupon.code} {status} successfully!')
+                return redirect('core:admin_coupon_management')
+        
+        # Handle delete action
+        elif action == 'delete' and coupon_id:
+            coupon = get_object_or_404(Coupon, id=coupon_id)
+            coupon_code = coupon.code
+            coupon.delete()
+            
+            # Check if this is an AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': f'Coupon {coupon_code} deleted successfully!'
+                })
+            else:
+                messages.success(request, f'Coupon {coupon_code} deleted successfully!')
+                return redirect('core:admin_coupon_management')
+        
+        if coupon_id:
+            # Update existing coupon
+            coupon = get_object_or_404(Coupon, id=coupon_id)
+        else:
+            # Create new coupon
+            coupon = Coupon()
+        
+        # Update coupon fields
+        coupon.code = request.POST.get('code', '')
+        coupon.coupon_type = request.POST.get('coupon_type', 'percentage')
+        coupon.discount_value = request.POST.get('discount_value', 0)
+        coupon.discount_application = request.POST.get('discount_application', 'cart')
+        
+        # Handle category
+        category_id = request.POST.get('category')
+        if category_id:
+            try:
+                coupon.category_id = int(category_id)
+            except (ValueError, TypeError):
+                coupon.category_id = None
+        else:
+            coupon.category_id = None
+            
+        # Handle product
+        product_id = request.POST.get('product')
+        if product_id:
+            try:
+                coupon.product_id = int(product_id)
+            except (ValueError, TypeError):
+                coupon.product_id = None
+        else:
+            coupon.product_id = None
+            
+        # Handle max uses
+        max_uses = request.POST.get('max_uses')
+        if max_uses:
+            try:
+                coupon.max_uses = int(max_uses)
+            except (ValueError, TypeError):
+                coupon.max_uses = None
+        else:
+            coupon.max_uses = None
+        
+        # Handle max uses per user
+        try:
+            coupon.max_uses_per_user = int(request.POST.get('max_uses_per_user', 1))
+        except (ValueError, TypeError):
+            coupon.max_uses_per_user = 1
+        
+        # Handle minimum purchase amount
+        min_purchase = request.POST.get('min_purchase_amount')
+        if min_purchase:
+            try:
+                coupon.min_purchase_amount = float(min_purchase)
+            except (ValueError, TypeError):
+                coupon.min_purchase_amount = None
+        else:
+            coupon.min_purchase_amount = None
+        
+        # Handle valid_from
+        valid_from = request.POST.get('valid_from')
+        if valid_from:
+            try:
+                from datetime import datetime
+                coupon.valid_from = datetime.strptime(valid_from, '%Y-%m-%dT%H:%M')
+            except (ValueError, TypeError):
+                coupon.valid_from = timezone.now()
+        else:
+            coupon.valid_from = timezone.now()
+        
+        # Handle valid_to
+        valid_to = request.POST.get('valid_to')
+        if valid_to:
+            try:
+                from datetime import datetime
+                coupon.valid_to = datetime.strptime(valid_to, '%Y-%m-%dT%H:%M')
+            except (ValueError, TypeError):
+                coupon.valid_to = None
+        else:
+            coupon.valid_to = None
+            
+        coupon.is_active = 'is_active' in request.POST
+        coupon.save()
+        
+        messages.success(request, f'Coupon {"updated" if coupon_id else "created"} successfully!')
+        return redirect('core:admin_coupon_management')
+    
+    # Display coupons
+    from apps.marketing.models import Coupon
+    from django.utils import timezone
+    
+    coupons = Coupon.objects.all().order_by('-created_at')
+    total_coupons = Coupon.objects.count()
+    active_coupons = Coupon.objects.filter(is_active=True)
+    active_coupons_count = active_coupons.count()
+    
+    # Calculate inactive and expired coupons
+    inactive_coupons_count = active_coupons.filter(valid_to__lte=timezone.now()).count()
+    expired_coupons_count = total_coupons - active_coupons_count - inactive_coupons_count
+    
+    # Get categories and products for the form
+    categories = Category.objects.filter(is_active=True)
+    products = Product.objects.filter(is_active=True)
+    
+    context = {
+        'coupons': coupons,
+        'total_coupons': total_coupons,
+        'active_coupons_count': active_coupons_count,
+        'inactive_coupons_count': inactive_coupons_count,
+        'expired_coupons_count': expired_coupons_count,
+        'categories': categories,
+        'products': products,
+        'now': timezone.now(),
+    }
+    return render(request, 'core/admin_coupon_management.html', context)
 
 @login_required
 def product_analytics(request):

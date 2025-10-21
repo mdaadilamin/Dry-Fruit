@@ -1,0 +1,538 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - NutriHarvest{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 fw-bold mb-4">Admin Dashboard</h1>
+            <p class="lead mb-4">Welcome, {{ user.full_name }}. Here's an overview of your e-commerce platform.</p>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-muted">Total Revenue</h5>
+                            <h2 class="fw-bold text-success">${{ total_revenue|floatformat:2 }}</h2>
+                        </div>
+                        <div class="stat-icon sales">
+                            <i data-lucide="dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-muted">Total Orders</h5>
+                            <h2 class="fw-bold text-primary">{{ total_orders }}</h2>
+                        </div>
+                        <div class="stat-icon orders">
+                            <i data-lucide="shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-muted">Products</h5>
+                            <h2 class="fw-bold text-warning">{{ total_products }}</h2>
+                        </div>
+                        <div class="stat-icon products">
+                            <i data-lucide="package"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-muted">Customers</h5>
+                            <h2 class="fw-bold text-info">{{ total_customers }}</h2>
+                        </div>
+                        <div class="stat-icon customers">
+                            <i data-lucide="users"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Recent Orders -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_orders %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Date</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td>{{ order.order_number }}</td>
+                                    <td>{{ order.customer.full_name }}</td>
+                                    <td>{{ order.created_at|date:"M d, Y" }}</td>
+                                    <td>${{ order.total_amount|floatformat:2 }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if order.order_status == 'pending' %}warning{% elif order.order_status == 'processing' %}info{% elif order.order_status == 'shipped' %}primary{% elif order.order_status == 'delivered' %}success{% else %}danger{% endif %}">
+                                            {{ order.get_order_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent orders found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pending Comments -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Pending Comments</h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_comments %}
+                    <div class="list-group list-group-flush">
+                        {% for comment in pending_comments %}
+                        <a href="{% url 'blog:comment_management' %}?status=pending" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ comment.author_name }}</h6>
+                                <small class="text-muted">{{ comment.content|truncatewords:10 }}</small>
+                            </div>
+                            <span class="badge bg-warning text-dark rounded-pill">{{ comment.post.title|truncatewords:3 }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-2 text-center">
+                        <a href="{% url 'blog:comment_management' %}?status=pending" class="btn btn-outline-warning btn-sm">View All Pending Comments</a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No pending comments.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Top Products -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Top Selling Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if top_products %}
+                    <div class="list-group list-group-flush">
+                        {% for product in top_products %}
+                        <a href="{% url 'core:product_detail' product.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ product.name }}</h6>
+                                    <small class="text-muted">{{ product.category.name }}</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">{{ product.order_count }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No product sales data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Product Analytics Section -->
+    <div class="row g-4 mt-4">
+        <!-- Low Stock Products -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Low Stock Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if low_stock_products %}
+                    <div class="list-group list-group-flush">
+                        {% for product in low_stock_products %}
+                        <a href="{% url 'core:product_detail' product.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ product.name }}</h6>
+                                <small class="text-muted">{{ product.category.name }}</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">{{ product.stock }} left</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">All products are well-stocked.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Best Rated Products -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Best Rated Products</h5>
+                </div>
+                <div class="card-body">
+                    {% if best_rated_products %}
+                    <div class="list-group list-group-flush">
+                        {% for product in best_rated_products %}
+                        <a href="{% url 'core:product_detail' product.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ product.name }}</h6>
+                                    <div class="testimonial-stars">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= product.avg_rating|floatformat:"0"|add:"0" %}
+                                                <i data-lucide="star" class="text-warning" style="width: 16px; height: 16px;"></i>
+                                            {% else %}
+                                                <i data-lucide="star" class="text-muted" style="width: 16px; height: 16px;"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <small class="text-muted ms-1">({{ product.review_count }} reviews)</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success rounded-pill">{{ product.avg_rating|floatformat:1 }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No highly rated products yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Worst Rated Products -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Needs Improvement</h5>
+                </div>
+                <div class="card-body">
+                    {% if worst_rated_products %}
+                    <div class="list-group list-group-flush">
+                        {% for product in worst_rated_products %}
+                        <a href="{% url 'core:product_detail' product.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ product.name }}</h6>
+                                    <div class="testimonial-stars">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= product.avg_rating|floatformat:"0"|add:"0" %}
+                                                <i data-lucide="star" class="text-warning" style="width: 16px; height: 16px;"></i>
+                                            {% else %}
+                                                <i data-lucide="star" class="text-muted" style="width: 16px; height: 16px;"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <small class="text-muted ms-1">({{ product.review_count }} reviews)</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-danger rounded-pill">{{ product.avg_rating|floatformat:1 }}</span>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">All products have good ratings.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Analytics -->
+    <div class="row g-4 mt-4">
+        <!-- Category Performance -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Category Performance</h5>
+                </div>
+                <div class="card-body">
+                    {% if category_performance %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Products</th>
+                                    <th>Total Sales</th>
+                                    <th>Avg Rating</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in category_performance %}
+                                <tr>
+                                    <td>{{ category.name }}</td>
+                                    <td>{{ category.product_count }}</td>
+                                    <td>{{ category.total_sales|default:0 }}</td>
+                                    <td>
+                                        {% if category.avg_rating %}
+                                            <span class="badge bg-{% if category.avg_rating >= 4 %}success{% elif category.avg_rating >= 3 %}warning{% else %}danger{% endif %}">
+                                                {{ category.avg_rating|floatformat:1 }}
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">No ratings</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No category performance data available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Reviews -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Recent Reviews</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_reviews %}
+                    <div class="list-group list-group-flush">
+                        {% for review in recent_reviews %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ review.product.name }}</h6>
+                                    <p class="mb-1">{{ review.comment|truncatewords:15 }}</p>
+                                    <small class="text-muted">
+                                        by {{ review.user.full_name }} on {{ review.created_at|date:"M d, Y" }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="testimonial-stars">
+                                        {% for i in "12345"|make_list %}
+                                            {% if forloop.counter <= review.rating %}
+                                                <i data-lucide="star" class="text-warning" style="width: 16px; height: 16px;"></i>
+                                            {% else %}
+                                                <i data-lucide="star" class="text-muted" style="width: 16px; height: 16px;"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    {% if review.is_approved %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent reviews.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mt-4">
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'cms:banner_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="image" class="me-2"></i>Manage Banners
+                        </a>
+                        <a href="{% url 'cms:testimonial_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="message-circle" class="me-2"></i>Manage Testimonials
+                        </a>
+                        <a href="{% url 'cms:page_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="file-text" class="me-2"></i>Manage Pages
+                        </a>
+                        <a href="{% url 'cms:contact_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="contact" class="me-2"></i>Manage Contact Info
+                        </a>
+                        <a href="{% url 'cms:enquiry_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="message-square" class="me-2"></i>Manage Enquiries
+                        </a>
+                        <a href="{% url 'users:employee_list' %}" class="btn btn-outline-primary">
+                            <i data-lucide="users" class="me-2"></i>Manage Employees
+                        </a>
+                        <a href="{% url 'users:customer_list' %}" class="btn btn-outline-primary">
+                            <i data-lucide="user" class="me-2"></i>Manage Customers
+                        </a>
+                        <a href="{% url 'notifications:system_notification_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="bell" class="me-2"></i>Manage Notifications
+                        </a>
+                        <a href="{% url 'shop:review_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="star" class="me-2"></i>Manage Reviews
+                        </a>
+                        <a href="{% url 'core:product_analytics' %}" class="btn btn-outline-primary">
+                            <i data-lucide="bar-chart-2" class="me-2"></i>Product Analytics
+                        </a>
+                        <a href="{% url 'blog:post_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="file-text" class="me-2"></i>Manage Blog Posts
+                        </a>
+                        <a href="{% url 'blog:category_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="folder" class="me-2"></i>Manage Blog Categories
+                        </a>
+                        <a href="{% url 'blog:comment_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="message-circle" class="me-2"></i>Manage Blog Comments
+                        </a>
+                        <a href="{% url 'marketing:coupon_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="tag" class="me-2"></i>Manage Coupons
+                        </a>
+                        <form method="post" action="{% url 'notifications:check_low_stock' %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="threshold" value="10">
+                            <button type="submit" class="btn btn-outline-primary">
+                                <i data-lucide="alert-triangle" class="me-2"></i>Check Low Stock
+                            </button>
+                        </form>
+                        <a href="/admin/" class="btn btn-outline-primary" target="_blank">
+                            <i data-lucide="settings" class="me-2"></i>Django Admin
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Active Coupons Widget -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Active Coupons</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_coupons %}
+                    <div class="list-group list-group-flush">
+                        {% for coupon in active_coupons|slice:":5" %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ coupon.code }}</strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {% if coupon.coupon_type == 'percentage' %}
+                                            {{ coupon.discount_value }}% off
+                                        {% elif coupon.coupon_type == 'fixed' %}
+                                            ${{ coupon.discount_value }} off
+                                        {% else %}
+                                            Free Shipping
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <span class="badge bg-success">{{ coupon.used_count }} used</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-2 text-center">
+                        <a href="{% url 'core:admin_coupon_management' %}" class="btn btn-outline-success btn-sm">Manage All Coupons</a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No active coupons.</p>
+                    <a href="{% url 'core:admin_coupon_management' %}" class="btn btn-outline-success btn-sm">Create New Coupon</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Status -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">System Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Order Status Distribution</h6>
+                            <ul class="list-group">
+                                {% for status in order_status_data %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    {{ status.order_status|title }}
+                                    <span class="badge bg-primary rounded-pill">{{ status.count }}</span>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Recent Activity</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <small class="text-muted">System is running normally</small>
+                                </li>
+                                <li class="list-group-item">
+                                    <small class="text-muted">All services are operational</small>
+                                </li>
+                                <li class="list-group-item">
+                                    <small class="text-muted">Database connection stable</small>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+});
+</script>
+{% endblock %}

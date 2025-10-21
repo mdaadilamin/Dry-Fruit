@@ -76,6 +76,27 @@ class Coupon(models.Model):
             return False
             
         return True
+    
+    def calculate_discount(self, cart_items, cart_total):
+        """Calculate discount amount based on coupon and cart"""
+        if not self.is_valid():
+            return 0.0
+        
+        # Check minimum purchase requirement
+        if self.min_purchase_amount and cart_total < float(self.min_purchase_amount):
+            return 0.0
+        
+        # Apply discount based on coupon type
+        if self.coupon_type == 'percentage':
+            return float(cart_total) * (float(self.discount_value) / 100.0)
+        elif self.coupon_type == 'fixed':
+            return min(float(self.discount_value), float(cart_total))
+        elif self.coupon_type == 'free_shipping':
+            # For free shipping, we would need shipping cost calculation
+            # For now, we'll return 0 as we don't have shipping costs in the cart
+            return 0.0
+        
+        return 0.0
 
 class CouponUsage(models.Model):
     coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)

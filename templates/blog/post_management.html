@@ -9,9 +9,14 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="display-4 fw-bold mb-0">Blog Post Management</h1>
-                <a href="{% url 'blog:create_post' %}" class="btn btn-primary">
-                    <i data-lucide="plus" class="me-2"></i>Create New Post
-                </a>
+                <div>
+                    <a href="{% url 'blog:comment_management' %}" class="btn btn-outline-primary me-2">
+                        <i data-lucide="message-circle" class="me-2"></i>Manage Comments
+                    </a>
+                    <a href="{% url 'blog:create_post' %}" class="btn btn-primary">
+                        <i data-lucide="plus" class="me-2"></i>Create New Post
+                    </a>
+                </div>
             </div>
             
             {% if messages %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Coupon Usage - NutriHarvest{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-4 fw-bold mb-0">Delete Coupon Usage Record</h1>
+                <a href="{% url 'core:admin_coupon_management' %}" class="btn btn-outline-primary">
+                    <i data-lucide="arrow-left" class="me-2"></i>Back to Coupons
+                </a>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">Warning!</h5>
+                        <p>You are about to delete a coupon usage record:</p>
+                        <ul>
+                            <li><strong>Coupon Code:</strong> {{ usage.coupon.code }}</li>
+                            <li><strong>User:</strong> {{ usage.user.full_name }} ({{ usage.user.email }})</li>
+                            <li><strong>Used At:</strong> {{ usage.used_at|date:"M d, Y H:i" }}</li>
+                            {% if usage.order %}
+                                <li><strong>Order:</strong> #{{ usage.order.order_number }}</li>
+                            {% endif %}
+                        </ul>
+                        <p><strong>This action will:</strong></p>
+                        <ul>
+                            <li>Delete this usage record from the database</li>
+                            <li>Decrement the coupon's usage count by 1</li>
+                        </ul>
+                        <p>This action cannot be undone.</p>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'marketing:coupon_usage_management' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-danger">Yes, Delete Usage Record</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+});
+</script>
+{% endblock %}

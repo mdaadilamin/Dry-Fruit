@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form_title }} - NutriHarvest{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="display-4 fw-bold mb-0">{{ form_title }}</h1>
+                <a href="{% url 'blog:comment_management' %}" class="btn btn-outline-primary">
+                    <i data-lucide="arrow-left" class="me-2"></i>Back to Comments
+                </a>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.author_name.id_for_label }}" class="form-label">Author Name *</label>
+                            {{ form.author_name }}
+                            {% if form.author_name.errors %}
+                                <div class="text-danger">{{ form.author_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.author_email.id_for_label }}" class="form-label">Author Email *</label>
+                            {{ form.author_email }}
+                            {% if form.author_email.errors %}
+                                <div class="text-danger">{{ form.author_email.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.content.id_for_label }}" class="form-label">Comment Content *</label>
+                            {{ form.content }}
+                            {% if form.content.errors %}
+                                <div class="text-danger">{{ form.content.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            {{ form.is_approved }}
+                            <label for="{{ form.is_approved.id_for_label }}" class="form-check-label">Approved</label>
+                            <div class="form-text">Check this box to approve the comment for public display</div>
+                            {% if form.is_approved.errors %}
+                                <div class="text-danger">{{ form.is_approved.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'blog:comment_management' %}" class="btn btn-outline-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save Comment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Lucide icons
+    lucide.createIcons();
+});
+</script>
+{% endblock %}

@@ -57,6 +57,37 @@ def apply_coupon(request):
             'message': 'Invalid coupon code or an error occurred'
         })
 
+@require_POST
+def apply_coupon_form(request):
+    """Apply coupon to cart via form submission"""
+    coupon_code = request.POST.get('coupon_code')
+    
+    if not coupon_code:
+        messages.error(request, 'Coupon code is required')
+        return redirect('core:cart')
+    
+    try:
+        coupon = get_object_or_404(Coupon, code=coupon_code)
+        
+        # Check if coupon is valid
+        if not coupon.is_valid():
+            messages.error(request, 'This coupon is not valid')
+            return redirect('core:cart')
+        
+        # Check if user can use this coupon
+        if not coupon.can_be_used_by_user(request.user):
+            messages.error(request, 'You cannot use this coupon')
+            return redirect('core:cart')
+        
+        # Store coupon in session for later use during checkout
+        request.session['coupon_code'] = coupon_code
+        messages.success(request, f'Coupon "{coupon_code}" applied successfully!')
+        
+    except Exception as e:
+        messages.error(request, 'Invalid coupon code or an error occurred')
+    
+    return redirect('core:cart')
+
 def remove_coupon(request):
     """Remove coupon from session"""
     if 'coupon_code' in request.session:
@@ -67,23 +98,23 @@ def remove_coupon(request):
 def calculate_discount(coupon, cart_items, cart_total):
     """Calculate discount amount based on coupon and cart"""
     if not coupon or not coupon.is_valid():
-        return 0
+        return 0.0
     
     # Check minimum purchase requirement
-    if coupon.min_purchase_amount and cart_total < coupon.min_purchase_amount:
-        return 0
+    if coupon.min_purchase_amount and cart_total < float(coupon.min_purchase_amount):
+        return 0.0
     
     # Apply discount based on coupon type
     if coupon.coupon_type == 'percentage':
-        return cart_total * (coupon.discount_value / 100)
+        return float(cart_total) * (float(coupon.discount_value) / 100.0)
     elif coupon.coupon_type == 'fixed':
-        return min(float(coupon.discount_value), cart_total)
+        return min(float(coupon.discount_value), float(cart_total))
     elif coupon.coupon_type == 'free_shipping':
         # For free shipping, we would need shipping cost calculation
         # For now, we'll return 0 as we don't have shipping costs in the cart
-        return 0
+        return 0.0
     
-    return 0
+    return 0.0
 
 @login_required
 def coupon_management(request):
@@ -186,3 +217,75 @@ def coupon_management(request):
         'can_delete': request.user.has_permission('products', 'delete'),
     }
     return render(request, 'marketing/coupon_management.html', context)
+
+@login_required
+def coupon_usage_management(request):
+    """Coupon usage management page (Admin only)"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    # Get filters
+    search_query = request.GET.get('search', '')
+    coupon_filter = request.GET.get('coupon', '')
+    user_filter = request.GET.get('user', '')
+    
+    # Get all coupon usages with filtering
+    coupon_usages = CouponUsage.objects.select_related('coupon', 'user', 'order').order_by('-used_at')
+    
+    if search_query:
+        coupon_usages = coupon_usages.filter(
+            Q(coupon__code__icontains=search_query) |
+            Q(user__username__icontains=search_query) |
+            Q(user__full_name__icontains=search_query)
+        )
+    
+    if coupon_filter:
+        coupon_usages = coupon_usages.filter(coupon_id=coupon_filter)
+    
+    if user_filter:
+        coupon_usages = coupon_usages.filter(user__username__icontains=user_filter)
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(coupon_usages, 20)  # Show 20 usages per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get all coupons for filter dropdown
+    coupons = Coupon.objects.all()
+    
+    context = {
+        'coupon_usages': page_obj,
+        'page_obj': page_obj,
+        'coupons': coupons,
+        'search_query': search_query,
+        'coupon_filter': coupon_filter,
+        'user_filter': user_filter,
+    }
+    return render(request, 'marketing/coupon_usage_management.html', context)
+
+@login_required
+def delete_coupon_usage(request, usage_id):
+    """Delete a coupon usage record"""
+    if not request.user.is_admin:
+        messages.error(request, 'Access denied. Admin privileges required.')
+        return redirect('core:dashboard')
+    
+    usage = get_object_or_404(CouponUsage, id=usage_id)
+    
+    if request.method == 'POST':
+        # Decrement the coupon's used count
+        usage.coupon.used_count = max(0, usage.coupon.used_count - 1)
+        usage.coupon.save()
+        
+        # Delete the usage record
+        usage.delete()
+        
+        messages.success(request, 'Coupon usage record deleted successfully!')
+        return redirect('marketing:coupon_usage_management')
+    
+    context = {
+        'usage': usage,
+    }
+    return render(request, 'marketing/coupon_usage_confirm_delete.html', context)

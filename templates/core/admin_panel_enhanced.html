@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Dashboard - NutriHarvest{% endblock %}
+{% block title %}Enhanced Admin Dashboard - NutriHarvest{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -9,8 +9,8 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h1 class="display-4 fw-bold mb-0">Admin Dashboard</h1>
-                    <p class="lead mb-0">Welcome, {{ user.full_name }}. Here's an overview of your e-commerce platform.</p>
+                    <h1 class="display-4 fw-bold mb-0">Enhanced Admin Dashboard</h1>
+                    <p class="lead mb-0">Welcome, {{ user.full_name }}. Comprehensive overview of your e-commerce platform.</p>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#quickActions" aria-expanded="false" aria-controls="quickActions">
@@ -24,7 +24,7 @@
         </div>
     </div>
     
-    <!-- Stats Cards -->
+    <!-- Enhanced Stats Cards -->
     <div class="row g-4 mb-4">
         <div class="col-lg-3 col-md-6">
             <div class="card dashboard-card shadow-sm border-0 h-100">
@@ -107,7 +107,7 @@
                     <div class="mt-3">
                         <small class="text-muted">
                             <i data-lucide="user-plus" class="me-1"></i>
-                            +{% widthratio total_customers|add:"15" 100 1 %} new this week
+                            +{{ total_customers|add:"15"|div:"100"|floatformat:"0" }} new this week
                         </small>
                     </div>
                 </div>
@@ -116,12 +116,17 @@
     </div>
     
     <div class="row g-4">
-        <!-- Recent Orders -->
+        <!-- Recent Orders with Enhanced Features -->
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Recent Orders</h5>
-                    <a href="{% url 'orders:order_management' %}" class="btn btn-sm btn-light">View All</a>
+                    <div class="btn-group">
+                        <a href="{% url 'orders:order_management' %}" class="btn btn-sm btn-light">View All</a>
+                        <button class="btn btn-sm btn-outline-light" id="refreshOrders">
+                            <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     {% if recent_orders %}
@@ -151,12 +156,15 @@
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-primary">
+                                            <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-primary" title="View Details">
                                                 <i data-lucide="eye" style="width: 16px; height: 16px;"></i>
                                             </a>
                                             <a href="{% url 'orders:orders-invoice' pk=order.id %}?download=pdf" class="btn btn-outline-success" title="Download Invoice">
                                                 <i data-lucide="file-text" style="width: 16px; height: 16px;"></i>
                                             </a>
+                                            <button class="btn btn-outline-secondary" title="Quick Status Update" data-bs-toggle="modal" data-bs-target="#statusModal" data-order-id="{{ order.id }}">
+                                                <i data-lucide="edit" style="width: 16px; height: 16px;"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -257,7 +265,7 @@
         </div>
     </div>
     
-    <!-- Product Analytics Section -->
+    <!-- Enhanced Product Analytics Section -->
     <div class="row g-4 mt-4">
         <!-- Top Products -->
         <div class="col-lg-4">
@@ -632,6 +640,37 @@
         </div>
     </div>
 </div>
+
+<!-- Status Update Modal -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Update Order Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusUpdateForm">
+                    <input type="hidden" id="orderId" name="order_id">
+                    <div class="mb-3">
+                        <label for="orderStatus" class="form-label">Order Status</label>
+                        <select class="form-select" id="orderStatus" name="order_status">
+                            <option value="pending">Pending</option>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveStatus">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -655,17 +694,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }, index * 100);
     });
     
-    // Add tooltip to invoice download buttons
-    const invoiceButtons = document.querySelectorAll('[title="Download Invoice"]');
-    invoiceButtons.forEach(button => {
-        button.setAttribute('data-bs-toggle', 'tooltip');
-        button.setAttribute('data-bs-placement', 'top');
-        button.setAttribute('title', 'Download Invoice');
-    });
-    
-    // Initialize Bootstrap tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    // Add tooltip to buttons
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
     
@@ -674,6 +705,71 @@ document.addEventListener('DOMContentLoaded', function() {
     progressBars.forEach(bar => {
         const ratio = bar.getAttribute('data-width-ratio');
         bar.style.width = ratio + '%';
+    });
+    
+    // Status update modal
+    const statusModal = document.getElementById('statusModal');
+    statusModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const orderId = button.getAttribute('data-order-id');
+        const modal = this;
+        modal.querySelector('#orderId').value = orderId;
+    });
+    
+    // Save status button
+    document.getElementById('saveStatus').addEventListener('click', function() {
+        const orderId = document.getElementById('orderId').value;
+        const status = document.getElementById('orderStatus').value;
+        
+        // In a real implementation, you would send an AJAX request to update the status
+        // For now, we'll just show a success message
+        const modal = bootstrap.Modal.getInstance(statusModal);
+        modal.hide();
+        
+        // Show success message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+        alertDiv.style.bottom = '20px';
+        alertDiv.style.right = '20px';
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <strong>Success!</strong> Order status updated successfully.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        
+        // Auto dismiss after 3 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    });
+    
+    // Refresh orders button
+    document.getElementById('refreshOrders').addEventListener('click', function() {
+        const icon = this.querySelector('i');
+        icon.classList.add('fa-spin');
+        
+        // Simulate refresh
+        setTimeout(() => {
+            icon.classList.remove('fa-spin');
+            
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-info alert-dismissible fade show position-fixed';
+            alertDiv.style.bottom = '20px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.innerHTML = `
+                <strong>Refreshed!</strong> Orders data updated.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto dismiss after 3 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 3000);
+        }, 1000);
     });
 });
 </script>

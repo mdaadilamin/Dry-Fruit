@@ -1,6 +1,6 @@
 from django import forms
 from django.utils.text import slugify
-from .models import Post, Category
+from .models import Post, Category, Comment
 
 class PostForm(forms.ModelForm):
     class Meta:
@@ -111,3 +111,13 @@ class CategoryForm(forms.ModelForm):
             raise forms.ValidationError("This slug is already in use. Please choose a different one.")
         
         return slug
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['author_name', 'author_email', 'content']
+        widgets = {
+            'author_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'author_email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+        }

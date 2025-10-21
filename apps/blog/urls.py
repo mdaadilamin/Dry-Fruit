@@ -19,4 +19,11 @@ urlpatterns = [
     path('categories/', views.category_management, name='category_management'),
     path('categories/create/', views.create_category, name='create_category'),
     path('categories/edit/<int:category_id>/', views.edit_category, name='edit_category'),
+    
+    # Comment Management URLs
+    path('comments/', views.comment_management, name='comment_management'),
+    path('comments/edit/<int:comment_id>/', views.edit_comment, name='edit_comment'),
+    path('comments/delete/<int:comment_id>/', views.delete_comment, name='delete_comment'),
+    path('comments/approve/<int:comment_id>/', views.approve_comment, name='approve_comment'),
+    path('comments/unapprove/<int:comment_id>/', views.unapprove_comment, name='unapprove_comment'),
 ]
