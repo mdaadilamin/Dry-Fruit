@@ -16,6 +16,52 @@ def employee_list(request):
     employees = Employee.objects.select_related('user').all()
     return render(request, 'users/employee_list.html', {'employees': employees})
 
+
+@login_required
+def employee_detail(request, employee_id):
+    """View employee details"""
+    if not request.user.has_permission('employees', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    employee = get_object_or_404(Employee.objects.select_related('user'), id=employee_id)
+    
+    context = {
+        'employee': employee,
+    }
+    return render(request, 'users/employee_detail.html', context)
+
+
+@login_required
+def employee_edit(request, employee_id):
+    """Edit employee information"""
+    if not request.user.has_permission('employees', 'edit'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    employee = get_object_or_404(Employee.objects.select_related('user'), id=employee_id)
+    
+    if request.method == 'POST':
+        # Update employee information
+        employee.user.full_name = request.POST.get('full_name', employee.user.full_name)
+        employee.user.email = request.POST.get('email', employee.user.email)
+        employee.user.mobile = request.POST.get('mobile', employee.user.mobile)
+        employee.user.save()
+        
+        employee.employee_id = request.POST.get('employee_id', employee.employee_id)
+        employee.department = request.POST.get('department', employee.department)
+        employee.status = request.POST.get('status', employee.status)
+        employee.save()
+        
+        messages.success(request, 'Employee information updated successfully!')
+        return redirect('users:employee_detail', employee_id=employee_id)
+    
+    context = {
+        'employee': employee,
+    }
+    return render(request, 'users/employee_edit.html', context)
+
+
 @login_required
 def customer_list(request):
     """List all customers"""
@@ -25,6 +71,54 @@ def customer_list(request):
     
     customers = Customer.objects.select_related('user').all()
     return render(request, 'users/customer_list.html', {'customers': customers})
+
+
+@login_required
+def customer_detail(request, customer_id):
+    """View customer details"""
+    if not request.user.has_permission('customers', 'view'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    customer = get_object_or_404(Customer.objects.select_related('user'), id=customer_id)
+    orders = Order.objects.filter(customer=customer.user).order_by('-created_at')
+    
+    context = {
+        'customer': customer,
+        'orders': orders,
+    }
+    return render(request, 'users/customer_detail.html', context)
+
+
+@login_required
+def customer_edit(request, customer_id):
+    """Edit customer information"""
+    if not request.user.has_permission('customers', 'edit'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    customer = get_object_or_404(Customer.objects.select_related('user'), id=customer_id)
+    
+    if request.method == 'POST':
+        # Update customer information
+        customer.user.full_name = request.POST.get('full_name', customer.user.full_name)
+        customer.user.email = request.POST.get('email', customer.user.email)
+        customer.user.mobile = request.POST.get('mobile', customer.user.mobile)
+        customer.user.save()
+        
+        customer.address = request.POST.get('address', customer.address)
+        customer.city = request.POST.get('city', customer.city)
+        customer.pincode = request.POST.get('pincode', customer.pincode)
+        customer.save()
+        
+        messages.success(request, 'Customer information updated successfully!')
+        return redirect('users:customer_detail', customer_id=customer_id)
+    
+    context = {
+        'customer': customer,
+    }
+    return render(request, 'users/customer_edit.html', context)
+
 
 @login_required
 def profile(request):

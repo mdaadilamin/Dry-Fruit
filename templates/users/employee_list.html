@@ -56,11 +56,11 @@
                                     <td>{{ employee.hire_date|date:"M d, Y" }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
-                                            <a href="#" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editEmployeeModal{{ employee.id }}">
-                                                <i data-lucide="edit" class="me-1"></i>Edit
+                                            <a href="{% url 'users:employee_detail' employee.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i data-lucide="eye" class="me-1"></i>View
                                             </a>
-                                            <a href="#" class="btn btn-sm btn-outline-danger">
-                                                <i data-lucide="trash" class="me-1"></i>Delete
+                                            <a href="{% url 'users:employee_edit' employee.id %}" class="btn btn-sm btn-outline-warning">
+                                                <i data-lucide="edit" class="me-1"></i>Edit
                                             </a>
                                         </div>
                                     </td>
@@ -158,68 +158,6 @@
         </div>
     </div>
 </div>
-
-<!-- Edit Employee Modals (one for each employee) -->
-{% for employee in employees %}
-<div class="modal fade" id="editEmployeeModal{{ employee.id }}" tabindex="-1" aria-labelledby="editEmployeeModalLabel{{ employee.id }}" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editEmployeeModalLabel{{ employee.id }}">Edit Employee</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="full_name_{{ employee.id }}" class="form-label">Full Name</label>
-                                <input type="text" class="form-control" id="full_name_{{ employee.id }}" name="full_name" value="{{ employee.user.full_name }}" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="email_{{ employee.id }}" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="email_{{ employee.id }}" name="email" value="{{ employee.user.email }}" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="mobile_{{ employee.id }}" class="form-label">Mobile Number</label>
-                                <input type="text" class="form-control" id="mobile_{{ employee.id }}" name="mobile" value="{{ employee.user.mobile }}">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="employee_id_{{ employee.id }}" class="form-label">Employee ID</label>
-                                <input type="text" class="form-control" id="employee_id_{{ employee.id }}" name="employee_id" value="{{ employee.employee_id }}" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="department_{{ employee.id }}" class="form-label">Department</label>
-                                <input type="text" class="form-control" id="department_{{ employee.id }}" name="department" value="{{ employee.department }}">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="status_{{ employee.id }}" class="form-label">Status</label>
-                                <select class="form-select" id="status_{{ employee.id }}" name="status">
-                                    <option value="active" {% if employee.status == 'active' %}selected{% endif %}>Active</option>
-                                    <option value="inactive" {% if employee.status == 'inactive' %}selected{% endif %}>Inactive</option>
-                                    <option value="suspended" {% if employee.status == 'suspended' %}selected{% endif %}>Suspended</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Save Changes</button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
 {% endblock %}
 
 {% block extra_js %}
