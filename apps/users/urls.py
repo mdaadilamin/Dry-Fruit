@@ -13,6 +13,7 @@ router.register(r'permissions', api_views.PermissionViewSet)
 urlpatterns = router.urls + [
     # Web views
     path('employees/', views.employee_list, name='employee_list'),
+    path('employees/create/', views.employee_create, name='employee_create'),
     path('employees/<int:employee_id>/', views.employee_detail, name='employee_detail'),
     path('employees/<int:employee_id>/edit/', views.employee_edit, name='employee_edit'),
     path('customers/', views.customer_list, name='customer_list'),

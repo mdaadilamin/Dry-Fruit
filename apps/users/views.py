@@ -2,9 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count
-from .models import User, Role, Permission, Employee, Customer, ActivityLog
+from django.contrib.auth import get_user_model
+from .models import Role, Permission, Employee, Customer, ActivityLog
 from apps.orders.models import Order
 from apps.shop.models import Product
+
+User = get_user_model()
+
 
 @login_required
 def employee_list(request):
@@ -30,6 +34,85 @@ def employee_detail(request, employee_id):
         'employee': employee,
     }
     return render(request, 'users/employee_detail.html', context)
+
+
+@login_required
+def employee_create(request):
+    """Create a new employee"""
+    if not request.user.has_permission('employees', 'add'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    if request.method == 'POST':
+        # Get form data
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        mobile = request.POST.get('mobile')
+        employee_id = request.POST.get('employee_id')
+        department = request.POST.get('department')
+        status = request.POST.get('status', 'active')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        # Validate form data
+        if not all([full_name, email, employee_id, password]):
+            messages.error(request, 'Please fill in all required fields.')
+            return render(request, 'users/employee_list.html', {
+                'employees': Employee.objects.select_related('user').all()
+            })
+        
+        if password != confirm_password:
+            messages.error(request, 'Passwords do not match.')
+            return render(request, 'users/employee_list.html', {
+                'employees': Employee.objects.select_related('user').all()
+            })
+        
+        # Check if user with this email already exists
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'A user with this email already exists.')
+            return render(request, 'users/employee_list.html', {
+                'employees': Employee.objects.select_related('user').all()
+            })
+        
+        # Check if employee with this employee_id already exists
+        if Employee.objects.filter(employee_id=employee_id).exists():
+            messages.error(request, 'An employee with this employee ID already exists.')
+            return render(request, 'users/employee_list.html', {
+                'employees': Employee.objects.select_related('user').all()
+            })
+        
+        try:
+            # Create user
+            employee_role = Role.objects.get(name='employee')
+            
+            user = User.objects.create_user(
+                username=email,
+                email=email,
+                password=password,
+                full_name=full_name,
+                mobile=mobile,
+                role=employee_role
+            )
+            
+            # Create employee
+            employee = Employee.objects.create(
+                user=user,
+                employee_id=employee_id,
+                department=department,
+                status=status
+            )
+            
+            messages.success(request, f'Employee {full_name} created successfully!')
+            return redirect('users:employee_list')
+            
+        except Exception as e:
+            messages.error(request, f'Error creating employee: {str(e)}')
+            return render(request, 'users/employee_list.html', {
+                'employees': Employee.objects.select_related('user').all()
+            })
+    
+    # If not POST request, redirect to employee list
+    return redirect('users:employee_list')
 
 
 @login_required
