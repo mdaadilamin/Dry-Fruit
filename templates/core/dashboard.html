@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Customer Dashboard - NutriHarvest{% endblock %}
+{% block title %}Customer Dashboard - DRY FRUITS DELIGHT{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -87,7 +87,7 @@
                                 <tr>
                                     <td>{{ order.order_number }}</td>
                                     <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                    <td>${{ order.total_amount|floatformat:2 }}</td>
+                                    <td>₹{{ order.total_amount|floatformat:2 }}</td>
                                     <td>
                                         <span class="badge bg-{% if order.order_status == 'pending' %}warning{% elif order.order_status == 'processing' %}info{% elif order.order_status == 'shipped' %}primary{% elif order.order_status == 'delivered' %}success{% else %}danger{% endif %}">
                                             {{ order.get_order_status_display }}

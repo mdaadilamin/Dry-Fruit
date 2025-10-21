@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Customer Management - NutriHarvest Admin{% endblock %}
+{% block title %}Customer Management - DRY FRUITS DELIGHT Admin{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -52,7 +52,7 @@
                                     <td>{{ customer.user.mobile|default:"-" }}</td>
                                     <td>{{ customer.city|default:"-" }}</td>
                                     <td>{{ customer.total_orders }}</td>
-                                    <td>${{ customer.total_spent|floatformat:2 }}</td>
+                                    <td>₹{{ customer.total_spent|floatformat:2 }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="#" class="btn btn-sm btn-outline-primary">

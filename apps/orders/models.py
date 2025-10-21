@@ -41,7 +41,7 @@ class GiftWrap(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.name} (${self.price})"
+        return f"{self.name} (₹{self.price})"
 
 class Order(models.Model):
     STATUS_CHOICES = [

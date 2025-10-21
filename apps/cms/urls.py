@@ -9,10 +9,11 @@ router = DefaultRouter()
 router.register(r'banners', api_views.BannerViewSet)
 router.register(r'testimonials', api_views.TestimonialViewSet)
 
-urlpatterns = router.urls + [
-    # Web views
+urlpatterns = [
+    # Web views (placed first to take precedence)
     path('manage/banners/', views.banner_management, name='banner_management'),
     path('manage/testimonials/', views.testimonial_management, name='testimonial_management'),
+    path('manage/testimonials/<int:testimonial_id>/delete/', views.delete_testimonial, name='delete_testimonial'),
     path('manage/pages/', views.page_management, name='page_management'),
     path('manage/contact/', views.contact_management, name='contact_management'),
     path('manage/enquiries/', views.enquiry_management, name='enquiry_management'),
@@ -27,4 +28,4 @@ urlpatterns = router.urls + [
     path('testimonial/submit/', views.submit_testimonial, name='submit_testimonial'),
     path('enquiry/submit/', views.submit_enquiry, name='submit_enquiry'),
     path('<str:page_type>/', views.page_view, name='page_view'),
-]
+] + router.urls  # API routes added last

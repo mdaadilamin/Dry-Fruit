@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
             name='ContactInfo',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('business_name', models.CharField(default='NutriHarvest', max_length=100)),
+                ('business_name', models.CharField(default='DRY FRUITS DELIGHT', max_length=100)),
                 ('tagline', models.CharField(default='Premium Dry Fruits & Nuts', max_length=200)),
                 ('email', models.EmailField(max_length=254)),
                 ('phone', models.CharField(max_length=20)),

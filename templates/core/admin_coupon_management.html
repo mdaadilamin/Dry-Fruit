@@ -110,7 +110,7 @@
                                         {% if coupon.coupon_type == 'percentage' %}
                                             {{ coupon.discount_value }}%
                                         {% else %}
-                                            ${{ coupon.discount_value }}
+                                            ₹{{ coupon.discount_value }}
                                         {% endif %}
                                     </td>
                                     <td>{{ coupon.get_discount_application_display }}
@@ -140,7 +140,7 @@
                                     </td>
                                     <td>
                                         {% if coupon.min_purchase_amount %}
-                                            ${{ coupon.min_purchase_amount }}
+                                            ₹{{ coupon.min_purchase_amount }}
                                         {% else %}
                                             None
                                         {% endif %}

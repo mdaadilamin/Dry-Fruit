@@ -31,7 +31,7 @@ class Command(BaseCommand):
         # Create an announcement
         SystemNotification.objects.get_or_create(
             title='Free Shipping Extended',
-            message='We\'ve extended our free shipping offer to all orders over $50!',
+            message='We\'ve extended our free shipping offer to all orders over ₹50!',
             notification_type='announcement',
             is_active=True,
             show_to_users=True,

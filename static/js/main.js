@@ -1,4 +1,4 @@
-// NutriHarvest Main JavaScript
+// DRY FRUITS DELIGHT Main JavaScript
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
@@ -14,6 +14,7 @@ function initializeApp() {
         initializeScrollAnimations();
         initializeSystemNotifications();
         initializeNotificationBell();
+        initializeWishlist();
     } catch (error) {
         console.error('Error initializing app:', error);
     }
@@ -594,7 +595,7 @@ function updateCartTotals() {
     
     const totalElements = document.querySelectorAll('.cart-total');
     totalElements.forEach(element => {
-        element.textContent = `$${total.toFixed(2)}`;
+        element.textContent = `₹${total.toFixed(2)}`;
     });
 }
 
@@ -684,4 +685,106 @@ function performBulkAction(action, items) {
 // Initialize admin features if on admin pages
 if (document.body.classList.contains('admin-page')) {
     document.addEventListener('DOMContentLoaded', initializeAdminFeatures);
+}
+
+// Wishlist functionality
+function initializeWishlist() {
+    // Fetch wishlist count on page load
+    fetchWishlistCount();
+    
+    // Wishlist button functionality
+    const wishlistButtons = document.querySelectorAll('.wishlist-btn');
+    wishlistButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            toggleWishlist(productId, this);
+        });
+    });
+}
+
+function toggleWishlist(productId, buttonElement) {
+    if (!isAuthenticated()) {
+        showNotification('Please login to add items to wishlist', 'warning');
+        window.location.href = '/login/';
+        return;
+    }
+    
+    const csrfToken = getCSRFToken();
+    const originalText = buttonElement.innerHTML;
+    
+    // Show loading state
+    buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+    buttonElement.disabled = true;
+    
+    fetch('/api/orders/add-to-wishlist/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        },
+        body: JSON.stringify({
+            product_id: productId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(data.message, 'success');
+            updateWishlistCount(data.wishlist_count);
+            
+            // Update button appearance based on action
+            if (data.message.includes('removed')) {
+                buttonElement.innerHTML = '<i data-lucide="heart" class="me-2"></i>Wishlist';
+                buttonElement.classList.remove('btn-danger');
+                buttonElement.classList.add('btn-outline-primary');
+            } else {
+                buttonElement.innerHTML = '<i data-lucide="heart" class="me-2"></i>Wishlisted';
+                buttonElement.classList.remove('btn-outline-primary');
+                buttonElement.classList.add('btn-danger');
+            }
+            
+            // Reinitialize Lucide icons
+            lucide.createIcons();
+        } else {
+            showNotification(data.message, 'error');
+            buttonElement.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred while updating wishlist', 'error');
+        buttonElement.innerHTML = originalText;
+    })
+    .finally(() => {
+        buttonElement.disabled = false;
+    });
+}
+
+function fetchWishlistCount() {
+    // Only fetch if user is authenticated
+    if (!isAuthenticated()) return;
+    
+    fetch('/api/orders/wishlist-count/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateWishlistCount(data.count);
+            }
+        })
+        .catch(error => {
+            console.log('Failed to fetch wishlist count:', error);
+        });
+}
+
+function updateWishlistCount(count) {
+    const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+    wishlistCountElements.forEach(element => {
+        element.textContent = count;
+        if (count > 0) {
+            element.style.display = 'inline';
+        } else {
+            element.style.display = 'none';
+        }
+    });
 }

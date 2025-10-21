@@ -21,7 +21,7 @@ def email_template_management(request):
     template, created = EmailTemplate.objects.get_or_create(
         template_type=template_type,
         defaults={
-            'subject': f'{template_type.replace("_", " ").title()} - NutriHarvest',
+            'subject': f'{template_type.replace("_", " ").title()} - DRY FRUITS DELIGHT',
             'body_html': f'<h1>{template_type.replace("_", " ").title()}</h1><p>Default template content</p>',
             'body_text': f'{template_type.replace("_", " ").title()}\n\nDefault template content'
         }

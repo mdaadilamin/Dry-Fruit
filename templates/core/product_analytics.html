@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Product Analytics - NutriHarvest{% endblock %}
+{% block title %}Product Analytics - DRY FRUITS DELIGHT{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -152,7 +152,7 @@
                                             <td>{{ product.name }}</td>
                                             <td>{{ product.category.name }}</td>
                                             <td>{{ product.total_sold|default:0 }}</td>
-                                            <td>${{ product.total_revenue|default:0|floatformat:2 }}</td>
+                                            <td>₹{{ product.total_revenue|default:0|floatformat:2 }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -189,7 +189,7 @@
                                             <td>{{ category.name }}</td>
                                             <td>{{ category.total_products }}</td>
                                             <td>{{ category.total_sold|default:0 }}</td>
-                                            <td>${{ category.total_revenue|default:0|floatformat:2 }}</td>
+                                            <td>₹{{ category.total_revenue|default:0|floatformat:2 }}</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

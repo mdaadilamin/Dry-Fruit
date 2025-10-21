@@ -16,4 +16,5 @@ urlpatterns = router.urls + [
     path('manage/products/add/', views.product_add, name='product_add'),
     path('manage/products/<int:product_id>/edit/', views.product_edit, name='product_edit'),
     path('manage/reviews/', views.review_management, name='review_management'),
+    path('submit-review/<int:product_id>/', views.submit_review, name='submit_review'),  # Add this line
 ]

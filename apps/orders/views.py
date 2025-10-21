@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator
-from .models import Order, OrderItem, CartItem, GiftWrap
+from .models import Order, OrderItem, CartItem, GiftWrap, Wishlist
 from apps.shop.models import Product
 import json
 
@@ -197,3 +197,49 @@ def update_gift_wrap(request):
             'success': False,
             'message': 'An error occurred while updating gift wrap option'
         })
+
+
+@login_required
+@require_POST
+def add_to_wishlist(request):
+    """Add product to wishlist via AJAX"""
+    try:
+        data = json.loads(request.body)
+        product_id = data.get('product_id')
+        
+        product = get_object_or_404(Product, id=product_id, is_active=True)
+        
+        # Check if product is already in wishlist
+        wishlist_item, created = Wishlist.objects.get_or_create(
+            user=request.user,
+            product=product
+        )
+        
+        if created:
+            message = 'Product added to wishlist successfully'
+        else:
+            # If already in wishlist, remove it
+            wishlist_item.delete()
+            message = 'Product removed from wishlist'
+        
+        # Get updated wishlist count
+        wishlist_count = Wishlist.objects.filter(user=request.user).count()
+        
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'wishlist_count': wishlist_count
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while updating wishlist'
+        })
+
+
+@login_required
+def wishlist(request):
+    """Display user's wishlist"""
+    wishlist_items = Wishlist.objects.filter(user=request.user).select_related('product')
+    return render(request, 'orders/wishlist.html', {'wishlist_items': wishlist_items})

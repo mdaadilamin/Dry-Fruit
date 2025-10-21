@@ -3,12 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.renderers import TemplateHTMLRenderer
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import get_template
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from io import BytesIO
 from xhtml2pdf import pisa
-from .models import Order, CartItem
+from .models import Order, CartItem, Wishlist
 from .serializers import OrderSerializer, CartItemSerializer
+import json
 
 class OrderViewSet(viewsets.ModelViewSet):
     serializer_class = OrderSerializer
@@ -72,3 +75,20 @@ class CartItemViewSet(viewsets.ModelViewSet):
         """Clear entire cart"""
         CartItem.objects.filter(user=request.user).delete()
         return Response({'message': 'Cart cleared'}, status=status.HTTP_204_NO_CONTENT)
+
+# Add this function for wishlist count API
+@login_required
+@require_POST
+def wishlist_count(request):
+    """Get wishlist count for authenticated user"""
+    try:
+        count = Wishlist.objects.filter(user=request.user).count()
+        return JsonResponse({
+            'success': True,
+            'count': count
+        })
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while fetching wishlist count'
+        })

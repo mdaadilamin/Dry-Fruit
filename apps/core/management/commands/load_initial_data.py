@@ -7,7 +7,7 @@ from decimal import Decimal
 from django.utils.text import slugify
 
 class Command(BaseCommand):
-    help = 'Load initial data for NutriHarvest application'
+    help = 'Load initial data for DRY FRUITS DELIGHT application'
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS('Starting to load initial data...'))
@@ -46,7 +46,7 @@ class Command(BaseCommand):
         admin, created = User.objects.get_or_create(
             username='admin',
             defaults={
-                'email': 'admin@nutriharvest.com',
+                'email': 'admin@dryfruitsdelight.com',
                 'full_name': 'Admin User',
                 'mobile': '+1234567890',
                 'role': admin_role,
@@ -239,10 +239,10 @@ class Command(BaseCommand):
         pages_data = [
             {
                 'page_type': 'about',
-                'title': 'About NutriHarvest',
+                'title': 'About DRY FRUITS DELIGHT',
                 'content': '''
                     <h2>Our Story</h2>
-                    <p>NutriHarvest was founded with a simple mission: to bring the finest quality dry fruits and nuts from around the world directly to your doorstep. We believe in the power of natural, wholesome nutrition and the incredible benefits that premium nuts and dried fruits can bring to your daily life.</p>
+                    <p>DRY FRUITS DELIGHT was founded with a simple mission: to bring the finest quality dry fruits and nuts from around the world directly to your doorstep. We believe in the power of natural, wholesome nutrition and the incredible benefits that premium nuts and dried fruits can bring to your daily life.</p>
 
                     <h3>Our Values</h3>
                     <ul>
@@ -257,7 +257,7 @@ class Command(BaseCommand):
 
                     <p>We believe in providing not just products, but a complete experience of health and wellness. From our carefully curated selection to our thoughtful packaging, every detail is designed with your well-being in mind.</p>
                 ''',
-                'meta_description': 'Learn about NutriHarvest, your trusted source for premium dry fruits and nuts.',
+                'meta_description': 'Learn about DRY FRUITS DELIGHT, your trusted source for premium dry fruits and nuts.',
             },
             {
                 'page_type': 'contact',
@@ -267,9 +267,9 @@ class Command(BaseCommand):
                     <p>We'd love to hear from you! Whether you have questions about our products, need help with an order, or just want to say hello, our team is here to help.</p>
 
                     <h3>Customer Service</h3>
-                    <p><strong>Phone:</strong> +1-234-567-8900<br>
-                    <strong>Email:</strong> info@nutriharvest.com<br>
-                    <strong>WhatsApp:</strong> +1-234-567-8900</p>
+                    <p><strong>Phone:</strong> +91-8309232756<br>
+                    <strong>Email:</strong> info@dryfruitsdelight.com<br>
+                    <strong>WhatsApp:</strong> +91-8309232756</p>
 
                     <h3>Business Hours</h3>
                     <p>Monday - Friday: 9:00 AM - 6:00 PM<br>
@@ -277,14 +277,14 @@ class Command(BaseCommand):
                     Sunday: Closed</p>
 
                     <h3>Visit Our Store</h3>
-                    <p>123 Business Street<br>
-                    Business City, BC 12345<br>
-                    United States</p>
+                    <p>Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008<br>
+                    Hyderabad -500008<br>
+                </p>
 
                     <h3>Follow Us</h3>
                     <p>Stay connected with us on social media for the latest updates, recipes, and special offers.</p>
                 ''',
-                'meta_description': 'Contact NutriHarvest customer service team. We are here to help!',
+                'meta_description': 'Contact DRY FRUITS DELIGHT customer service team. We are here to help!',
             },
             {
                 'page_type': 'shipping',
@@ -295,9 +295,9 @@ class Command(BaseCommand):
                     <h3>Shipping Methods</h3>
                     <p>We offer several shipping options to meet your needs:</p>
                     <ul>
-                        <li><strong>Standard Shipping:</strong> 5-7 business days - Free on orders over $50</li>
-                        <li><strong>Express Shipping:</strong> 2-3 business days - $9.99</li>
-                        <li><strong>Overnight Shipping:</strong> 1 business day - $19.99</li>
+                        <li><strong>Standard Shipping:</strong> 5-7 business days - Free on orders over ₹50</li>
+                        <li><strong>Express Shipping:</strong> 2-3 business days - ₹9.99</li>
+                        <li><strong>Overnight Shipping:</strong> 1 business day - ₹19.99</li>
                     </ul>
 
                     <h3>Processing Time</h3>
@@ -312,7 +312,7 @@ class Command(BaseCommand):
                     <h3>Tracking Your Order</h3>
                     <p>Once your order ships, you'll receive a tracking number via email. You can also track your order by logging into your account dashboard.</p>
                 ''',
-                'meta_description': 'Learn about NutriHarvest shipping options, delivery times, and policies.',
+                'meta_description': 'Learn about DRY FRUITS DELIGHT shipping options, delivery times, and policies.',
             },
             {
                 'page_type': 'returns',
@@ -326,7 +326,7 @@ class Command(BaseCommand):
 
                     <h3>How to Return an Item</h3>
                     <ol>
-                        <li>Contact our customer service team at info@nutriharvest.com</li>
+                        <li>Contact our customer service team at info@dryfruitsdelight.com</li>
                         <li>Provide your order number and reason for return</li>
                         <li>We'll provide you with a return shipping label</li>
                         <li>Pack the item securely and ship it back to us</li>
@@ -342,7 +342,7 @@ class Command(BaseCommand):
                     <h3>Non-Returnable Items</h3>
                     <p>For health and safety reasons, opened food products cannot be returned unless defective or damaged.</p>
                 ''',
-                'meta_description': 'NutriHarvest return and refund policy. Learn about our hassle-free returns process.',
+                'meta_description': 'DRY FRUITS DELIGHT return and refund policy. Learn about our hassle-free returns process.',
             },
             {
                 'page_type': 'terms',
@@ -352,7 +352,7 @@ class Command(BaseCommand):
                     <p><em>Last updated: January 2024</em></p>
 
                     <h3>Agreement to Terms</h3>
-                    <p>By accessing and using NutriHarvest's website and services, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use our services.</p>
+                    <p>By accessing and using DRY FRUITS DELIGHT's website and services, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, please do not use our services.</p>
 
                     <h3>Use of Service</h3>
                     <p>You must be at least 18 years old to make purchases on our website. You agree to provide accurate, current, and complete information during the registration and purchasing process.</p>
@@ -364,18 +364,18 @@ class Command(BaseCommand):
                     <p>All orders are subject to acceptance and availability. We reserve the right to refuse or cancel any order for any reason. Payment must be received before order processing.</p>
 
                     <h3>Intellectual Property</h3>
-                    <p>All content on this website, including text, graphics, logos, images, and software, is the property of NutriHarvest and protected by copyright laws.</p>
+                    <p>All content on this website, including text, graphics, logos, images, and software, is the property of DRY FRUITS DELIGHT and protected by copyright laws.</p>
 
                     <h3>Limitation of Liability</h3>
-                    <p>NutriHarvest shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of our services.</p>
+                    <p>DRY FRUITS DELIGHT shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of our services.</p>
 
                     <h3>Changes to Terms</h3>
                     <p>We reserve the right to modify these terms at any time. Your continued use of the service after changes constitutes acceptance of the new terms.</p>
 
                     <h3>Contact Information</h3>
-                    <p>For questions about these Terms and Conditions, please contact us at info@nutriharvest.com</p>
+                    <p>For questions about these Terms and Conditions, please contact us at info@dryfruitsdelight.com</p>
                 ''',
-                'meta_description': 'Read NutriHarvest Terms and Conditions for using our website and services.',
+                'meta_description': 'Read DRY FRUITS DELIGHT Terms and Conditions for using our website and services.',
             },
             {
                 'page_type': 'privacy',
@@ -432,9 +432,9 @@ class Command(BaseCommand):
                     <p>We may update this Privacy Policy from time to time. We will notify you of any significant changes by email or through our website.</p>
 
                     <h3>Contact Us</h3>
-                    <p>If you have questions about this Privacy Policy, please contact us at privacy@nutriharvest.com</p>
+                    <p>If you have questions about this Privacy Policy, please contact us at privacy@dryfruitsdelight.com</p>
                 ''',
-                'meta_description': 'Learn how NutriHarvest collects, uses, and protects your personal information.',
+                'meta_description': 'Learn how DRY FRUITS DELIGHT collects, uses, and protects your personal information.',
             },
         ]
 
@@ -457,18 +457,18 @@ class Command(BaseCommand):
         contact_info, created = ContactInfo.objects.get_or_create(
             id=1,
             defaults={
-                'business_name': 'NutriHarvest',
+                'business_name': 'DRY FRUITS DELIGHT',
                 'tagline': 'Premium Dry Fruits & Nuts',
-                'email': 'info@nutriharvest.com',
-                'phone': '+1-234-567-8900',
-                'whatsapp': '+1-234-567-8900',
-                'address': '123 Business Street',
-                'city': 'Business City, BC 12345',
+                'email': 'info@dryfruitsdelight.com',
+                'phone': '+91-8309232756',
+                'whatsapp': '+91-8309232756',
+                'address': 'Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008',
+                'city': 'Hyderabad -500008',
                 'pincode': '12345',
-                'facebook_url': 'https://facebook.com/nutriharvest',
-                'instagram_url': 'https://instagram.com/nutriharvest',
-                'twitter_url': 'https://twitter.com/nutriharvest',
-                'youtube_url': 'https://youtube.com/nutriharvest',
+                'facebook_url': 'https://facebook.com/dryfruitsdelight',
+                'instagram_url': 'https://instagram.com/dryfruitsdelight',
+                'twitter_url': 'https://twitter.com/dryfruitsdelight',
+                'youtube_url': 'https://youtube.com/dryfruitsdelight',
                 'business_hours': 'Monday - Friday: 9:00 AM - 6:00 PM\nSaturday: 10:00 AM - 4:00 PM\nSunday: Closed',
             }
         )
@@ -482,13 +482,13 @@ class Command(BaseCommand):
             {
                 'customer_name': 'Sarah Johnson',
                 'rating': 5,
-                'comment': 'The quality of the almonds I received was outstanding! Fresh, crunchy, and perfectly packaged. NutriHarvest has become my go-to source for all my nut needs.',
+                'comment': 'The quality of the almonds I received was outstanding! Fresh, crunchy, and perfectly packaged. DRY FRUITS DELIGHT has become my go-to source for all my nut needs.',
                 'location': 'New York, NY',
             },
             {
                 'customer_name': 'Michael Chen',
                 'rating': 5,
-                'comment': 'I\'ve been ordering from NutriHarvest for over a year now. Their organic cashews are the best I\'ve ever tasted, and the customer service is exceptional.',
+                'comment': 'I\'ve been ordering from DRY FRUITS DELIGHT for over a year now. Their organic cashews are the best I\'ve ever tasted, and the customer service is exceptional.',
                 'location': 'San Francisco, CA',
             },
             {
@@ -506,7 +506,7 @@ class Command(BaseCommand):
             {
                 'customer_name': 'Lisa Patel',
                 'rating': 5,
-                'comment': 'As someone who values organic and sustainable products, NutriHarvest is perfect. The quality is excellent and I appreciate their commitment to ethical sourcing.',
+                'comment': 'As someone who values organic and sustainable products, DRY FRUITS DELIGHT is perfect. The quality is excellent and I appreciate their commitment to ethical sourcing.',
                 'location': 'Portland, OR',
             },
             {

@@ -41,9 +41,9 @@ class Command(BaseCommand):
 
         # Create default testimonials
         testimonials_data = [
-            {'name': 'Sarah Johnson', 'position': 'Marketing Manager', 'testimonial': 'Working at NutriHarvest has been transformative. The company truly values employee growth and provides amazing opportunities to innovate.', 'order': 0},
+            {'name': 'Sarah Johnson', 'position': 'Marketing Manager', 'testimonial': 'Working at DRY FRUITS DELIGHT has been transformative. The company truly values employee growth and provides amazing opportunities to innovate.', 'order': 0},
             {'name': 'Michael Chen', 'position': 'Product Specialist', 'testimonial': 'The collaborative environment and focus on quality products make this a truly rewarding place to work. I\'ve grown both professionally and personally.', 'order': 1},
-            {'name': 'Priya Sharma', 'position': 'Customer Experience Lead', 'testimonial': 'NutriHarvest\'s commitment to quality and customer satisfaction aligns perfectly with my values. It\'s fulfilling to work for a company that makes a positive impact.', 'order': 2},
+            {'name': 'Priya Sharma', 'position': 'Customer Experience Lead', 'testimonial': 'DRY FRUITS DELIGHT\'s commitment to quality and customer satisfaction aligns perfectly with my values. It\'s fulfilling to work for a company that makes a positive impact.', 'order': 2},
         ]
 
         for data in testimonials_data:

@@ -1,4 +1,4 @@
-# NutriHarvest - Complete Django E-commerce Application
+# DRY FRUITS DELIGHT - Complete Django E-commerce Application
 
 A comprehensive, production-ready Django e-commerce platform for a premium dry fruit shop with advanced features including role-based access control, order management, content management system, and enhanced user experience with notifications and improved navigation.
 
@@ -327,7 +327,7 @@ API uses session-based authentication with CSRF protection.
 
 ## 🆘 Support
 
-For support, email support@nutriharvest.com or create an issue on GitHub.
+For support, email info@dryfruitsdelight.com or create an issue on GitHub.
 
 ## 🚀 Future Enhancements
 
@@ -345,5 +345,5 @@ For support, email support@nutriharvest.com or create an issue on GitHub.
 
 ---
 
-**NutriHarvest** - Premium Dry Fruits & Nuts E-commerce Platform
+**DRY FRUITS DELIGHT** - Premium Dry Fruits & Nuts E-commerce Platform
 Built with ❤️ using Django and modern web technologies.

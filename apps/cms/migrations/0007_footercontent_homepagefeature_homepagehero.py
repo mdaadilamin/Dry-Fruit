@@ -15,8 +15,8 @@ class Migration(migrations.Migration):
             name='FooterContent',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('business_name', models.CharField(default='NutriHarvest', max_length=100)),
-                ('copyright_text', models.CharField(default='© 2024 NutriHarvest. All rights reserved.', max_length=200)),
+                ('business_name', models.CharField(default='DRY FRUITS DELIGHT', max_length=100)),
+                ('copyright_text', models.CharField(default='© 2024 DRY FRUITS DELIGHT. All rights reserved.', max_length=200)),
                 ('address', models.TextField()),
                 ('phone', models.CharField(max_length=20)),
                 ('email', models.EmailField(max_length=254)),

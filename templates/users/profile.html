@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Profile - NutriHarvest{% endblock %}
+{% block title %}My Profile - DRY FRUITS DELIGHT{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -153,7 +153,7 @@
                             
                             <div class="mb-3">
                                 <small class="text-muted">Total Spent</small>
-                                <p class="mb-0">${{ user.customer.total_spent|floatformat:2 }}</p>
+                                <p class="mb-0">₹{{ user.customer.total_spent|floatformat:2 }}</p>
                             </div>
                             {% endif %}
                         </div>

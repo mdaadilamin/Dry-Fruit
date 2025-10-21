@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Coupon Management - NutriHarvest{% endblock %}
+{% block title %}Coupon Management - DRY FRUITS DELIGHT{% endblock %}
 
 {% block content %}
 <section class="py-5">
@@ -51,7 +51,7 @@
                                     {% if coupon.coupon_type == 'percentage' %}
                                         {{ coupon.discount_value }}%
                                     {% else %}
-                                        ${{ coupon.discount_value }}
+                                        ₹{{ coupon.discount_value }}
                                     {% endif %}
                                 </td>
                                 <td>

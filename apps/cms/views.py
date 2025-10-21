@@ -25,26 +25,66 @@ def testimonial_management(request):
         return redirect('core:dashboard')
     
     if request.method == 'POST' and request.user.has_permission('cms', 'add'):
-        customer_name = request.POST.get('customer_name')
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment')
-        location = request.POST.get('location', '')
-        customer_image = request.FILES.get('customer_image')
-        
-        if all([customer_name, rating, comment]):
-            Testimonial.objects.create(
-                customer_name=customer_name,
-                rating=int(rating),
-                comment=comment,
-                location=location,
-                customer_image=customer_image
-            )
-            messages.success(request, 'Testimonial added successfully!')
+        # Check if we're editing an existing testimonial
+        testimonial_id = request.POST.get('testimonial_id')
+        if testimonial_id:
+            # Editing existing testimonial
+            if not request.user.has_permission('cms', 'edit'):
+                messages.error(request, 'Access denied.')
+                return redirect('cms:testimonial_management')
+            
+            testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+            testimonial.customer_name = request.POST.get('customer_name', testimonial.customer_name)
+            testimonial.rating = int(request.POST.get('rating', testimonial.rating))
+            testimonial.comment = request.POST.get('comment', testimonial.comment)
+            testimonial.location = request.POST.get('location', testimonial.location)
+            # Fix the is_active handling - when checkbox is unchecked, it won't be in POST data
+            testimonial.is_active = 'is_active' in request.POST
+            
+            if 'customer_image' in request.FILES:
+                testimonial.customer_image = request.FILES['customer_image']
+                
+            testimonial.save()
+            messages.success(request, 'Testimonial updated successfully!')
         else:
-            messages.error(request, 'Please fill all required fields.')
+            # Adding new testimonial
+            customer_name = request.POST.get('customer_name')
+            rating = request.POST.get('rating')
+            comment = request.POST.get('comment')
+            location = request.POST.get('location', '')
+            customer_image = request.FILES.get('customer_image')
+            
+            if all([customer_name, rating, comment]):
+                Testimonial.objects.create(
+                    customer_name=customer_name,
+                    rating=int(rating),
+                    comment=comment,
+                    location=location,
+                    customer_image=customer_image,
+                    is_active='is_active' in request.POST  # Fix the is_active handling
+                )
+                messages.success(request, 'Testimonial added successfully!')
+            else:
+                messages.error(request, 'Please fill all required fields.')
     
     testimonials = Testimonial.objects.all()
     return render(request, 'cms/testimonial_management.html', {'testimonials': testimonials})
+
+
+@login_required
+def delete_testimonial(request, testimonial_id):
+    """Delete a testimonial"""
+    if not request.user.has_permission('cms', 'delete'):
+        messages.error(request, 'Access denied.')
+        return redirect('cms:testimonial_management')
+    
+    if request.method == 'POST':
+        testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+        testimonial.delete()
+        messages.success(request, 'Testimonial deleted successfully!')
+    
+    return redirect('cms:testimonial_management')
+
 
 def submit_testimonial(request):
     """Customer testimonial submission"""
@@ -112,10 +152,10 @@ def contact_management(request):
     contact_info, created = ContactInfo.objects.get_or_create(
         id=1,  # Ensure only one contact info record
         defaults={
-            'email': 'info@nutriharvest.com',
-            'phone': '+1-234-567-8900',
-            'address': '123 Business Street',
-            'city': 'Business City',
+            'email': 'info@dryfruitsdelight.com',
+            'phone': '+91-8309232756',
+            'address': 'Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008',
+            'city': 'Hyderabad',
             'pincode': '123456'
         }
     )

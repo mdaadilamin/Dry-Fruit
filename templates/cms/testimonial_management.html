@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Testimonial Management - NutriHarvest CMS{% endblock %}
+{% block title %}Testimonial Management - DRY FRUITS DELIGHT CMS{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -135,10 +135,18 @@
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                                <a href="#" class="btn btn-sm btn-outline-primary edit-testimonial" 
+                                                   data-id="{{ testimonial.id }}"
+                                                   data-name="{{ testimonial.customer_name }}"
+                                                   data-location="{{ testimonial.location }}"
+                                                   data-rating="{{ testimonial.rating }}"
+                                                   data-comment="{{ testimonial.comment }}"
+                                                   data-active="{{ testimonial.is_active|yesno:'true,false' }}">
                                                     <i data-lucide="edit" class="me-1"></i>Edit
                                                 </a>
-                                                <a href="#" class="btn btn-sm btn-outline-danger">
+                                                <a href="#" class="btn btn-sm btn-outline-danger delete-testimonial" 
+                                                   data-id="{{ testimonial.id }}"
+                                                   data-name="{{ testimonial.customer_name }}">
                                                     <i data-lucide="trash" class="me-1"></i>Delete
                                                 </a>
                                             </div>
@@ -160,6 +168,98 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Form (hidden by default, shown in modal) -->
+<div class="modal fade" id="editTestimonialModal" tabindex="-1" aria-labelledby="editTestimonialModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="editTestimonialModalLabel">Edit Testimonial</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="editTestimonialForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" id="testimonial_id" name="testimonial_id">
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="edit_customer_name" class="form-label fw-bold">Customer Name</label>
+                            <input type="text" class="form-control" id="edit_customer_name" name="customer_name" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="edit_location" class="form-label fw-bold">Location</label>
+                            <input type="text" class="form-control" id="edit_location" name="location">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="edit_rating" class="form-label fw-bold">Rating</label>
+                            <select class="form-select" id="edit_rating" name="rating" required>
+                                <option value="5">5 Stars</option>
+                                <option value="4">4 Stars</option>
+                                <option value="3">3 Stars</option>
+                                <option value="2">2 Stars</option>
+                                <option value="1">1 Star</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="edit_customer_image" class="form-label fw-bold">Customer Image</label>
+                            <input type="file" class="form-control" id="edit_customer_image" name="customer_image" accept="image/*">
+                            <div class="form-text">Optional - Square image recommended</div>
+                            <div id="current_image_preview" class="mt-2"></div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="edit_comment" class="form-label fw-bold">Testimonial</label>
+                            <textarea class="form-control" id="edit_comment" name="comment" rows="4" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="edit_is_active" name="is_active" checked>
+                    <label class="form-check-label fw-bold" for="edit_is_active">
+                        Testimonial is Active
+                    </label>
+                </div>
+                
+                <div class="d-flex justify-content-end">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Testimonial</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTestimonialModal" tabindex="-1" aria-labelledby="deleteTestimonialModalLabel" aria-hidden="true">
+<div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="deleteTestimonialModalLabel">Delete Testimonial</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete the testimonial from <strong id="delete_customer_name"></strong>?</p>
+            <p>This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form id="deleteTestimonialForm" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete Testimonial</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -168,10 +268,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize Lucide icons
     lucide.createIcons();
     
-    // Form validation
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
+    // Form validation for the main form
+    const mainForm = document.querySelector('form:not(#editTestimonialForm)');
+    if (mainForm) {
+        mainForm.addEventListener('submit', function(e) {
             const customerName = document.getElementById('customer_name');
             const comment = document.getElementById('comment');
             
@@ -202,6 +302,53 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    
+    // Edit testimonial functionality
+    document.querySelectorAll('.edit-testimonial').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const testimonialId = this.getAttribute('data-id');
+            const customerName = this.getAttribute('data-name');
+            const location = this.getAttribute('data-location');
+            const rating = this.getAttribute('data-rating');
+            const comment = this.getAttribute('data-comment');
+            const isActive = this.getAttribute('data-active') === 'true';
+            
+            // Populate the edit form
+            document.getElementById('testimonial_id').value = testimonialId;
+            document.getElementById('edit_customer_name').value = customerName;
+            document.getElementById('edit_location').value = location;
+            document.getElementById('edit_rating').value = rating;
+            document.getElementById('edit_comment').value = comment;
+            document.getElementById('edit_is_active').checked = isActive;
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('editTestimonialModal'));
+            modal.show();
+        });
+    });
+    
+    // Delete testimonial functionality
+    document.querySelectorAll('.delete-testimonial').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const testimonialId = this.getAttribute('data-id');
+            const customerName = this.getAttribute('data-name');
+            
+            // Set the customer name in the modal
+            document.getElementById('delete_customer_name').textContent = customerName;
+            
+            // Update the form action to use the correct URL
+            const deleteForm = document.getElementById('deleteTestimonialForm');
+            deleteForm.action = '{% url "cms:delete_testimonial" testimonial_id=99999 %}'.replace('99999', testimonialId);
+            
+            // Show the modal
+            const modal = new bootstrap.Modal(document.getElementById('deleteTestimonialModal'));
+            modal.show();
+        });
+    });
 });
 </script>
 {% endblock %}

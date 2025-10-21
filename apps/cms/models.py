@@ -74,7 +74,7 @@ class Page(models.Model):
         return str(self.title)
 
 class ContactInfo(models.Model):
-    business_name = models.CharField(max_length=100, default='NutriHarvest')
+    business_name = models.CharField(max_length=100, default='DRY FRUITS DELIGHT')
     tagline = models.CharField(max_length=200, default='Premium Dry Fruits & Nuts')
     email = models.EmailField()
     phone = models.CharField(max_length=20)
@@ -300,8 +300,8 @@ class HomePageHero(models.Model):
 
 class FooterContent(models.Model):
     """Model for managing footer content"""
-    business_name = models.CharField(max_length=100, default="NutriHarvest")
-    copyright_text = models.CharField(max_length=200, default="© 2024 NutriHarvest. All rights reserved.")
+    business_name = models.CharField(max_length=100, default="DRY FRUITS DELIGHT")
+    copyright_text = models.CharField(max_length=200, default="© 2024 DRY FRUITS DELIGHT. All rights reserved.")
     address = models.TextField()
     phone = models.CharField(max_length=20)
     email = models.EmailField()

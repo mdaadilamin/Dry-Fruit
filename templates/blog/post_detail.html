@@ -1,7 +1,7 @@
 {% extends 'blog/base.html' %}
 {% load static %}
 
-{% block title %}{{ post.title }} - NutriHarvest Blog{% endblock %}
+{% block title %}{{ post.title }} - DRY FRUITS DELIGHT Blog{% endblock %}
 {% block meta_description %}{{ post.excerpt|default:post.content|truncatewords:30 }}{% endblock %}
 
 {% block content %}
@@ -214,7 +214,7 @@
     },
     "publisher": {
         "@type": "Organization",
-        "name": "NutriHarvest",
+        "name": "DRY FRUITS DELIGHT",
         "logo": {
             "@type": "ImageObject",
             "url": "{{ request.build_absolute_uri }}{% static 'images/logo.png' %}"

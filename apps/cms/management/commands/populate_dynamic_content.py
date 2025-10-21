@@ -18,15 +18,15 @@ class Command(BaseCommand):
 
         # Create footer content
         FooterContent.objects.get_or_create(
-            business_name="NutriHarvest",
-            copyright_text="© 2024 NutriHarvest. All rights reserved.",
-            address="123 Business Street\nBusiness City, BC 12345",
-            phone="+1-234-567-8900",
-            email="info@nutriharvest.com",
-            facebook_url="https://www.facebook.com/nutriharvest",
-            instagram_url="https://www.instagram.com/nutriharvest",
-            twitter_url="https://www.twitter.com/nutriharvest",
-            youtube_url="https://www.youtube.com/nutriharvest",
+            business_name="DRY FRUITS DELIGHT",
+            copyright_text="© 2024 DRY FRUITS DELIGHT. All rights reserved.",
+            address="Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008",
+            phone="+91-8309232756",
+            email="info@dryfruitsdelight.com",
+            facebook_url="https://www.facebook.com/dryfruitsdelight",
+            instagram_url="https://www.instagram.com/dryfruitsdelight",
+            twitter_url="https://www.twitter.com/dryfruitsdelight",
+            youtube_url="https://www.youtube.com/dryfruitsdelight",
             is_active=True
         )
 

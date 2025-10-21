@@ -162,3 +162,52 @@ def review_management(request):
         'reviews': page_obj,
     }
     return render(request, 'shop/review_management.html', context)
+
+@login_required
+def submit_review(request, product_id):
+    """Submit a product review via AJAX"""
+    if request.method == 'POST':
+        try:
+            import json
+            data = json.loads(request.body)
+            rating = data.get('rating')
+            comment = data.get('comment')
+            
+            product = get_object_or_404(Product, id=product_id)
+            
+            # Check if user has already reviewed this product
+            review, created = ProductReview.objects.get_or_create(
+                product=product,
+                user=request.user,
+                defaults={
+                    'rating': rating,
+                    'comment': comment,
+                    'is_verified': False,  # Could be set to True if user purchased the product
+                    'is_approved': False   # Admin needs to approve reviews
+                }
+            )
+            
+            if not created:
+                # Update existing review
+                review.rating = rating
+                review.comment = comment
+                review.save()
+                message = 'Your review has been updated successfully!'
+            else:
+                message = 'Your review has been submitted successfully! It will be visible after approval.'
+            
+            return JsonResponse({
+                'success': True,
+                'message': message
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': 'An error occurred while submitting your review. Please try again.'
+            })
+    
+    return JsonResponse({
+        'success': False,
+        'message': 'Invalid request method.'
+    })

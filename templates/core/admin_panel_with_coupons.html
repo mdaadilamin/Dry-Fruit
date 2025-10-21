@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Admin Dashboard - NutriHarvest{% endblock %}
+{% block title %}Admin Dashboard - DRY FRUITS DELIGHT{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -20,7 +20,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h5 class="text-muted">Total Revenue</h5>
-                            <h2 class="fw-bold text-success">${{ total_revenue|floatformat:2 }}</h2>
+                            <h2 class="fw-bold text-success">₹{{ total_revenue|floatformat:2 }}</h2>
                         </div>
                         <div class="stat-icon sales">
                             <i data-lucide="dollar-sign"></i>
@@ -106,7 +106,7 @@
                                     <td>{{ order.order_number }}</td>
                                     <td>{{ order.customer.full_name }}</td>
                                     <td>{{ order.created_at|date:"M d, Y" }}</td>
-                                    <td>${{ order.total_amount|floatformat:2 }}</td>
+                                    <td>₹{{ order.total_amount|floatformat:2 }}</td>
                                     <td>
                                         <span class="badge bg-{% if order.order_status == 'pending' %}warning{% elif order.order_status == 'processing' %}info{% elif order.order_status == 'shipped' %}primary{% elif order.order_status == 'delivered' %}success{% else %}danger{% endif %}">
                                             {{ order.get_order_status_display }}
@@ -465,7 +465,7 @@
                                         {% if coupon.coupon_type == 'percentage' %}
                                             {{ coupon.discount_value }}% off
                                         {% elif coupon.coupon_type == 'fixed' %}
-                                            ${{ coupon.discount_value }} off
+                                            ₹{{ coupon.discount_value }} off
                                         {% else %}
                                             Free Shipping
                                         {% endif %}

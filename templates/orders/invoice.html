@@ -275,7 +275,7 @@
             
             <div class="summary">
                 <p><strong>Executive Summary</strong></p>
-                <p>This invoice for {{ order.customer.full_name }} totals ${{ order.total_amount|floatformat:2 }}, with a subtotal of ${{ order.total_amount|floatformat:2 }} and sales tax of $0.00. Payment is due upon receipt.</p>
+                <p>This invoice for {{ order.customer.full_name }} totals ₹{{ order.total_amount|floatformat:2 }}, with a subtotal of ₹{{ order.total_amount|floatformat:2 }} and sales tax of ₹0.00. Payment is due upon receipt.</p>
             </div>
             
             <div class="section-title">Invoice Details</div>
@@ -301,23 +301,23 @@
                             {% endif %}
                         </td>
                         <td class="text-center">{{ item.quantity }}</td>
-                        <td class="text-right">${{ item.price|floatformat:2 }}</td>
+                        <td class="text-right">₹{{ item.price|floatformat:2 }}</td>
                         <td class="text-right">0%</td>
-                        <td class="text-right">${{ item.get_total_price|floatformat:2 }}</td>
+                        <td class="text-right">₹{{ item.get_total_price|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                     
                     <tr class="subtotal-row">
                         <td colspan="5" class="text-right"><strong>Subtotal</strong></td>
-                        <td class="text-right">${{ order.total_amount|floatformat:2 }}</td>
+                        <td class="text-right">₹{{ order.total_amount|floatformat:2 }}</td>
                     </tr>
                     <tr class="tax-row">
                         <td colspan="5" class="text-right"><strong>Total Tax</strong></td>
-                        <td class="text-right">$0.00</td>
+                        <td class="text-right">₹0.00</td>
                     </tr>
                     <tr class="total-row">
                         <td colspan="5" class="text-right"><strong>Invoice Total</strong></td>
-                        <td class="text-right">${{ order.total_amount|floatformat:2 }}</td>
+                        <td class="text-right">₹{{ order.total_amount|floatformat:2 }}</td>
                     </tr>
                 </tbody>
             </table>

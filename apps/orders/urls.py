@@ -16,5 +16,10 @@ urlpatterns = router.urls + [
     path('add-to-cart/', views.add_to_cart, name='add_to_cart'),
     path('update-cart/', views.update_cart, name='update_cart'),
     path('remove-from-cart/', views.remove_from_cart, name='remove_from_cart'),
-    path('update-gift-wrap/', views.update_gift_wrap, name='update_gift_wrap'),  # Add this line
+    path('update-gift-wrap/', views.update_gift_wrap, name='update_gift_wrap'),
+    path('add-to-wishlist/', views.add_to_wishlist, name='add_to_wishlist'),
+    path('wishlist/', views.wishlist, name='wishlist'),
+    
+    # API endpoints
+    path('api/wishlist-count/', api_views.wishlist_count, name='wishlist_count'),  # Add this line
 ]

@@ -7,26 +7,26 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     
     <!-- Primary Meta Tags -->
-    <title>{% block title %}NutriHarvest - Premium Dry Fruits & Nuts{% endblock %}</title>
-    <meta name="title" content="{% block meta_title %}NutriHarvest - Premium Dry Fruits & Nuts{% endblock %}">
+    <title>{% block title %}DRY FRUITS DELIGHT - Premium Dry Fruits & Nuts{% endblock %}</title>
+    <meta name="title" content="{% block meta_title %}DRY FRUITS DELIGHT - Premium Dry Fruits & Nuts{% endblock %}">
     <meta name="description" content="{% block meta_description %}Discover the finest selection of organic, hand-picked dry fruits and nuts from around the world. Quality, taste, and nutrition in every bite.{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}dry fruits, nuts, organic, healthy snacks, premium quality, NutriHarvest{% endblock %}">
-    <meta name="author" content="NutriHarvest">
+    <meta name="keywords" content="{% block meta_keywords %}dry fruits, nuts, organic, healthy snacks, premium quality, DRY FRUITS DELIGHT{% endblock %}">
+    <meta name="author" content="DRY FRUITS DELIGHT">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ request.build_absolute_uri }}">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{% block og_url %}https://dryfruithouse.com/{% endblock %}">
-    <meta property="og:title" content="{% block og_title %}NutriHarvest - Premium Dry Fruits & Nuts{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}DRY FRUITS DELIGHT - Premium Dry Fruits & Nuts{% endblock %}">
     <meta property="og:description" content="{% block og_description %}Discover the finest selection of organic, hand-picked dry fruits and nuts from around the world. Quality, taste, and nutrition in every bite.{% endblock %}">
     <meta property="og:image" content="{% block og_image %}https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600{% endblock %}">
-    <meta property="og:site_name" content="NutriHarvest">
+    <meta property="og:site_name" content="DRY FRUITS DELIGHT">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{% block twitter_url %}https://dryfruithouse.com/{% endblock %}">
-    <meta property="twitter:title" content="{% block twitter_title %}NutriHarvest - Premium Dry Fruits & Nuts{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}DRY FRUITS DELIGHT - Premium Dry Fruits & Nuts{% endblock %}">
     <meta property="twitter:description" content="{% block twitter_description %}Discover the finest selection of organic, hand-picked dry fruits and nuts from around the world. Quality, taste, and nutrition in every bite.{% endblock %}">
     <meta property="twitter:image" content="{% block twitter_image %}https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600{% endblock %}">
     
@@ -57,20 +57,20 @@
     {
         "@context": "https://schema.org",
         "@type": "Organization",
-        "name": "NutriHarvest",
+        "name": "DRY FRUITS DELIGHT",
         "url": "https://dryfruithouse.com",
         "logo": "https://dryfruithouse.com{% static 'images/logo.png' %}",
         "description": "Premium dry fruits and nuts sourced directly from the finest farms worldwide.",
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "123 Business Street",
-            "addressLocality": "Business City",
+            "streetAddress": "Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008",
+            "addressLocality": "Hyderabad",
             "postalCode": "12345",
             "addressCountry": "US"
         },
         "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "+1-234-567-8900",
+            "telephone": "+91-8309232756",
             "contactType": "customer service"
         }
     }
@@ -82,7 +82,7 @@
         <div class="container">
             <a class="navbar-brand" href="{% url 'core:home' %}">
                 <i data-lucide="shopping-bag" class="me-2"></i>
-                NutriHarvest
+                DRY FRUITS DELIGHT
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -211,7 +211,7 @@
                             {% endif %}
                         </div>
                     {% else %}
-                        <h5><i data-lucide="shopping-bag" class="me-2"></i>NutriHarvest</h5>
+                        <h5><i data-lucide="shopping-bag" class="me-2"></i>DRY FRUITS DELIGHT</h5>
                         <p class="mb-3">Premium quality dry fruits and nuts sourced directly from the finest farms worldwide. Committed to delivering healthy, natural, and delicious products to your doorstep.</p>
                         <div class="d-flex">
                             <a href="#" class="me-3"><i data-lucide="facebook"></i></a>
@@ -266,15 +266,15 @@
                         <ul class="list-unstyled">
                             <li class="mb-2">
                                 <i data-lucide="phone" class="me-2"></i>
-                                +1-234-567-8900
+                                +91-8309232756
                             </li>
                             <li class="mb-2">
                                 <i data-lucide="mail" class="me-2"></i>
-                                info@nutriharvest.com
+                                info@dryfruitsdelight.com
                             </li>
                             <li class="mb-3">
                                 <i data-lucide="map-pin" class="me-2"></i>
-                                123 Business Street, Business City, BC 12345
+                                Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008
                             </li>
                         </ul>
                     {% endif %}
@@ -298,7 +298,7 @@
                         {% if footer_content %}
                             <p>{{ footer_content.copyright_text }}</p>
                         {% else %}
-                            <p>&copy; 2024 NutriHarvest. All rights reserved.</p>
+                            <p>&copy; 2024 DRY FRUITS DELIGHT. All rights reserved.</p>
                         {% endif %}
                     </div>
                     <div class="col-md-6 text-md-end">

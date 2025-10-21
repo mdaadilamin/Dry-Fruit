@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ category_name }} - NutriHarvest{% endblock %}
+{% block title %}{{ category_name }} - DRY FRUITS DELIGHT{% endblock %}
 
 {% block content %}
 <section class="py-5">
@@ -190,11 +190,11 @@
                                     <div class="d-flex justify-content-between align-items-center mb-2">
                                         {% if product.has_discount %}
                                             <div>
-                                                <span class="product-price text-decoration-line-through text-muted me-2">${{ product.price }}</span>
-                                                <span class="product-price text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                                                <span class="product-price text-decoration-line-through text-muted me-2">₹{{ product.price }}</span>
+                                                <span class="product-price text-success fw-bold">₹{{ product.discounted_price|floatformat:2 }}</span>
                                             </div>
                                         {% else %}
-                                            <span class="product-price fw-bold">${{ product.price }}</span>
+                                            <span class="product-price fw-bold">₹{{ product.price }}</span>
                                         {% endif %}
                                         
                                         {% if product.in_stock %}
@@ -253,11 +253,11 @@
                                             <div class="d-flex justify-content-between align-items-center mb-3">
                                                 {% if product.has_discount %}
                                                     <div>
-                                                        <span class="text-decoration-line-through text-muted me-2">${{ product.price }}</span>
-                                                        <span class="text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                                                        <span class="text-decoration-line-through text-muted me-2">₹{{ product.price }}</span>
+                                                        <span class="text-success fw-bold">₹{{ product.discounted_price|floatformat:2 }}</span>
                                                     </div>
                                                 {% else %}
-                                                    <span class="fw-bold">${{ product.price }}</span>
+                                                    <span class="fw-bold">₹{{ product.price }}</span>
                                                 {% endif %}
                                                 
                                                 {% if product.in_stock %}

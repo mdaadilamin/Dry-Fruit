@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}NutriHarvest - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
-{% block meta_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over $50.{% endblock %}
+{% block title %}DRY FRUITS DELIGHT - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
+{% block meta_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over ₹50.{% endblock %}
 {% block meta_keywords %}dry fruits, nuts, organic snacks, healthy food, online store, premium quality, almonds, walnuts, cashews, dried fruits, gift boxes, chocolates, spices{% endblock %}
 
-{% block og_title %}NutriHarvest - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
-{% block og_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over $50.{% endblock %}
+{% block og_title %}DRY FRUITS DELIGHT - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
+{% block og_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over ₹50.{% endblock %}
 
-{% block twitter_title %}NutriHarvest - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
-{% block twitter_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over $50.{% endblock %}
+{% block twitter_title %}DRY FRUITS DELIGHT - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
+{% block twitter_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over ₹50.{% endblock %}
 
 {% block content %}
 <!-- Hero Section with Promotional Banner -->
@@ -45,7 +45,7 @@
                 <div class="mt-4 p-3 bg-white rounded shadow-sm">
                     <div class="d-flex align-items-center">
                         <i data-lucide="gift" class="text-danger me-2"></i>
-                        <span class="fw-bold text-primary">Limited Time Offer: Free Shipping on Orders Over $50!</span>
+                        <span class="fw-bold text-primary">Limited Time Offer: Free Shipping on Orders Over ₹50!</span>
                     </div>
                 </div>
             </div>
@@ -445,7 +445,7 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h2 class="display-5 fw-bold">Why Choose NutriHarvest?</h2>
+                <h2 class="display-5 fw-bold">Why Choose DRY FRUITS DELIGHT?</h2>
                 <p class="lead text-muted">We are committed to providing the highest quality products</p>
             </div>
         </div>
@@ -528,16 +528,25 @@
         <div class="row g-4">
             {% for testimonial in testimonials %}
             <div class="col-lg-4 col-md-6">
-                <div class="testimonial-card">
-                    {% if testimonial.customer_image %}
-                        <img src="{{ testimonial.customer_image.url }}" alt="{{ testimonial.customer_name }}" class="testimonial-avatar">
-                    {% else %}
-                        <div class="testimonial-avatar bg-secondary d-flex align-items-center justify-content-center">
-                            <i data-lucide="user" class="text-white"></i>
+                <div class="testimonial-card position-relative h-100">
+                    <div class="testimonial-header d-flex align-items-center mb-3">
+                        {% if testimonial.customer_image %}
+                            <img src="{{ testimonial.customer_image.url }}" alt="{{ testimonial.customer_name }}" class="testimonial-avatar me-3">
+                        {% else %}
+                            <div class="testimonial-avatar bg-secondary d-flex align-items-center justify-content-center me-3">
+                                <i data-lucide="user" class="text-white"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="testimonial-author-info">
+                            <h5 class="testimonial-author mb-0">{{ testimonial.customer_name }}</h5>
+                            {% if testimonial.location %}
+                                <small class="text-muted">{{ testimonial.location }}</small>
+                            {% endif %}
                         </div>
-                    {% endif %}
+                    </div>
                     
-                    <div class="testimonial-stars">
+                    <div class="testimonial-stars mb-3">
                         {% for i in "12345"|make_list %}
                             {% if forloop.counter <= testimonial.rating %}
                                 <i data-lucide="star" class="filled"></i>
@@ -549,11 +558,8 @@
                     
                     <p class="testimonial-text">"{{ testimonial.comment }}"</p>
                     
-                    <div class="testimonial-author">
-                        <strong>{{ testimonial.customer_name }}</strong>
-                        {% if testimonial.location %}
-                            <br><small class="text-muted">{{ testimonial.location }}</small>
-                        {% endif %}
+                    <div class="testimonial-quote-icon">
+                        <i data-lucide="quote" class="text-primary opacity-25"></i>
                     </div>
                 </div>
             </div>
@@ -568,7 +574,7 @@
         <div class="row">
             <div class="col-12 text-center text-white">
                 <h2 class="display-5 fw-bold mb-4">Ready to Experience Premium Quality?</h2>
-                <p class="lead mb-4">Join thousands of satisfied customers who trust NutriHarvest for their healthy snacking needs.</p>
+                <p class="lead mb-4">Join thousands of satisfied customers who trust DRY FRUITS DELIGHT for their healthy snacking needs.</p>
                 <div class="d-flex flex-wrap justify-content-center gap-3">
                     <a href="{% url 'core:shop' %}" class="btn btn-light btn-lg">
                         <i data-lucide="shopping-bag" class="me-2"></i>Start Shopping
@@ -588,7 +594,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="promoModalLabel">Welcome to NutriHarvest!</h5>
+                <h5 class="modal-title" id="promoModalLabel">Welcome to DRY FRUITS DELIGHT!</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body text-center">
@@ -611,27 +617,27 @@
 {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "NutriHarvest",
+    "name": "DRY FRUITS DELIGHT",
     "url": "https://dryfruithouse.com",
     "logo": "https://dryfruithouse.com{% static 'images/logo.png' %}",
     "description": "Premium dry fruits and nuts sourced directly from the finest farms worldwide.",
     "address": {
         "@type": "PostalAddress",
-        "streetAddress": "123 Business Street",
-        "addressLocality": "Business City",
+        "streetAddress": "Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008",
+        "addressLocality": "Hyderabad",
         "postalCode": "12345",
         "addressCountry": "US"
     },
     "contactPoint": {
         "@type": "ContactPoint",
-        "telephone": "+1-234-567-8900",
+        "telephone": "+91-8309232756",
         "contactType": "customer service"
     },
     "sameAs": [
-        "https://www.facebook.com/nutriharvest",
-        "https://www.instagram.com/nutriharvest",
-        "https://www.twitter.com/nutriharvest",
-        "https://www.youtube.com/nutriharvest"
+        "https://www.facebook.com/dryfruitsdelight",
+        "https://www.instagram.com/dryfruitsdelight",
+        "https://www.twitter.com/dryfruitsdelight",
+        "https://www.youtube.com/dryfruitsdelight"
     ]
 }
 </script>

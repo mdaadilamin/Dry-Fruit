@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ product.name }} - NutriHarvest{% endblock %}
+{% block title %}{{ product.name }} - DRY FRUITS DELIGHT{% endblock %}
 {% block meta_description %}{{ product.description|truncatewords:30 }} Buy premium {{ product.name }} at the best price. Fast delivery and quality guarantee.{% endblock %}
 {% block meta_keywords %}{{ product.name }}, {{ product.category.name }}, dry fruits, nuts, organic, healthy snacks{% endblock %}
 
-{% block og_title %}{{ product.name }} - NutriHarvest{% endblock %}
+{% block og_title %}{{ product.name }} - DRY FRUITS DELIGHT{% endblock %}
 {% block og_description %}{{ product.description|truncatewords:30 }} Buy premium {{ product.name }} at the best price. Fast delivery and quality guarantee.{% endblock %}
 {% block og_image %}{% if product.image %}{{ request.build_absolute_uri }}{{ product.image.url }}{% else %}https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600{% endif %}{% endblock %}
 
-{% block twitter_title %}{{ product.name }} - NutriHarvest{% endblock %}
+{% block twitter_title %}{{ product.name }} - DRY FRUITS DELIGHT{% endblock %}
 {% block twitter_description %}{{ product.description|truncatewords:30 }} Buy premium {{ product.name }} at the best price. Fast delivery and quality guarantee.{% endblock %}
 {% block twitter_image %}{% if product.image %}{{ request.build_absolute_uri }}{{ product.image.url }}{% else %}https://images.pexels.com/photos/1295572/pexels-photo-1295572.jpeg?auto=compress&cs=tinysrgb&w=600{% endif %}{% endblock %}
 
@@ -74,11 +74,11 @@
                 
                 <div class="mb-3">
                     {% if product.has_discount %}
-                        <span class="h4 text-muted text-decoration-line-through me-2">${{ product.price }}</span>
-                        <span class="h4 text-success fw-bold">${{ product.discounted_price|floatformat:2 }}</span>
+                        <span class="h4 text-muted text-decoration-line-through me-2">₹{{ product.price }}</span>
+                        <span class="h4 text-success fw-bold">₹{{ product.discounted_price|floatformat:2 }}</span>
                         <span class="badge bg-danger ms-2">{{ product.discount_percent }}% OFF</span>
                     {% else %}
-                        <span class="h4 text-primary fw-bold">${{ product.price }}</span>
+                        <span class="h4 text-primary fw-bold">₹{{ product.price }}</span>
                     {% endif %}
                     
                     {% if product.in_stock %}
@@ -109,10 +109,11 @@
                 </div>
                 
                 <!-- Tags -->
+                {% load cms_extras %}
                 {% if product.tags %}
                 <div class="mb-4">
                     <h5 class="fw-bold">Tags</h5>
-                    {% for tag in product.tags.split(',') %}
+                    {% for tag in product.tags|split:"," %}
                     <span class="badge bg-info me-1">{{ tag|capfirst }}</span>
                     {% endfor %}
                 </div>
@@ -134,7 +135,7 @@
                                 <label class="form-check-label" for="customization{{ customization.id }}">
                                     {{ customization.name }} 
                                     {% if customization.price > 0 %}
-                                        <span class="text-muted">(+${{ customization.price }})</span>
+                                        <span class="text-muted">(+₹{{ customization.price }})</span>
                                     {% else %}
                                         <span class="text-muted">(Free)</span>
                                     {% endif %}
@@ -160,7 +161,7 @@
                                 <span class="fw-medium">{{ item.item.name }}</span>
                                 <span class="text-muted">× {{ item.quantity }}</span>
                             </div>
-                            <span class="text-muted">${{ item.item.price }}</span>
+                            <span class="text-muted">₹{{ item.item.price }}</span>
                         </li>
                         {% endfor %}
                     </ul>
@@ -469,19 +470,19 @@
     "sku": "{{ product.id }}",
     "brand": {
         "@type": "Brand",
-        "name": "NutriHarvest"
+        "name": "DRY FRUITS DELIGHT"
     },
     "offers": {
         "@type": "Offer",
         "url": "{{ request.build_absolute_uri }}",
-        "priceCurrency": "USD",
+        "priceCurrency": "INR",
         "price": "{{ product.discounted_price|floatformat:2 }}",
         "priceValidUntil": "{{ product.updated_at|date:'Y-m-d' }}",
         "itemCondition": "https://schema.org/NewCondition",
         "availability": "{% if product.in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}",
         "seller": {
             "@type": "Organization",
-            "name": "NutriHarvest"
+            "name": "DRY FRUITS DELIGHT"
         }
     },
     "aggregateRating": {
@@ -603,8 +604,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Wishlist functionality
     const wishlistBtn = document.querySelector('.wishlist-btn');
     if (wishlistBtn) {
-        wishlistBtn.addEventListener('click', function() {
+        wishlistBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             const productId = this.getAttribute('data-product-id');
+            const button = this;
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Loading...';
+            button.disabled = true;
             
             fetch('{% url "orders:add_to_wishlist" %}', {
                 method: 'POST',
@@ -633,6 +641,215 @@ document.addEventListener('DOMContentLoaded', function() {
                     setTimeout(() => {
                         alertDiv.remove();
                     }, 3000);
+                    
+                    // Update button text based on action
+                    if (data.message.includes('removed')) {
+                        button.innerHTML = '<i data-lucide="heart" class="me-2"></i>Wishlist';
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-primary');
+                    } else {
+                        button.innerHTML = '<i data-lucide="heart" class="me-2"></i>Wishlisted';
+                        button.classList.remove('btn-outline-primary');
+                        button.classList.add('btn-danger');
+                    }
+                    
+                    // Update wishlist count if element exists
+                    const wishlistCount = document.querySelector('.wishlist-count');
+                    if (wishlistCount && data.wishlist_count !== undefined) {
+                        wishlistCount.textContent = data.wishlist_count;
+                        wishlistCount.style.display = data.wishlist_count > 0 ? 'inline' : 'none';
+                    }
+                } else {
+                    // Show error message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                    alertDiv.setAttribute('role', 'alert');
+                    alertDiv.innerHTML = `
+                        <strong>Error!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alertDiv);
+                    
+                    // Auto dismiss after 3 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 3000);
+                    
+                    // Restore original button text
+                    button.innerHTML = originalText;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Show error message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    <strong>Error!</strong> An error occurred while updating wishlist. Please try again.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Auto dismiss after 3 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 3000);
+                
+                // Restore original button text
+                button.innerHTML = originalText;
+            })
+            .finally(() => {
+                button.disabled = false;
+                // Reinitialize Lucide icons
+                lucide.createIcons();
+            });
+        });
+    }
+    
+    // Rating stars
+    const starIcons = document.querySelectorAll('.star-icon[data-rating]');
+    const ratingValue = document.getElementById('rating-value');
+    
+    if (starIcons.length > 0 && ratingValue) {
+        starIcons.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                ratingValue.value = rating;
+                
+                // Update star appearance
+                starIcons.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.add('filled', 'text-warning');
+                        s.classList.remove('text-muted');
+                    } else {
+                        s.classList.remove('filled', 'text-warning');
+                        s.classList.add('text-muted');
+                    }
+                });
+                
+                // Reinitialize Lucide icons to reflect changes
+                lucide.createIcons();
+            });
+            
+            star.addEventListener('mouseenter', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                starIcons.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.add('text-warning');
+                        s.classList.remove('text-muted');
+                    } else {
+                        s.classList.remove('text-warning');
+                        s.classList.add('text-muted');
+                    }
+                });
+            });
+        });
+        
+        // Reset star appearance on mouse leave
+        const ratingStarsContainer = document.querySelector('.rating-stars');
+        if (ratingStarsContainer) {
+            ratingStarsContainer.addEventListener('mouseleave', function() {
+                const currentRating = parseInt(ratingValue.value) || 0;
+                starIcons.forEach((s, index) => {
+                    if (index < currentRating) {
+                        s.classList.add('filled', 'text-warning');
+                        s.classList.remove('text-muted');
+                    } else {
+                        s.classList.remove('filled', 'text-warning');
+                        s.classList.add('text-muted');
+                    }
+                });
+            });
+        }
+    }
+    
+    // Review form submission
+    const reviewForm = document.getElementById('review-form');
+    if (reviewForm) {
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const rating = document.getElementById('rating-value').value;
+            const comment = document.getElementById('review-comment').value;
+            
+            if (rating === '0') {
+                // Show error message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-warning alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    <strong>Warning!</strong> Please select a rating
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Auto dismiss after 3 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 3000);
+                return;
+            }
+            
+            if (comment.trim() === '') {
+                // Show error message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-warning alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    <strong>Warning!</strong> Please enter your review
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Auto dismiss after 3 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 3000);
+                return;
+            }
+            
+            fetch('{% url "shop:submit_review" product.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({
+                    rating: rating,
+                    comment: comment
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                    alertDiv.setAttribute('role', 'alert');
+                    alertDiv.innerHTML = `
+                        <strong>Success!</strong> ${data.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    document.body.appendChild(alertDiv);
+                    
+                    // Auto dismiss after 3 seconds
+                    setTimeout(() => {
+                        alertDiv.remove();
+                    }, 3000);
+                    
+                    // Reset form
+                    reviewForm.reset();
+                    // Reset stars
+                    ratingValue.value = '0';
+                    starIcons.forEach(s => {
+                        s.classList.remove('filled');
+                        s.classList.remove('text-warning');
+                        s.classList.add('text-muted');
+                    });
+                    
+                    // Reinitialize Lucide icons
+                    lucide.createIcons();
                 } else {
                     // Show error message
                     const alertDiv = document.createElement('div');
@@ -652,112 +869,20 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-            });
-        });
-    }
-    
-    // Rating stars
-    const starIcons = document.querySelectorAll('.star-icon[data-rating]');
-    const ratingValue = document.getElementById('rating-value');
-    
-    starIcons.forEach(star => {
-        star.addEventListener('click', function() {
-            const rating = this.getAttribute('data-rating');
-            ratingValue.value = rating;
-            
-            // Update star appearance
-            starIcons.forEach((s, index) => {
-                if (index < rating) {
-                    s.classList.add('filled');
-                    s.classList.remove('text-muted');
-                    s.classList.add('text-warning');
-                } else {
-                    s.classList.remove('filled');
-                    s.classList.remove('text-warning');
-                    s.classList.add('text-muted');
-                }
-            });
-        });
-        
-        star.addEventListener('mouseenter', function() {
-            const rating = this.getAttribute('data-rating');
-            starIcons.forEach((s, index) => {
-                if (index < rating) {
-                    s.classList.add('text-warning');
-                } else {
-                    s.classList.remove('text-warning');
-                }
-            });
-        });
-    });
-    
-    // Reset star appearance on mouse leave
-    document.querySelector('.rating-stars').addEventListener('mouseleave', function() {
-        const currentRating = parseInt(ratingValue.value);
-        starIcons.forEach((s, index) => {
-            if (index < currentRating) {
-                s.classList.add('filled');
-                s.classList.add('text-warning');
-                s.classList.remove('text-muted');
-            } else {
-                s.classList.remove('filled');
-                s.classList.remove('text-warning');
-                s.classList.add('text-muted');
-            }
-        });
-    });
-    
-    // Review form submission
-    const reviewForm = document.getElementById('review-form');
-    if (reviewForm) {
-        reviewForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const rating = document.getElementById('rating-value').value;
-            const comment = document.getElementById('review-comment').value;
-            
-            if (rating === '0') {
-                alert('Please select a rating');
-                return;
-            }
-            
-            if (comment.trim() === '') {
-                alert('Please enter your review');
-                return;
-            }
-            
-            fetch('{% url "shop:submit_review" product.id %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: JSON.stringify({
-                    rating: rating,
-                    comment: comment
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    alert('Review submitted successfully!');
-                    // Reset form
-                    reviewForm.reset();
-                    // Reset stars
-                    ratingValue.value = '0';
-                    starIcons.forEach(s => {
-                        s.classList.remove('filled');
-                        s.classList.remove('text-warning');
-                        s.classList.add('text-muted');
-                    });
-                } else {
-                    alert('Error submitting review: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error submitting review. Please try again.');
+                // Show error message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-3';
+                alertDiv.setAttribute('role', 'alert');
+                alertDiv.innerHTML = `
+                    <strong>Error!</strong> An error occurred while submitting your review. Please try again.
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(alertDiv);
+                
+                // Auto dismiss after 3 seconds
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 3000);
             });
         });
     }
