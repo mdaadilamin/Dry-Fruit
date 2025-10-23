@@ -1,16 +1,18 @@
-from django.urls import path
+from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views, api_views
 
 app_name = 'users'
 
 # API Routes
-router = DefaultRouter()
-router.register(r'users', api_views.UserViewSet)
-router.register(r'roles', api_views.RoleViewSet)
-router.register(r'permissions', api_views.PermissionViewSet)
+api_router = DefaultRouter()
+api_router.register(r'users', api_views.UserViewSet)
+api_router.register(r'customers', api_views.CustomerViewSet)
+api_router.register(r'roles', api_views.RoleViewSet)
+api_router.register(r'permissions', api_views.PermissionViewSet)
 
-urlpatterns = router.urls + [
+# Web Routes
+web_urlpatterns = [
     # Web views
     path('employees/', views.employee_list, name='employee_list'),
     path('employees/create/', views.employee_create, name='employee_create'),
@@ -26,4 +28,10 @@ urlpatterns = router.urls + [
     path('activity/', views.activity_log, name='activity_log'),
     path('roles/manage/', views.role_management, name='role_management'),
     path('roles/<int:role_id>/permissions/', views.update_role_permissions, name='update_role_permissions'),
+]
+
+# Combine API and web URLs
+urlpatterns = [
+    path('api/', include(api_router.urls)),
+    path('', include(web_urlpatterns)),
 ]
