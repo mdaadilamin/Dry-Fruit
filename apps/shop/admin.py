@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Product, ProductVariant, ProductImage, ProductReview
+from .models import Category, Product, ProductVariant, ProductImage, ProductReview, GiftBoxCustomization, GiftBoxItem
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -67,4 +67,18 @@ class ProductReviewAdmin(admin.ModelAdmin):
     list_display = ['product', 'user', 'rating', 'is_verified', 'created_at']
     list_filter = ['rating', 'is_verified', 'created_at']
     search_fields = ['product__name', 'user__username']
+    readonly_fields = ['created_at']
+
+@admin.register(GiftBoxCustomization)
+class GiftBoxCustomizationAdmin(admin.ModelAdmin):
+    list_display = ['product', 'name', 'price', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['product__name', 'name']
+    readonly_fields = ['created_at']
+
+@admin.register(GiftBoxItem)
+class GiftBoxItemAdmin(admin.ModelAdmin):
+    list_display = ['product', 'item', 'quantity', 'is_default', 'is_removable', 'created_at']
+    list_filter = ['is_default', 'is_removable', 'created_at']
+    search_fields = ['product__name', 'item__name']
     readonly_fields = ['created_at']

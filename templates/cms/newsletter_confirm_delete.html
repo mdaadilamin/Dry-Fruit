@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Newsletter Subscriber - DRY FRUITS DELIGHT{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i data-lucide="alert-triangle" class="me-2"></i>
+                        Confirm Subscriber Deletion
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5>
+                            <i data-lucide="alert-circle" class="me-2"></i>
+                            Warning!
+                        </h5>
+                        <p>You are about to permanently delete the newsletter subscriber <strong>{{ subscriber.email }}</strong>.</p>
+                        <p>This action cannot be undone. The subscriber will be removed from all mailing lists.</p>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6>Subscriber Details:</h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Email:</strong> {{ subscriber.email }}</li>
+                                <li><strong>Status:</strong> 
+                                    {% if subscriber.is_confirmed %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending Confirmation</span>
+                                    {% endif %}
+                                </li>
+                                <li><strong>Subscribed:</strong> {{ subscriber.created_at|date:"M d, Y H:i" }}</li>
+                                {% if subscriber.confirmed_at %}
+                                    <li><strong>Confirmed:</strong> {{ subscriber.confirmed_at|date:"M d, Y H:i" }}</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'cms:newsletter_management' %}" class="btn btn-secondary">
+                                <i data-lucide="x" class="me-1"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i data-lucide="trash-2" class="me-1"></i>
+                                Delete Subscriber
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

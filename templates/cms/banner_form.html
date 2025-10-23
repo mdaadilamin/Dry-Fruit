@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Banner Management - DRY FRUITS DELIGHT{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="display-6 fw-bold">
+                {% if banner %}Edit Banner{% else %}Add New Banner{% endif %}
+            </h1>
+            <p class="text-muted">Manage website banners</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <a href="{% url 'cms:banner_management' %}" class="btn btn-secondary">
+                <i data-lucide="arrow-left" class="me-1"></i> Back to Banners
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% if banner %}
+                    <input type="hidden" name="banner_id" value="{{ banner.id }}">
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title *</label>
+                            <input type="text" class="form-control" id="title" name="title" 
+                                   value="{{ banner.title|default:'' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="subtitle" class="form-label">Subtitle</label>
+                            <input type="text" class="form-control" id="subtitle" name="subtitle" 
+                                   value="{{ banner.subtitle|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="image" class="form-label">
+                        Banner Image *
+                        {% if banner and banner.image %}
+                            <span class="text-muted">(Leave blank to keep current image)</span>
+                        {% endif %}
+                    </label>
+                    <input type="file" class="form-control" id="image" name="image" 
+                           accept="image/*" {% if not banner %}required{% endif %}>
+                    {% if banner and banner.image %}
+                        <div class="mt-2">
+                            <img src="{{ banner.image.url }}" alt="Current banner" class="img-thumbnail" style="max-height: 150px;">
+                        </div>
+                    {% endif %}
+                    <div class="form-text">Recommended size: 1200x400 pixels</div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="button_text" class="form-label">Button Text</label>
+                            <input type="text" class="form-control" id="button_text" name="button_text" 
+                                   value="{{ banner.button_text|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="button_url" class="form-label">Button URL</label>
+                            <input type="url" class="form-control" id="button_url" name="button_url" 
+                                   value="{{ banner.button_url|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="order" class="form-label">Display Order</label>
+                            <input type="number" class="form-control" id="order" name="order" 
+                                   value="{{ banner.order|default:'0' }}" min="0">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="text_position" class="form-label">Text Position</label>
+                            <select class="form-select" id="text_position" name="text_position">
+                                <option value="center" {% if banner.text_position == 'center' %}selected{% endif %}>Center</option>
+                                <option value="left" {% if banner.text_position == 'left' %}selected{% endif %}>Left</option>
+                                <option value="right" {% if banner.text_position == 'right' %}selected{% endif %}>Right</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="text_color" class="form-label">Text Color</label>
+                    <input type="color" class="form-control form-control-color" id="text_color" name="text_color" 
+                           value="{{ banner.text_color|default:'#ffffff' }}" title="Choose text color">
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                           {% if banner.is_active|default:True %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">Active</label>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">
+                        {% if banner %}Update Banner{% else %}Create Banner{% endif %}
+                    </button>
+                    {% if banner %}
+                    <a href="{% url 'cms:banner_management' %}" class="btn btn-secondary">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

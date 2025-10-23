@@ -473,6 +473,128 @@
         </div>
     </div>
     
+    <!-- Management Sections -->
+    <div class="row g-4 mt-4">
+        <!-- Product Management -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Product Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'shop:product_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="package" class="me-2"></i>Manage Products
+                        </a>
+                        <a href="{% url 'shop:category_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="folder" class="me-2"></i>Manage Categories
+                        </a>
+                        <a href="{% url 'shop:review_management' %}" class="btn btn-outline-primary">
+                            <i data-lucide="star" class="me-2"></i>Manage Reviews
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Content Management -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Content Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'cms:banner_management' %}" class="btn btn-outline-success">
+                            <i data-lucide="image" class="me-2"></i>Manage Banners
+                        </a>
+                        <a href="{% url 'cms:testimonial_management' %}" class="btn btn-outline-success">
+                            <i data-lucide="message-circle" class="me-2"></i>Manage Testimonials
+                        </a>
+                        <a href="{% url 'cms:page_management' %}" class="btn btn-outline-success">
+                            <i data-lucide="file-text" class="me-2"></i>Manage Pages
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Management -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">User Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'users:employee_list' %}" class="btn btn-outline-info">
+                            <i data-lucide="users" class="me-2"></i>Manage Employees
+                        </a>
+                        <a href="{% url 'users:customer_list' %}" class="btn btn-outline-info">
+                            <i data-lucide="user" class="me-2"></i>Manage Customers
+                        </a>
+                        <a href="{% url 'users:role_management' %}" class="btn btn-outline-info">
+                            <i data-lucide="lock" class="me-2"></i>Manage Roles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Additional Management Sections -->
+    <div class="row g-4 mt-4">
+        <!-- Marketing & Blog -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Marketing & Blog</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'core:admin_coupon_management' %}" class="btn btn-outline-warning">
+                            <i data-lucide="tag" class="me-2"></i>Manage Coupons
+                        </a>
+                        <a href="{% url 'blog:post_management' %}" class="btn btn-outline-warning">
+                            <i data-lucide="file-text" class="me-2"></i>Manage Blog Posts
+                        </a>
+                        <a href="{% url 'blog:category_management' %}" class="btn btn-outline-warning">
+                            <i data-lucide="folder" class="me-2"></i>Manage Blog Categories
+                        </a>
+                        <a href="{% url 'blog:comment_management' %}" class="btn btn-outline-warning">
+                            <i data-lucide="message-circle" class="me-2"></i>Manage Blog Comments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- System Management -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">System Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'orders:order_management' %}" class="btn btn-outline-danger">
+                            <i data-lucide="shopping-cart" class="me-2"></i>Manage Orders
+                        </a>
+                        <a href="{% url 'notifications:system_notification_management' %}" class="btn btn-outline-danger">
+                            <i data-lucide="bell" class="me-2"></i>Manage Notifications
+                        </a>
+                        <a href="{% url 'cms:contact_management' %}" class="btn btn-outline-danger">
+                            <i data-lucide="contact" class="me-2"></i>Manage Contact Info
+                        </a>
+                        <a href="{% url 'cms:enquiry_management' %}" class="btn btn-outline-danger">
+                            <i data-lucide="message-square" class="me-2"></i>Manage Enquiries
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Quick Actions Section (Collapsible) -->
     <div class="row g-4 mt-4">
         <div class="col-12">

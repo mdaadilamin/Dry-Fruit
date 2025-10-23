@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Email Template Management - DRY FRUITS DELIGHT{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="display-6 fw-bold">Email Template Management</h1>
+            <p class="text-muted">Manage email templates for automated notifications</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i data-lucide="mail" class="me-1"></i> Select Template
+                </button>
+                <ul class="dropdown-menu">
+                    {% for type_value, type_label in template_choices %}
+                        <li>
+                            <a class="dropdown-item {% if current_template == type_value %}active{% endif %}" 
+                               href="?template={{ type_value }}">
+                                {{ type_label }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Email Subject *</label>
+                    <input type="text" class="form-control" id="subject" name="subject" 
+                           value="{{ template.subject }}" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="body_html" class="form-label">HTML Content *</label>
+                    <textarea class="form-control" id="body_html" name="body_html" rows="10" required>{{ template.body_html }}</textarea>
+                    <div class="form-text">HTML version of the email content</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="body_text" class="form-label">Plain Text Content *</label>
+                    <textarea class="form-control" id="body_text" name="body_text" rows="6" required>{{ template.body_text }}</textarea>
+                    <div class="form-text">Plain text version of the email content</div>
+                </div>
+                
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="is_active" name="is_active" 
+                           {% if template.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">Active</label>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">
+                        <i data-lucide="save" class="me-1"></i>
+                        Save Template
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="previewBtn">
+                        <i data-lucide="eye" class="me-1"></i>
+                        Preview
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Available Variables</h5>
+        </div>
+        <div class="card-body">
+            <p>You can use the following variables in your email templates:</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li><code>{{ customer_name }}</code> - Customer's full name</li>
+                        <li><code>{{ order_number }}</code> - Order number</li>
+                        <li><code>{{ order_total }}</code> - Order total amount</li>
+                        <li><code>{{ order_date }}</code> - Order date</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul>
+                        <li><code>{{ order_items }}</code> - List of order items</li>
+                        <li><code>{{ shipping_address }}</code> - Customer's shipping address</li>
+                        <li><code>{{ company_name }}</code> - Company name</li>
+                        <li><code>{{ company_address }}</code> - Company address</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Email Template Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const previewBtn = document.getElementById('previewBtn');
+    const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+    const previewContent = document.getElementById('previewContent');
+    
+    previewBtn.addEventListener('click', function() {
+        const subject = document.getElementById('subject').value;
+        const bodyHtml = document.getElementById('body_html').value;
+        
+        previewContent.innerHTML = `
+            <div class="border p-3 mb-3">
+                <h6 class="text-muted">Subject: ${subject}</h6>
+            </div>
+            <div class="border p-3">
+                ${bodyHtml}
+            </div>
+        `;
+        
+        previewModal.show();
+    });
+});
+</script>
+{% endblock %}

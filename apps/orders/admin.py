@@ -1,15 +1,15 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Order, OrderItem, CartItem, Wishlist
+from .models import Order, OrderItem, CartItem, Wishlist, GiftWrap
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     readonly_fields = ['product', 'quantity', 'price', 'get_total_price']
     extra = 0
     
+    @admin.display(description='Total Price')
     def get_total_price(self, obj):
         return obj.get_total_price()
-    get_total_price.short_description = 'Total Price'
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -42,12 +42,19 @@ class CartItemAdmin(admin.ModelAdmin):
     list_filter = ['created_at']
     search_fields = ['user__username', 'product__name']
     
+    @admin.display(description='Total Price')
     def get_total_price(self, obj):
         return obj.get_total_price()
-    get_total_price.short_description = 'Total Price'
 
 @admin.register(Wishlist)
 class WishlistAdmin(admin.ModelAdmin):
     list_display = ['user', 'product', 'created_at']
     list_filter = ['created_at']
     search_fields = ['user__username', 'product__name']
+
+@admin.register(GiftWrap)
+class GiftWrapAdmin(admin.ModelAdmin):
+    list_display = ['name', 'price', 'is_active', 'created_at']
+    list_filter = ['is_active', 'created_at']
+    search_fields = ['name', 'description']
+    list_editable = ['is_active']
