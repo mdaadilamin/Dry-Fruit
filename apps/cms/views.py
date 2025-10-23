@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from .models import Banner, Testimonial, Page, ContactInfo, Newsletter, Enquiry
+from . import models
 import json
 import uuid
 
@@ -14,7 +14,7 @@ def banner_management(request):
         messages.error(request, 'Access denied.')
         return redirect('core:dashboard')
     
-    banners = Banner.objects.all()
+    banners = models.Banner.objects.all()
     return render(request, 'cms/banner_management.html', {'banners': banners})
 
 @login_required
@@ -33,7 +33,7 @@ def testimonial_management(request):
                 messages.error(request, 'Access denied.')
                 return redirect('cms:testimonial_management')
             
-            testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+            testimonial = get_object_or_404(models.Testimonial, id=testimonial_id)
             testimonial.customer_name = request.POST.get('customer_name', testimonial.customer_name)
             testimonial.rating = int(request.POST.get('rating', testimonial.rating))
             testimonial.comment = request.POST.get('comment', testimonial.comment)
@@ -55,7 +55,7 @@ def testimonial_management(request):
             customer_image = request.FILES.get('customer_image')
             
             if all([customer_name, rating, comment]):
-                Testimonial.objects.create(
+                models.Testimonial.objects.create(
                     customer_name=customer_name,
                     rating=int(rating),
                     comment=comment,
@@ -67,7 +67,7 @@ def testimonial_management(request):
             else:
                 messages.error(request, 'Please fill all required fields.')
     
-    testimonials = Testimonial.objects.all()
+    testimonials = models.Testimonial.objects.all()
     return render(request, 'cms/testimonial_management.html', {'testimonials': testimonials})
 
 
@@ -79,7 +79,7 @@ def delete_testimonial(request, testimonial_id):
         return redirect('cms:testimonial_management')
     
     if request.method == 'POST':
-        testimonial = get_object_or_404(Testimonial, id=testimonial_id)
+        testimonial = get_object_or_404(models.Testimonial, id=testimonial_id)
         testimonial.delete()
         messages.success(request, 'Testimonial deleted successfully!')
     
@@ -97,7 +97,7 @@ def submit_testimonial(request):
         
         if all([customer_name, rating, comment]):
             # Create testimonial with is_active=False by default (requires admin approval)
-            Testimonial.objects.create(
+            models.Testimonial.objects.create(
                 customer_name=customer_name,
                 rating=int(rating),
                 comment=comment,
@@ -120,7 +120,7 @@ def page_management(request):
         return redirect('core:dashboard')
     
     page_type = request.GET.get('page', 'about')
-    page, created = Page.objects.get_or_create(
+    page, created = models.Page.objects.get_or_create(
         page_type=page_type,
         defaults={
             'title': page_type.replace('_', ' ').title(),
@@ -137,7 +137,7 @@ def page_management(request):
     
     context = {
         'page': page,
-        'page_choices': Page.PAGE_CHOICES,
+        'page_choices': models.Page.PAGE_CHOICES,
         'current_page': page_type,
     }
     return render(request, 'cms/page_management.html', context)
@@ -149,7 +149,7 @@ def contact_management(request):
         messages.error(request, 'Access denied.')
         return redirect('core:dashboard')
     
-    contact_info, created = ContactInfo.objects.get_or_create(
+    contact_info, created = models.ContactInfo.objects.get_or_create(
         id=1,  # Ensure only one contact info record
         defaults={
             'email': 'info@dryfruitsdelight.com',
@@ -181,7 +181,7 @@ def contact_management(request):
 
 def page_view(request, page_type):
     """Display CMS pages"""
-    page = get_object_or_404(Page, page_type=page_type, is_active=True)
+    page = get_object_or_404(models.Page, page_type=page_type, is_active=True)
     
     # Use specific templates for certain pages
     if page_type == 'about':
@@ -231,7 +231,7 @@ def newsletter_subscribe(request):
             })
         
         # Create newsletter subscription with is_active=False by default
-        newsletter, created = Newsletter.objects.get_or_create(
+        newsletter, created = models.Newsletter.objects.get_or_create(
             email=email,
             defaults={
                 'is_active': False,
@@ -266,7 +266,7 @@ def newsletter_subscribe(request):
 def confirm_newsletter_subscription(request, token):
     """Confirm newsletter subscription"""
     try:
-        newsletter = get_object_or_404(Newsletter, confirmation_token=token)
+        newsletter = get_object_or_404(models.Newsletter, confirmation_token=token)
         
         if newsletter.is_active:
             messages.info(request, 'Your subscription is already confirmed.')
@@ -390,7 +390,7 @@ def enquiry_management(request):
     subject_filter = request.GET.get('subject', 'all')
     
     # Get enquiries
-    enquiries = Enquiry.objects.all()
+    enquiries = models.Enquiry.objects.all()
     
     # Apply filters
     if status_filter == 'resolved':
@@ -411,7 +411,7 @@ def enquiry_management(request):
         'enquiries': page_obj,
         'status_filter': status_filter,
         'subject_filter': subject_filter,
-        'subject_choices': Enquiry.SUBJECT_CHOICES,
+        'subject_choices': models.Enquiry.SUBJECT_CHOICES,
     }
     return render(request, 'cms/enquiry_management.html', context)
 
@@ -672,3 +672,45 @@ def delete_newsletter_subscriber(request, subscriber_id):
         return JsonResponse({'success': False, 'message': 'Subscriber not found.'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': 'An error occurred while deleting the subscriber.'})
+
+
+@login_required
+def footer_content_management(request):
+    """Footer content management"""
+    if not request.user.has_permission('cms', 'edit'):
+        messages.error(request, 'Access denied.')
+        return redirect('core:dashboard')
+    
+    # Import models inside the function to follow the same pattern as other views
+    from .models import FooterContent
+    
+    # Get or create the single footer content instance
+    try:
+        footer_content = FooterContent.objects.get(id=1)
+    except FooterContent.DoesNotExist:
+        footer_content = FooterContent.objects.create(
+            id=1,
+            business_name='DRY FRUITS DELIGHT',
+            copyright_text='© 2024 DRY FRUITS DELIGHT. All rights reserved.',
+            address='Shop no 4 , QMAKS Ayzal Residency , S.A. Colony , Tolichowki, Hyderabad -500008',
+            phone='+91-8309232756',
+            email='info@dryfruitsdelight.com'
+        )
+    
+    if request.method == 'POST':
+        footer_content.business_name = request.POST.get('business_name', footer_content.business_name)
+        footer_content.copyright_text = request.POST.get('copyright_text', footer_content.copyright_text)
+        footer_content.address = request.POST.get('address', footer_content.address)
+        footer_content.phone = request.POST.get('phone', footer_content.phone)
+        footer_content.email = request.POST.get('email', footer_content.email)
+        footer_content.facebook_url = request.POST.get('facebook_url', footer_content.facebook_url)
+        footer_content.instagram_url = request.POST.get('instagram_url', footer_content.instagram_url)
+        footer_content.twitter_url = request.POST.get('twitter_url', footer_content.twitter_url)
+        footer_content.youtube_url = request.POST.get('youtube_url', footer_content.youtube_url)
+        footer_content.is_active = 'is_active' in request.POST
+        footer_content.save()
+        messages.success(request, 'Footer content updated successfully!')
+        return redirect('cms:footer_content_management')
+    
+    return render(request, 'cms/footer_content_management.html', {'footer_content': footer_content})
+
