@@ -164,7 +164,7 @@ button>
                     {% for product in products %}
                     <div class="col-lg-4 col-md-6 product-item">
                         <div class="product-card h-100">
-                            <div class="position-relative">
+                            <div class="position-relative" style="overflow: visible !important;">
                                 {% if product.image %}
                                     <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
                                 {% else %}
@@ -184,7 +184,7 @@ button>
                                 {% endif %}
                                 
                                 <!-- Quick View Button -->
-                                <div class="position-absolute top-50 start-50 translate-middle d-none quick-view">
+                                <div class="quick-view">
                                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#productModal{{ product.id }}">
                                         Quick View
                                     </button>
@@ -407,20 +407,49 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Quick view hover effect
+    // Quick view hover effect - Completely reworked for maximum visibility
     const productCards = document.querySelectorAll('.product-card');
     productCards.forEach(card => {
         card.addEventListener('mouseenter', function() {
             const quickView = this.querySelector('.quick-view');
             if (quickView) {
-                quickView.classList.remove('d-none');
+                // Ensure the card is above all other elements
+                this.style.zIndex = '1000';
+                this.style.overflow = 'visible';
+                
+                // Ensure the image container doesn't clip the button
+                const imgContainer = this.querySelector('.position-relative');
+                if (imgContainer) {
+                    imgContainer.style.overflow = 'visible';
+                    imgContainer.style.zIndex = '2';
+                }
+                
+                // Make the quick view button visible with enhanced properties
+                quickView.style.opacity = '1';
+                quickView.style.visibility = 'visible';
+                quickView.style.pointerEvents = 'auto';
+                quickView.style.zIndex = '10000';
+                
+                // Force reflow to ensure proper rendering
+                quickView.offsetHeight;
             }
         });
         
         card.addEventListener('mouseleave', function() {
             const quickView = this.querySelector('.quick-view');
             if (quickView) {
-                quickView.classList.add('d-none');
+                // Reset all properties
+                this.style.zIndex = '1';
+                this.style.overflow = 'visible';
+                
+                const imgContainer = this.querySelector('.position-relative');
+                if (imgContainer) {
+                    imgContainer.style.overflow = 'visible';
+                }
+                
+                quickView.style.opacity = '0';
+                quickView.style.visibility = 'hidden';
+                quickView.style.pointerEvents = 'none';
             }
         });
     });
@@ -533,7 +562,35 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .quick-view {
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 100;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+}
+
+.product-card:hover .quick-view {
+    opacity: 1;
+    visibility: visible;
+}
+
+.product-card .quick-view .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--golden-beige) 0%, var(--light-brown) 100%);
+}
+
+.product-card .quick-view .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Product card quantity selector */

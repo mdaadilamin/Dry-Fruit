@@ -364,26 +364,89 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3, .display-4 {
 .product-card {
     background: var(--white);
     border-radius: 15px;
-    overflow: hidden;
+    overflow: visible; /* Critical: Prevent clipping of absolutely positioned elements */
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     border: none;
     height: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .product-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    z-index: 1000; /* Very high z-index to ensure it's above all other elements */
+}
+
+/* Critical fix: Ensure image container doesn't clip absolutely positioned children */
+.product-card .position-relative {
+    overflow: visible !important;
+    position: relative;
+    z-index: 2;
 }
 
 .product-card img {
-    height: 250px;
+    height: 200px;
     object-fit: cover;
     transition: transform 0.3s ease;
+    border-radius: 15px 15px 0 0;
+    position: relative;
+    z-index: 1;
 }
 
 .product-card:hover img {
     transform: scale(1.05);
+}
+
+/* Quick View Button - Completely reworked for maximum visibility */
+.quick-view {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000; /* Extremely high z-index */
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    width: max-content; /* Ensure button width fits content */
+}
+
+.product-card:hover .quick-view {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.product-card .quick-view .btn {
+    padding: 12px 24px; /* Larger padding for better visibility */
+    font-size: 16px; /* Larger font size */
+    font-weight: 600;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(135deg, var(--golden-beige) 0%, var(--light-brown) 100%);
+    color: white;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    position: relative;
+    z-index: 10001;
+}
+
+.product-card .quick-view .btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Ensure parent containers don't clip the quick view button */
+.row.g-4 {
+    overflow: visible;
+}
+
+.col-lg-4.col-md-6.product-item {
+    overflow: visible;
+    z-index: auto;
 }
 
 .product-card-body {
