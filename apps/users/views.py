@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from .models import Role, Permission, Employee, Customer, ActivityLog
 from apps.orders.models import Order
 from apps.shop.models import Product
+from django.core.paginator import Paginator
 
 User = get_user_model()
 
@@ -153,7 +154,13 @@ def customer_list(request):
         return redirect('core:dashboard')
     
     customers = Customer.objects.select_related('user').all()
-    return render(request, 'users/customer_list.html', {'customers': customers})
+    
+    # Pagination
+    paginator = Paginator(customers, 20)  # Show 20 customers per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'users/customer_list.html', {'customers': page_obj})
 
 
 @login_required
@@ -236,7 +243,14 @@ def profile(request):
 def order_history(request):
     """User order history"""
     orders = Order.objects.filter(customer=request.user).order_by('-created_at')
-    return render(request, 'users/order_history.html', {'orders': orders})
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(orders, 10)  # Show 10 orders per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'users/order_history.html', {'orders': page_obj})
 
 @login_required
 def reorder(request, order_id):
@@ -324,8 +338,14 @@ def activity_log(request):
         messages.error(request, 'Access denied.')
         return redirect('core:dashboard')
     
-    logs = ActivityLog.objects.filter(user=request.user).order_by('-timestamp')[:50]
-    return render(request, 'users/activity_log.html', {'logs': logs})
+    logs = ActivityLog.objects.filter(user=request.user).order_by('-timestamp')
+    
+    # Pagination
+    paginator = Paginator(logs, 50)  # Show 50 logs per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'users/activity_log.html', {'logs': page_obj})
 
 @login_required
 def role_management(request):

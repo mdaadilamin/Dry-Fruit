@@ -205,11 +205,18 @@ def coupon_management(request):
     
     # Display coupons
     coupons = Coupon.objects.all()
+    
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(coupons, 20)  # Show 20 coupons per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
     categories = Category.objects.filter(is_active=True)
     products = Product.objects.filter(is_active=True)
     
     context = {
-        'coupons': coupons,
+        'coupons': page_obj,
         'categories': categories,
         'products': products,
         'can_add': request.user.has_permission('products', 'add'),

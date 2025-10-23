@@ -110,6 +110,45 @@
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Pagination -->
+                {% if coupons.has_other_pages %}
+                <nav aria-label="Coupons pagination">
+                    <ul class="pagination justify-content-center">
+                        {% if coupons.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ coupons.previous_page_number }}">Previous</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in coupons.paginator.page_range %}
+                            {% if coupons.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > coupons.number|add:'-3' and num < coupons.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if coupons.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ coupons.next_page_number }}">Next</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
             </div>
         </div>
     </div>
