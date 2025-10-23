@@ -484,6 +484,26 @@
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-lg-3 col-md-4 col-sm-6">
+                                <a href="{% url 'shop:review_management' %}" class="btn btn-outline-primary w-100">
+                                    <i data-lucide="star" class="me-2"></i>Reviews
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-sm-6">
+                                <a href="{% url 'shop:product_management' %}" class="btn btn-outline-primary w-100">
+                                    <i data-lucide="package" class="me-2"></i>Products
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-sm-6">
+                                <a href="{% url 'shop:category_management' %}" class="btn btn-outline-primary w-100">
+                                    <i data-lucide="folder" class="me-2"></i>Categories
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-sm-6">
+                                <a href="{% url 'core:product_analytics' %}" class="btn btn-outline-primary w-100">
+                                    <i data-lucide="bar-chart-2" class="me-2"></i>Analytics
+                                </a>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-sm-6">
                                 <a href="{% url 'cms:banner_management' %}" class="btn btn-outline-primary w-100">
                                     <i data-lucide="image" class="me-2"></i>Banners
                                 </a>
@@ -526,16 +546,6 @@
                             <div class="col-lg-3 col-md-4 col-sm-6">
                                 <a href="{% url 'notifications:system_notification_management' %}" class="btn btn-outline-primary w-100">
                                     <i data-lucide="bell" class="me-2"></i>Notifications
-                                </a>
-                            </div>
-                            <div class="col-lg-3 col-md-4 col-sm-6">
-                                <a href="{% url 'shop:review_management' %}" class="btn btn-outline-primary w-100">
-                                    <i data-lucide="star" class="me-2"></i>Reviews
-                                </a>
-                            </div>
-                            <div class="col-lg-3 col-md-4 col-sm-6">
-                                <a href="{% url 'core:product_analytics' %}" class="btn btn-outline-primary w-100">
-                                    <i data-lucide="bar-chart-2" class="me-2"></i>Analytics
                                 </a>
                             </div>
                             <div class="col-lg-3 col-md-4 col-sm-6">
