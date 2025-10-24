@@ -38,12 +38,14 @@ def home(request):
     
     # Get featured products for each category
     category_featured_products = {}
+    category_ids = {}
     for category in categories:
         category_featured_products[category.name] = Product.objects.filter(
             category=category,
             is_active=True,
             is_featured=True
         )[:4]  # Already limited to 4 featured products per category
+        category_ids[category.name] = category.id
     
     # Get personalized recommendations for authenticated users
     recommended_products = []
@@ -59,6 +61,7 @@ def home(request):
         'homepage_features': homepage_features,
         'gift_box_products': gift_box_products,
         'category_featured_products': category_featured_products,
+        'category_ids': category_ids,
         'recommended_products': recommended_products,
     }
     return render(request, 'core/home.html', context)

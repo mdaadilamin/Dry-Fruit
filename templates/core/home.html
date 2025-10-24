@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load core_dict_extras %}
 
 {% block title %}DRY FRUITS DELIGHT - Premium Dry Fruits, Nuts & Gift Boxes{% endblock %}
 {% block meta_description %}Shop premium quality organic dry fruits, nuts, chocolates, spices and gift boxes online. Fresh, healthy snacks delivered to your doorstep. Free shipping on orders over ₹50.{% endblock %}
@@ -431,7 +432,7 @@
             </div>
             
             <div class="text-center mt-5">
-                <a href="{% url 'core:shop' %}?category={{ category.id }}" class="btn btn-outline-primary btn-lg">
+                <a href="{% url 'core:shop' %}?category={{ category_ids|get_item:category_name }}" class="btn btn-outline-primary btn-lg">
                     View All {{ category_name }} <i data-lucide="arrow-right" class="ms-2"></i>
                 </a>
             </div>
