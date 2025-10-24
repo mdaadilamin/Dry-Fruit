@@ -34,3 +34,10 @@ class NotificationViewSet(viewsets.ModelViewSet):
         notification.is_read = True
         notification.save()
         return Response({'message': 'Notification marked as read'})
+    
+    @action(detail=True, methods=['delete'])
+    def delete_notification(self, request, pk=None):
+        """Delete a specific notification"""
+        notification = self.get_object()
+        notification.delete()
+        return Response({'message': 'Notification deleted successfully'})

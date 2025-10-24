@@ -504,16 +504,29 @@ function updateNotificationBell(notifications) {
         notifications.slice(0, 5).forEach(notification => {
             const notificationElement = document.createElement('li');
             notificationElement.innerHTML = `
-                <a class="dropdown-item ${notification.is_read ? '' : 'bg-light'}" href="#">
+                <div class="dropdown-item ${notification.is_read ? '' : 'bg-light'}" data-notification-id="${notification.id}">
                     <div class="d-flex justify-content-between">
                         <strong>${notification.title}</strong>
                         ${!notification.is_read ? '<span class="badge bg-danger badge-sm">New</span>' : ''}
                     </div>
                     <small class="text-muted">${notification.message.substring(0, 60)}${notification.message.length > 60 ? '...' : ''}</small>
                     <div class="small text-muted mt-1">${new Date(notification.created_at).toLocaleString()}</div>
-                </a>
+                    <div class="mt-2">
+                        <button class="btn btn-sm btn-outline-danger dismiss-dropdown-notification" data-notification-id="${notification.id}">
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
             `;
             dropdownMenu.appendChild(notificationElement);
+                        
+            // Add event listener for dismiss button
+            const dismissButton = notificationElement.querySelector('.dismiss-dropdown-notification');
+            dismissButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const notificationId = this.dataset.notificationId;
+                dismissNotification(notificationId);
+            });
         });
         
         // Add view all link
@@ -521,13 +534,59 @@ function updateNotificationBell(notifications) {
             const viewAllElement = document.createElement('li');
             viewAllElement.innerHTML = `
                 <hr class="dropdown-divider">
-                <a class="dropdown-item text-center" href="#">View all notifications</a>
+                <a class="dropdown-item text-center view-all-notifications" href="/api/notifications/user-notifications/all/">View all notifications</a>
             `;
             dropdownMenu.appendChild(viewAllElement);
+            
+            // Add event listener to handle navigation properly
+            const viewAllLink = viewAllElement.querySelector('.view-all-notifications');
+            viewAllLink.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                // Navigate to the notifications page
+                window.location.href = this.getAttribute('href');
+            });
         }
     } else {
         noNotificationsElement.style.display = 'block';
     }
+}
+
+function dismissNotification(notificationId) {
+    // Send request to dismiss notification
+    fetch(`/api/notifications/${notificationId}/delete_notification/`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Remove the notification from the dropdown
+        const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+        if (notificationElement) {
+            notificationElement.remove();
+        }
+        
+        // Update notification count
+        const countElement = document.querySelector('.notification-count');
+        if (countElement) {
+            const currentCount = parseInt(countElement.textContent);
+            countElement.textContent = Math.max(0, currentCount - 1);
+        }
+        
+        // If no notifications left, show the "no notifications" message
+        const dropdownMenu = document.getElementById('notificationDropdown');
+        const notificationItems = dropdownMenu.querySelectorAll('[data-notification-id]');
+        const noNotificationsElement = document.getElementById('noNotifications');
+        if (notificationItems.length === 0) {
+            noNotificationsElement.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error dismissing notification:', error);
+    });
 }
 
 function showNotification(message, type = 'info', duration = 5000) {

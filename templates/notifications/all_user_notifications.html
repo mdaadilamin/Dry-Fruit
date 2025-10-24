@@ -27,15 +27,20 @@
                     {% if notifications %}
                         <div class="list-group">
                             {% for notification in notifications %}
-                            <div class="list-group-item {% if not notification.is_read %}bg-light{% endif %}">
+                            <div class="list-group-item {% if not notification.is_read %}bg-light{% endif %}" data-notification-id="{{ notification.id }}">
                                 <div class="d-flex justify-content-between">
                                     <h6 class="mb-1">{{ notification.title }}</h6>
                                     <small class="text-muted">{{ notification.created_at|date:"M d, Y H:i" }}</small>
                                 </div>
                                 <p class="mb-1">{{ notification.message }}</p>
-                                <small class="badge bg-{% if notification.notification_type == 'info' %}primary{% elif notification.notification_type == 'success' %}success{% elif notification.notification_type == 'warning' %}warning{% else %}danger{% endif %}">
-                                    {{ notification.get_notification_type_display }}
-                                </small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="badge bg-{% if notification.notification_type == 'info' %}primary{% elif notification.notification_type == 'success' %}success{% elif notification.notification_type == 'warning' %}warning{% else %}danger{% endif %}">
+                                        {{ notification.get_notification_type_display }}
+                                    </small>
+                                    <button class="btn btn-sm btn-outline-danger dismiss-notification" data-notification-id="{{ notification.id }}">
+                                        Dismiss
+                                    </button>
+                                </div>
                             </div>
                             {% endfor %}
                         </div>
@@ -58,6 +63,38 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Lucide icons
     lucide.createIcons();
+    
+    // Add event listeners for dismiss buttons
+    document.querySelectorAll('.dismiss-notification').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationId = this.dataset.notificationId;
+            const notificationElement = this.closest('.list-group-item');
+            
+            // Send request to dismiss notification
+            fetch(`/api/notifications/${notificationId}/mark_read/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove the notification from the list
+                notificationElement.remove();
+                
+                // Update notification count
+                const countElement = document.querySelector('.notification-count');
+                if (countElement) {
+                    const currentCount = parseInt(countElement.textContent);
+                    countElement.textContent = currentCount - 1;
+                }
+            })
+            .catch(error => {
+                console.error('Error dismissing notification:', error);
+            });
+        });
+    });
 });
 </script>
 {% endblock %}
