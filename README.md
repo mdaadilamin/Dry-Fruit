@@ -85,7 +85,7 @@ cd nutriharvest
 ### 2. Create Virtual Environment
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/scripts/activate  # On Windows: venv\Scripts\activate myenv
 ```
 
 ### 3. Install Dependencies
