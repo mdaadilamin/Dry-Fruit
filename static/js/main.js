@@ -402,10 +402,24 @@ function showSystemNotification(notification) {
     notificationElement.innerHTML = `
         <h6 class="alert-heading">${notification.title}</h6>
         <p class="mb-0">${notification.message}</p>
+        <div class="mt-2 d-flex justify-content-between">
+            <button type="button" class="btn btn-sm btn-outline-light dismiss-notification" data-notification-id="${notification.id}">
+                Dismiss
+            </button>
+            <a href="/api/notifications/user-notifications/all/" class="btn btn-sm btn-outline-light">
+                View All
+            </a>
+        </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     `;
     
     container.appendChild(notificationElement);
+    
+    // Add event listener for dismiss button
+    const dismissButton = notificationElement.querySelector('.dismiss-notification');
+    dismissButton.addEventListener('click', function() {
+        notificationElement.remove();
+    });
     
     // Auto-hide after 10 seconds
     setTimeout(() => {
@@ -788,3 +802,131 @@ function updateWishlistCount(count) {
         }
     });
 }
+
+// Banner popup functionality
+function initializeBannerPopups() {
+    console.log('Initializing banner popups...');
+    
+    // Check if user has already dismissed banners in this session
+    const bannersDismissed = sessionStorage.getItem('bannersDismissed');
+    console.log('Banners dismissed in session storage:', bannersDismissed);
+    
+    if (bannersDismissed) {
+        console.log('Banners already dismissed in this session');
+        return;
+    }
+    
+    console.log('Fetching banner popups...');
+    // Fetch and display active banners
+    fetchBannerPopups();
+}
+
+function fetchBannerPopups() {
+    fetch('/api/cms/banners/active/')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Banner API response:', data);
+            if (data.success && data.banners.length > 0) {
+                console.log('Displaying', data.banners.length, 'banners');
+                // Display each banner as a popup
+                data.banners.forEach(banner => {
+                    showBannerPopup(banner);
+                });
+            } else {
+                console.log('No active banners to display');
+            }
+        })
+        .catch(error => {
+            console.error('Failed to fetch banner popups:', error);
+        });
+}
+
+function showBannerPopup(banner) {
+    console.log('Showing banner popup:', banner);
+    
+    const container = document.getElementById('notification-popup-container');
+    console.log('Container element:', container);
+    
+    if (!container) {
+        console.error('Notification popup container not found!');
+        return;
+    }
+    
+    // Check if banner is already displayed
+    if (document.getElementById(`banner-popup-${banner.id}`)) {
+        console.log('Banner already displayed:', banner.id);
+        return;
+    }
+    
+    // Fix image URL if it's a relative path
+    let imageUrl = banner.image;
+    if (imageUrl && imageUrl.startsWith('/media/')) {
+        // In a real application, you might want to use window.location.origin + imageUrl
+        // But for now, we'll leave it as is since Django should serve it correctly
+        console.log('Image URL is relative:', imageUrl);
+    }
+    
+    const bannerElement = document.createElement('div');
+    bannerElement.id = `banner-popup-${banner.id}`;
+    bannerElement.className = 'alert alert-info alert-dismissible fade show mb-2';
+    bannerElement.style.minWidth = '300px';
+    bannerElement.innerHTML = `
+        <div class="d-flex">
+            <div class="flex-shrink-0">
+                ${imageUrl ? `<img src="${imageUrl}" alt="${banner.title}" style="width: 60px; height: 60px; object-fit: cover;" class="rounded">` : ''}
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <h6 class="alert-heading">${banner.title}</h6>
+                ${banner.subtitle ? `<p class="mb-1"><small>${banner.subtitle}</small></p>` : ''}
+                ${banner.description ? `<p class="mb-2">${banner.description}</p>` : ''}
+                <div class="d-flex justify-content-between">
+                    ${banner.button_text && banner.button_link ? 
+                        `<a href="${banner.button_link}" class="btn btn-sm btn-primary">${banner.button_text}</a>` : ''}
+                    <button type="button" class="btn btn-sm btn-outline-light dismiss-banner" data-banner-id="${banner.id}">
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    container.appendChild(bannerElement);
+    console.log('Banner element added to container');
+    
+    // Add event listener for dismiss button
+    const dismissButton = bannerElement.querySelector('.dismiss-banner');
+    dismissButton.addEventListener('click', function() {
+        bannerElement.remove();
+        // Store dismissal in sessionStorage
+        sessionStorage.setItem('bannersDismissed', 'true');
+        console.log('Banner dismissed, setting session storage');
+    });
+    
+    // Auto-hide after 15 seconds
+    setTimeout(() => {
+        if (bannerElement.parentNode) {
+            bannerElement.style.opacity = '0';
+            setTimeout(() => {
+                if (bannerElement.parentNode) {
+                    bannerElement.parentNode.removeChild(bannerElement);
+                }
+            }, 300);
+        }
+    }, 15000);
+}
+
+// Initialize all components when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, initializing app...');
+    initializeApp();
+    console.log('App initialized, initializing banner popups...');
+    initializeBannerPopups();
+    console.log('Banner popups initialized');
+    
+    // Add a way to reset banner dismissal for testing
+    window.resetBannerDismissal = function() {
+        sessionStorage.removeItem('bannersDismissed');
+        console.log('Banner dismissal reset');
+    };
+});

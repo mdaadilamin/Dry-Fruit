@@ -29,5 +29,6 @@ urlpatterns = [
     path('manage/careers/openings/', views.careers_opening_management, name='careers_opening_management'),
     path('manage/newsletter/', views.newsletter_management, name='newsletter_management'),
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('banners/active/', api_views.get_active_banners, name='get_active_banners'),
     path('<str:page_type>/', views.page_view, name='page_view'),
 ] + router.urls

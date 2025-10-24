@@ -9,6 +9,7 @@ from .models import EmailTemplate, SMSTemplate, EmailLog, SMSLog, SystemNotifica
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_http_methods
 from .management.commands.check_low_stock import Command as CheckLowStockCommand
+from django.http import HttpResponseNotAllowed
 
 @login_required
 def email_template_management(request):
@@ -220,3 +221,43 @@ def check_low_stock_view(request):
     
     messages.success(request, f'Low stock check completed with threshold {threshold}.')
     return redirect('core:admin_panel')
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def delete_system_notification(request, notification_id):
+    """Delete a system notification"""
+    if request.method != 'POST':
+        return HttpResponseNotAllowed(['POST'])
+    
+    notification = get_object_or_404(SystemNotification, id=notification_id)
+    
+    # Delete related user notifications
+    Notification.objects.filter(
+        title=notification.title,
+        message=notification.message,
+        created_at=notification.created_at
+    ).delete()
+    
+    # Delete the system notification
+    notification.delete()
+    
+    messages.success(request, f'Notification "{notification.title}" deleted successfully!')
+    return redirect('notifications:system_notification_management')
+
+
+@login_required
+def all_user_notifications(request):
+    """Display all user notifications"""
+    # Get all user notifications ordered by creation date
+    notifications = Notification.objects.filter(
+        user=request.user
+    ).order_by('-created_at')
+    
+    # Mark all as read when viewing
+    notifications.filter(is_read=False).update(is_read=True)
+    
+    context = {
+        'notifications': notifications
+    }
+    return render(request, 'notifications/all_user_notifications.html', context)

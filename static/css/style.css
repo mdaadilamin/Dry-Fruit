@@ -726,6 +726,20 @@ h1, h2, h3, h4, h5, h6, .display-1, .display-2, .display-3, .display-4 {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 }
 
+/* Notification Popup Container */
+#notification-popup-container {
+    z-index: 1050;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 1rem;
+    pointer-events: none;
+}
+
+#notification-popup-container > * {
+    pointer-events: auto;
+}
+
 /* Badge Styles */
 .badge {
     font-weight: 600;
