@@ -731,7 +731,7 @@ function toggleWishlist(productId, buttonElement) {
     buttonElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
     buttonElement.disabled = true;
     
-    fetch('/orders/add-to-wishlist/', {
+    fetch('/api/orders/add-to-wishlist/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -779,7 +779,7 @@ function fetchWishlistCount() {
     // Only fetch if user is authenticated
     if (!isAuthenticated()) return;
     
-    fetch('/orders/api/wishlist-count/')
+    fetch('/api/orders/api/wishlist-count/')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -929,4 +929,126 @@ document.addEventListener('DOMContentLoaded', function() {
         sessionStorage.removeItem('bannersDismissed');
         console.log('Banner dismissal reset');
     };
+    
+    // Initialize review functionality
+    initializeReviewForm();
 });
+
+// Review functionality
+function initializeReviewForm() {
+    const reviewForm = document.getElementById('review-form');
+    if (!reviewForm) return;
+    
+    // Handle star rating selection
+    const starIcons = reviewForm.querySelectorAll('.star-icon');
+    const ratingInput = document.getElementById('rating-value');
+    
+    starIcons.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            ratingInput.value = rating;
+            
+            // Update star appearance
+            starIcons.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('filled');
+                    s.style.fill = '#ffc107';
+                } else {
+                    s.classList.remove('filled');
+                    s.style.fill = 'none';
+                }
+            });
+        });
+        
+        // Add hover effect
+        star.addEventListener('mouseenter', function() {
+            const rating = this.dataset.rating;
+            starIcons.forEach((s, index) => {
+                if (index < rating) {
+                    s.style.fill = '#ffc107';
+                } else {
+                    s.style.fill = 'none';
+                }
+            });
+        });
+    });
+    
+    // Reset stars on mouse leave
+    reviewForm.querySelector('.rating-stars').addEventListener('mouseleave', function() {
+        const currentRating = ratingInput.value;
+        starIcons.forEach((s, index) => {
+            if (index < currentRating) {
+                s.style.fill = '#ffc107';
+            } else {
+                s.style.fill = 'none';
+            }
+        });
+    });
+    
+    // Handle form submission
+    reviewForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const productId = window.location.pathname.split('/')[2]; // Assuming URL is /product/{id}/
+        const rating = ratingInput.value;
+        const comment = document.getElementById('review-comment').value;
+        
+        if (!rating || rating === '0') {
+            showNotification('Please select a rating', 'warning');
+            return;
+        }
+        
+        if (!comment.trim()) {
+            showNotification('Please enter your review comment', 'warning');
+            return;
+        }
+        
+        const submitButton = reviewForm.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
+        submitButton.disabled = true;
+        
+        const csrfToken = getCSRFToken();
+        
+        fetch(`/api/shop/submit-review/${productId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                rating: rating,
+                comment: comment
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                reviewForm.reset();
+                ratingInput.value = '0';
+                
+                // Reset star appearance
+                starIcons.forEach(s => {
+                    s.classList.remove('filled');
+                    s.style.fill = 'none';
+                });
+                
+                // Reload reviews section or add the new review to the page
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showNotification(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred while submitting your review', 'error');
+        })
+        .finally(() => {
+            submitButton.innerHTML = originalText;
+            submitButton.disabled = false;
+        });
+    });
+}
