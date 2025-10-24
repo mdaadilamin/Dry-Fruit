@@ -25,10 +25,6 @@ urlpatterns = [
     path('manage/careers/benefits/', views.careers_benefit_management, name='careers_benefit_management'),
     path('manage/careers/openings/', views.careers_opening_management, name='careers_opening_management'),
     path('manage/newsletter/', views.newsletter_management, name='newsletter_management'),
-    path('manage/newsletter/<int:subscriber_id>/confirm/', views.confirm_newsletter_subscriber, name='confirm_newsletter_subscriber'),
-    path('manage/newsletter/<int:subscriber_id>/delete/', views.delete_newsletter_subscriber, name='delete_newsletter_subscriber'),
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
-    path('testimonial/submit/', views.submit_testimonial, name='submit_testimonial'),
-    path('enquiry/submit/', views.submit_enquiry, name='submit_enquiry'),
     path('<str:page_type>/', views.page_view, name='page_view'),
-] + router.urls  # API routes added last
+] + router.urls

@@ -14,8 +14,113 @@ def banner_management(request):
         messages.error(request, 'Access denied.')
         return redirect('core:dashboard')
     
+    if request.method == 'POST' and request.user.has_permission('cms', 'add'):
+        # Handle banner creation
+        title = request.POST.get('title')
+        subtitle = request.POST.get('subtitle', '')
+        description = request.POST.get('description', '')
+        image = request.FILES.get('image')
+        button_text = request.POST.get('button_text', '')
+        button_link = request.POST.get('button_link', '')
+        order = request.POST.get('order', 0)
+        is_active = 'is_active' in request.POST
+        
+        if title and image:
+            models.Banner.objects.create(
+                title=title,
+                subtitle=subtitle,
+                description=description,
+                image=image,
+                button_text=button_text,
+                button_link=button_link,
+                order=order,
+                is_active=is_active
+            )
+            messages.success(request, 'Banner added successfully!')
+        else:
+            messages.error(request, 'Please provide a title and image for the banner.')
+        
+        return redirect('cms:banner_management')
+    
     banners = models.Banner.objects.all()
     return render(request, 'cms/banner_management.html', {'banners': banners})
+
+@login_required
+def add_banner(request):
+    """Add a new banner"""
+    if not request.user.has_permission('cms', 'add'):
+        messages.error(request, 'Access denied.')
+        return redirect('cms:banner_management')
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        subtitle = request.POST.get('subtitle', '')
+        description = request.POST.get('description', '')
+        image = request.FILES.get('image')
+        button_text = request.POST.get('button_text', '')
+        button_link = request.POST.get('button_link', '')
+        order = request.POST.get('order', 0)
+        is_active = 'is_active' in request.POST
+        
+        if title and image:
+            models.Banner.objects.create(
+                title=title,
+                subtitle=subtitle,
+                description=description,
+                image=image,
+                button_text=button_text,
+                button_link=button_link,
+                order=order,
+                is_active=is_active
+            )
+            messages.success(request, 'Banner added successfully!')
+            return redirect('cms:banner_management')
+        else:
+            messages.error(request, 'Please provide a title and image for the banner.')
+    
+    return render(request, 'cms/banner_form.html')
+
+@login_required
+def edit_banner(request, banner_id):
+    """Edit an existing banner"""
+    if not request.user.has_permission('cms', 'edit'):
+        messages.error(request, 'Access denied.')
+        return redirect('cms:banner_management')
+    
+    banner = get_object_or_404(models.Banner, id=banner_id)
+    
+    if request.method == 'POST':
+        banner.title = request.POST.get('title', banner.title)
+        banner.subtitle = request.POST.get('subtitle', banner.subtitle)
+        banner.description = request.POST.get('description', banner.description)
+        if 'image' in request.FILES:
+            banner.image = request.FILES['image']
+        banner.button_text = request.POST.get('button_text', banner.button_text)
+        banner.button_link = request.POST.get('button_link', banner.button_link)
+        banner.order = request.POST.get('order', banner.order)
+        banner.is_active = 'is_active' in request.POST
+        
+        banner.save()
+        messages.success(request, 'Banner updated successfully!')
+        return redirect('cms:banner_management')
+    
+    return render(request, 'cms/banner_form.html', {'banner': banner})
+
+@login_required
+def delete_banner(request, banner_id):
+    """Delete a banner"""
+    if not request.user.has_permission('cms', 'delete'):
+        messages.error(request, 'Access denied.')
+        return redirect('cms:banner_management')
+    
+    banner = get_object_or_404(models.Banner, id=banner_id)
+    
+    if request.method == 'POST':
+        banner.delete()
+        messages.success(request, 'Banner deleted successfully!')
+        return redirect('cms:banner_management')
+    
+    return render(request, 'cms/banner_confirm_delete.html', {'banner': banner})
 
 @login_required
 def testimonial_management(request):
