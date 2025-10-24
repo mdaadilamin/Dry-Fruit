@@ -1,6 +1,6 @@
-# DRY FRUITS DELIGHT - Complete Django E-commerce Application
+# DRY FRUITS DELIGHT - Complete Django E-commerce Platform
 
-A comprehensive, production-ready Django e-commerce platform for a premium dry fruit shop with advanced features including role-based access control, order management, content management system, and enhanced user experience with notifications and improved navigation.
+A comprehensive, production-ready Django e-commerce platform for a premium dry fruit shop with advanced features including role-based access control, order management, content management system, blog system, marketing tools, and enhanced user experience with notifications and improved navigation.
 
 ## 🚀 Features
 
@@ -21,6 +21,11 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 - **Customer Enquiry System**: Contact form with admin notifications and management interface
 - **Improved Admin Panel**: Enhanced dashboard with quick access to all management interfaces
 - **Code Quality Improvements**: Refactored utility functions for better maintainability
+- **Blog System**: Complete blog management with categories, posts, and comment moderation
+- **Marketing Tools**: Coupon system with flexible discount options and usage tracking
+- **Careers Page**: Dynamic careers page with culture, benefits, testimonials, and job openings
+- **Enhanced Footer Management**: Dynamic footer content management
+- **Advanced Search**: Improved product search with multiple filtering options
 
 ### Frontend Features
 - **Responsive Design**: Mobile-first design with Bootstrap 5
@@ -31,8 +36,13 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 - **Rich UI/UX**: Premium "Rich Earthy Luxury" theme
 - **Interactive Elements**: Carousels, modals, and dynamic forms
 - **Enhanced Navigation**: Product categories dropdown with Dry Fruits, Gift Boxes, Chocolates, and Spices
-- **Blog Integration**: Added blog link to main navigation
+- **Blog Integration**: Complete blog system with categories and posts
 - **Product Search**: Implemented search bar in navbar for quick product discovery
+- **Personalized Recommendations**: Product recommendations based on user behavior
+- **Wishlist Functionality**: Save products for later purchase
+- **Multi-step Checkout**: Streamlined checkout process with multiple payment options
+- **Order Tracking**: Real-time order status updates
+- **Coupon System**: Apply discount codes during checkout
 
 ### Backend Features
 - **Django REST Framework**: Full API support
@@ -44,6 +54,12 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 - **Activity Logging**: Complete audit trail
 - **Advanced Analytics**: Sales reporting, inventory insights, and customer behavior analysis
 - **Code Reusability**: Utility functions for common operations
+- **Blog System**: Complete blog management with categories, posts, and comment moderation
+- **Marketing Tools**: Coupon system with flexible discount options and usage tracking
+- **Customer Reviews**: Product review system with moderation capabilities
+- **Newsletter Management**: Email subscription system with confirmation workflow
+- **Enquiry System**: Customer contact form with admin management
+- **Gift Box Customization**: Interactive tool allowing customers to customize gift boxes
 
 ### Admin Features
 - **Comprehensive Dashboard**: Sales analytics and metrics with visual charts
@@ -56,6 +72,11 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 - **Review Moderation**: Approve/reject customer reviews with bulk operations
 - **Enquiry Management**: Handle customer inquiries with resolution tracking
 - **Enhanced Navigation**: Improved admin navigation and menu structure
+- **Blog Management**: Create and manage blog posts, categories, and comments
+- **Marketing Tools**: Coupon management with detailed analytics
+- **Newsletter Management**: Manage email subscribers and subscriptions
+- **Careers Page Management**: Dynamic content management for careers page
+- **Footer Content Management**: Manage website footer content dynamically
 
 ## 🛠️ Tech Stack
 
@@ -66,13 +87,16 @@ A comprehensive, production-ready Django e-commerce platform for a premium dry f
 - **File Storage**: Django file handling with Pillow
 - **Email**: Django email backend (configurable)
 - **Icons**: Lucide Icons for consistent iconography
+- **Payment Gateways**: Stripe and PayPal integration
+- **Static Files**: Whitenoise for serving static files
+- **Environment Management**: python-decouple for configuration
 
 ## 📋 Requirements
 
 - Python 3.13.7
 - Django 5.2.7
-- Node.js (for frontend assets)
 - MySQL (for production)
+- Stripe and PayPal accounts (for payment processing)
 
 ## 🚀 Installation
 
@@ -85,7 +109,7 @@ cd nutriharvest
 ### 2. Create Virtual Environment
 ```bash
 python -m venv venv
-source venv/scripts/activate  # On Windows: venv\Scripts\activate myenv
+source venv/scripts/activate  # On Windows: venv\Scripts\activate
 ```
 
 ### 3. Install Dependencies
@@ -108,6 +132,12 @@ SECRET_KEY=your-secret-key-here
 DATABASE_ENGINE=django.db.backends.sqlite3
 DATABASE_NAME=db.sqlite3
 EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
+STRIPE_SECRET_KEY=your-stripe-secret-key
+PAYPAL_CLIENT_ID=your-paypal-client-id
+PAYPAL_CLIENT_SECRET=your-paypal-client-secret
 ```
 
 ### 5. Database Setup
@@ -160,14 +190,17 @@ Visit `http://127.0.0.1:8000` to access the application.
 ## 📁 Project Structure
 
 ```
-nutriharvest/
+DRY FRUITS DELIGHT/
 ├── apps/
-│   ├── core/           # Main app with views and URLs
-│   ├── users/          # User management and authentication
-│   ├── shop/           # Product and category management
-│   ├── orders/         # Cart and order management
+│   ├── blog/           # Blog system with posts and comments
 │   ├── cms/            # Content management system
-│   └── notifications/  # Email, SMS, and system notifications
+│   ├── core/           # Main app with views and URLs
+│   ├── marketing/      # Marketing tools and coupon system
+│   ├── notifications/  # Email, SMS, and system notifications
+│   ├── orders/         # Cart and order management
+│   ├── payments/       # Payment processing (Stripe and PayPal)
+│   ├── shop/           # Product and category management
+│   └── users/          # User management and authentication
 ├── templates/          # HTML templates
 ├── static/            # CSS, JS, and image files
 ├── media/             # Uploaded files
@@ -203,6 +236,9 @@ nutriharvest/
 - Inventory tracking
 - SEO-friendly URLs
 - Bulk operations
+- Gift box customization options
+- Product reviews and ratings
+- Related products suggestions
 
 ### Order Processing
 - Shopping cart with session storage
@@ -210,6 +246,8 @@ nutriharvest/
 - Order status tracking
 - Email notifications
 - Invoice generation
+- Gift wrap options
+- Coupon discount system
 
 ### Customer Experience
 - Advanced product search and filtering
@@ -220,6 +258,8 @@ nutriharvest/
 - Enhanced navigation with product categories dropdown
 - Blog access from main navigation
 - Real-time notification system
+- Personalized product recommendations
+- Multi-step checkout with multiple payment options
 
 ## 📧 Email & Notifications
 
@@ -228,6 +268,7 @@ nutriharvest/
 - Shipping updates
 - Welcome emails
 - Password reset
+- Low stock alerts
 
 ### SMS Integration (Ready)
 - Order confirmations
@@ -247,6 +288,7 @@ nutriharvest/
 - **Real-time Updates**: Automatic notification fetching with periodic updates
 - **Notification Bell**: Navbar icon with unread count and dropdown preview
 - **Pop-up Notifications**: Non-intrusive pop-ups for system-wide announcements
+- **Newsletter System**: Email subscription with confirmation workflow
 
 ## 📊 Reports & Analytics
 
@@ -261,6 +303,18 @@ nutriharvest/
 - Low stock alerts
 - Product movement
 - Reorder recommendations
+
+### Marketing Reports
+- Coupon usage analytics
+- Customer engagement metrics
+- Conversion tracking
+- Campaign performance
+
+### Product Analytics
+- Sales trends
+- Top performing products
+- Category performance
+- Review analytics
 
 ## 🚀 Production Deployment
 
@@ -292,6 +346,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'your-email@gmail.com'
 EMAIL_HOST_PASSWORD = 'your-app-password'
+DEFAULT_FROM_EMAIL = 'your-email@gmail.com'
 ```
 
 ## 🧪 Testing
@@ -311,8 +366,12 @@ The application includes a comprehensive REST API:
 - `/api/orders/` - Order management
 - `/api/users/` - User management
 - `/api/cms/` - Content management
+- `/api/cms/banners/active/` - Active banners for homepage
 - `/api/notifications/system-notifications/` - System notifications
 - `/api/notifications/user-notifications/` - User notifications
+- `/api/marketing/coupons/` - Coupon management
+- `/api/blog/posts/` - Blog posts
+- `/api/blog/categories/` - Blog categories
 
 ### Authentication
 API uses session-based authentication with CSRF protection.
@@ -342,6 +401,10 @@ For support, email info@dryfruitsdelight.com or create an issue on GitHub.
 - [ ] Advanced search with autocomplete
 - [ ] Product comparison feature
 - [ ] Wishlist sharing functionality
+- [ ] Advanced customer segmentation
+- [ ] Marketing automation
+- [ ] Social media integration
+- [ ] Influencer marketing tools
 
 ---
 
