@@ -81,7 +81,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{% url 'core:home' %}">
-                <img src="{% static 'images/dry fruits logo.png' %}" alt="DRY FRUITS DELIGHT Logo" class="me-2" style="height: 30px; width: auto; object-fit: contain;">
+                <img src="{% static 'images/dry fruits logo.png' %}" alt="DRY FRUITS DELIGHT Logo" class="me-2" style="height: 85px; width: auto; object-fit: contain;">
                 DRY FRUITS DELIGHT
             </a>
             
@@ -194,9 +194,8 @@
             <div class="row">
                 <div class="col-lg-4 col-md-6 mb-4">
                     {% if footer_content %}
-                        <img src="{% static 'images/dry fruits logo.png' %}" alt="DRY FRUITS DELIGHT Logo" class="mb-3" style="height: 50px; width: auto; object-fit: contain;">
+                        <img src="{% static 'images/dry fruits logo.png' %}" alt="DRY FRUITS DELIGHT Logo" class="mb-3" style="height: 85px; width: auto; object-fit: contain;">
                         <h5><i data-lucide="shopping-bag" class="me-2"></i>{{ footer_content.business_name }}</h5>
-                        <p class="mb-3">{{ footer_content.copyright_text|linebreaksbr }}</p>
                         <div class="d-flex">
                             {% if footer_content.facebook_url %}
                                 <a href="{{ footer_content.facebook_url }}" class="me-3"><i data-lucide="facebook"></i></a>
@@ -299,13 +298,13 @@
                         {% if footer_content %}
                             <p>{{ footer_content.copyright_text }}</p>
                         {% else %}
-                            <p>&copy; 2024 DRY FRUITS DELIGHT. All rights reserved.</p>
+                            <p>&copy; 2025 Dry Fruit House. All rights reserved.</p>
                         {% endif %}
                     </div>
-                    <div class="col-md-6 text-md-end">
+                    <div class="col-md-6 text-end" style="white-space: nowrap;">
                         <a href="{% url 'cms:page_view' 'privacy' %}" class="me-3">Privacy Policy</a>
                         <a href="{% url 'cms:page_view' 'terms' %}" class="me-3">Terms & Conditions</a>
-                        <a href="{% url 'cms:page_view' 'returns' %}">Returns & Refunds</a>
+                        <a href="{% url 'cms:page_view' 'returns' %}" class="me-3">Returns & Refunds</a>
                     </div>
                 </div>
             </div>

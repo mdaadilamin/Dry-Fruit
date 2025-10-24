@@ -122,3 +122,70 @@ class WhatsAppService:
         except Exception as e:
             logger.error(f"Failed to send WhatsApp: {str(e)}")
             return False
+
+
+class NotificationService:
+    """Service for handling notification conversions and management"""
+    
+    @staticmethod
+    def convert_system_to_user_notifications(system_notification):
+        """Convert a SystemNotification to individual User Notifications for all users"""
+        from apps.users.models import User
+        from .models import Notification
+        
+        try:
+            # Get all active users
+            users = User.objects.filter(is_active=True)
+            
+            # Create individual notifications for each user
+            notifications_created = 0
+            for user in users:
+                # Check if user already has this notification
+                if not Notification.objects.filter(
+                    user=user,
+                    title=system_notification.title,
+                    message=system_notification.message,
+                    created_at=system_notification.created_at
+                ).exists():
+                    Notification.objects.create(
+                        user=user,
+                        title=system_notification.title,
+                        message=system_notification.message,
+                        notification_type=system_notification.notification_type
+                    )
+                    notifications_created += 1
+            
+            logger.info(f"Created {notifications_created} user notifications from system notification: {system_notification.title}")
+            return notifications_created
+            
+        except Exception as e:
+            logger.error(f"Failed to convert system notification to user notifications: {str(e)}")
+            return 0
+    
+    @staticmethod
+    def create_user_notifications_for_all_users(title, message, notification_type='info'):
+        """Create a notification for all active users"""
+        from apps.users.models import User
+        from .models import Notification
+        
+        try:
+            # Get all active users
+            users = User.objects.filter(is_active=True)
+            
+            # Create individual notifications for each user
+            notifications_created = 0
+            for user in users:
+                Notification.objects.create(
+                    user=user,
+                    title=title,
+                    message=message,
+                    notification_type=notification_type
+                )
+                notifications_created += 1
+            
+            logger.info(f"Created {notifications_created} user notifications: {title}")
+            return notifications_created
+            
+        except Exception as e:
+            logger.error(f"Failed to create user notifications: {str(e)}")
+            return 0
