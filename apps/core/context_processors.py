@@ -1,4 +1,4 @@
-from apps.cms.models import FooterContent
+from apps.cms.models import FooterContent, ContactInfo
 
 def footer_content(request):
     """Context processor to add footer content to all templates"""
@@ -9,4 +9,15 @@ def footer_content(request):
     
     return {
         'footer_content': footer
+    }
+
+def contact_info(request):
+    """Context processor to add contact information to all templates"""
+    try:
+        contact = ContactInfo.objects.get(id=1)
+    except ContactInfo.DoesNotExist:
+        contact = None
+    
+    return {
+        'contact_info': contact
     }

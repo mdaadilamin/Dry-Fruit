@@ -11,6 +11,7 @@ from io import BytesIO
 from xhtml2pdf import pisa
 from .models import Order, CartItem, Wishlist
 from .serializers import OrderSerializer, CartItemSerializer
+from apps.cms.models import ContactInfo
 import json
 
 class OrderViewSet(viewsets.ModelViewSet):
@@ -30,6 +31,12 @@ class OrderViewSet(viewsets.ModelViewSet):
         if request.user.role.name != 'admin' and order.customer != request.user:
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
+        # Get contact information
+        try:
+            contact_info = ContactInfo.objects.get(id=1)
+        except ContactInfo.DoesNotExist:
+            contact_info = None
+        
         # Check if PDF download is requested
         download_pdf = request.GET.get('download') == 'pdf'
         
@@ -37,6 +44,7 @@ class OrderViewSet(viewsets.ModelViewSet):
         template = get_template('orders/invoice.html')
         context = {
             'order': order,
+            'contact_info': contact_info,
             'request': request
         }
         

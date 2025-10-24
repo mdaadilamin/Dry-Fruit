@@ -1,9 +1,9 @@
-{% load static %}
+
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Invoice #{{ order.order_number }}</title>
+    <title>Invoice #NH16544411</title>
     <style>
         * {
             margin: 0;
@@ -237,35 +237,35 @@
     <div class="invoice-container">
         <div class="header">
             <h1>INVOICE</h1>
-            <p>{{ contact_info.business_name }} | {{ contact_info.tagline }}</p>
+            <p>DRY FRUITS DELIGHT | Premium Dry Fruits &amp; Nuts</p>
         </div>
         
         <div class="company-info">
-            <div>{{ contact_info.address }}, {{ contact_info.city }}, {{ contact_info.pincode }}</div>
-            <div>Phone: {{ contact_info.phone }} | Email: {{ contact_info.email }}</div>
+            <div>Shop no 4 , QMAKS Ayzal Residency , S.A. Colony, Tolichowki, Hyderabad, 500008</div>
+            <div>Phone: +91-8309232756 | Email: info@dryfruitsdelight.com</div>
         </div>
         
         <div class="content">
             <div class="invoice-meta">
                 <div class="invoice-details">
                     <div class="section-title">Invoice Information</div>
-                    <div class="meta-item"><span class="meta-label">Document ID:</span> INV-{{ order.order_number|slice:"4:" }}</div>
-                    <div class="meta-item"><span class="meta-label">Issue Date:</span> {{ order.created_at|date:"F d, Y" }}</div>
-                    <div class="meta-item"><span class="meta-label">Due Date:</span> {{ order.created_at|date:"F d, Y" }}</div>
+                    <div class="meta-item"><span class="meta-label">Document ID:</span> INV-544411</div>
+                    <div class="meta-item"><span class="meta-label">Issue Date:</span> October 23, 2025</div>
+                    <div class="meta-item"><span class="meta-label">Due Date:</span> October 23, 2025</div>
                     <div class="meta-item">
                         <span class="meta-label">Status:</span>
-                        <span class="status-badge status-{{ order.order_status }}">
-                            {{ order.get_order_status_display }}
+                        <span class="status-badge status-delivered">
+                            Delivered
                         </span>
                     </div>
                 </div>
                 
                 <div class="bill-to">
                     <div class="section-title">Bill To</div>
-                    <div class="meta-item">{{ order.customer.full_name }}</div>
-                    <div class="meta-item">{{ order.shipping_address }}</div>
-                    <div class="meta-item">{{ order.shipping_email }}</div>
-                    <div class="meta-item">{{ order.shipping_mobile }}</div>
+                    <div class="meta-item">Siddharth </div>
+                    <div class="meta-item">I-414 GANGA NAGAR </div>
+                    <div class="meta-item">rajanchaudhary@gmail.com</div>
+                    <div class="meta-item">6391652500</div>
                 </div>
                 
                 <!-- <div class="prepared-by">
@@ -276,7 +276,7 @@
             
             <div class="summary">
                 <p><strong>Executive Summary</strong></p>
-                <p>This invoice for {{ order.customer.full_name }} totals ₹{{ order.total_amount|floatformat:2 }}, with a subtotal of ₹{{ order.total_amount|floatformat:2 }} and sales tax of ₹0.00. Payment is due upon receipt.</p>
+                <p>This invoice for Siddharth  totals ₹21.98, with a subtotal of ₹21.98 and sales tax of ₹0.00. Payment is due upon receipt.</p>
             </div>
             
             <div class="section-title">Invoice Details</div>
@@ -292,25 +292,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for item in order.items.all %}
+                    
                     <tr>
-                        <td>{{ item.product.name }}</td>
+                        <td>Turkish Apricots</td>
                         <td>
-                            {{ item.product.name }}
-                            {% if item.gift_wrap %}
-                                <br><small>Gift Wrap: {{ item.gift_wrap.name }}</small>
-                            {% endif %}
+                            Turkish Apricots
+                            
                         </td>
-                        <td class="text-center">{{ item.quantity }}</td>
-                        <td class="text-right">₹{{ item.price|floatformat:2 }}</td>
+                        <td class="text-center">1</td>
+                        <td class="text-right">₹9.99</td>
                         <td class="text-right">0%</td>
-                        <td class="text-right">₹{{ item.get_total_price|floatformat:2 }}</td>
+                        <td class="text-right">₹9.99</td>
                     </tr>
-                    {% endfor %}
+                    
+                    <tr>
+                        <td>Dried Figs</td>
+                        <td>
+                            Dried Figs
+                            
+                        </td>
+                        <td class="text-center">1</td>
+                        <td class="text-right">₹11.99</td>
+                        <td class="text-right">0%</td>
+                        <td class="text-right">₹11.99</td>
+                    </tr>
+                    
                     
                     <tr class="subtotal-row">
                         <td colspan="5" class="text-right"><strong>Subtotal</strong></td>
-                        <td class="text-right">₹{{ order.total_amount|floatformat:2 }}</td>
+                        <td class="text-right">₹21.98</td>
                     </tr>
                     <tr class="tax-row">
                         <td colspan="5" class="text-right"><strong>Total Tax</strong></td>
@@ -318,21 +328,21 @@
                     </tr>
                     <tr class="total-row">
                         <td colspan="5" class="text-right"><strong>Invoice Total</strong></td>
-                        <td class="text-right">₹{{ order.total_amount|floatformat:2 }}</td>
+                        <td class="text-right">₹21.98</td>
                     </tr>
                 </tbody>
             </table>
             
             <div class="payment-terms">
                 <div class="section-title">Payment Terms & Methods</div>
-                <p><strong>Payment Terms:</strong> Net 30. Please pay by {{ order.created_at|date:"F d, Y" }}.</p>
+                <p><strong>Payment Terms:</strong> Net 30. Please pay by October 23, 2025.</p>
                 <p><strong>Accepted Methods:</strong> Bank Transfer, Credit Card, PayPal.</p>
                 <p><strong>Late Fee:</strong> A finance charge of 1.5% per month will be applied to overdue balances.</p>
                 
                 <div class="bank-details">
                     <div><strong>Bank Transfer Details:</strong></div>
                     <div>Bank: Corporate Bank</div>
-                    <div>Account Name: {{ contact_info.business_name }}</div>
+                    <div>Account Name: DRY FRUITS DELIGHT</div>
                     <div>Routing #: 021000021</div>
                     <div>Account #: 120000879</div>
                 </div>
@@ -340,13 +350,13 @@
             
             <div class="notes">
                 <div class="section-title">Notes</div>
-                <p>Thank you for your business. Please reference the Invoice ID (INV-{{ order.order_number|slice:"4:" }}) with your payment.</p>
-                <p>For any questions regarding this invoice, please contact {{ contact_info.email }}.</p>
+                <p>Thank you for your business. Please reference the Invoice ID (INV-544411) with your payment.</p>
+                <p>For any questions regarding this invoice, please contact info@dryfruitsdelight.com.</p>
             </div>
         </div>
         
         <div class="footer">
-            <p>{{ contact_info.business_name }} Report | www.dryfruitsdelight.com</p>
+            <p>DRY FRUITS DELIGHT Report | www.dryfruitsdelight.com</p>
         </div>
     </div>
 </body>
